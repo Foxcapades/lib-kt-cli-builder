@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.impl.arg
 
 import io.foxcapades.lib.cli.wrapper.arg.StringArgument
-import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.serial.CliStringBuilder
 import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
 

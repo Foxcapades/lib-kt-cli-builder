@@ -1,8 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.wrapper.utils
 
-import io.foxcapades.lib.cli.wrapper.serial.CliStringBuilderImpl
-
 internal inline val Char.isValidShortFlag
   get() = isASCII && code.toByte().isValidShortFlag
 

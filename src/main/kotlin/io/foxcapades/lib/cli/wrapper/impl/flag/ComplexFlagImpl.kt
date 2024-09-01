@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.wrapper.impl.flag
 
-import io.foxcapades.lib.cli.wrapper.flag.ComplexFlag
 import io.foxcapades.lib.cli.wrapper.arg.ComplexArgument
+import io.foxcapades.lib.cli.wrapper.flag.ComplexFlag
 
 internal class ComplexFlagImpl<T> : AbstractFlagImpl<ComplexArgument<T>, T>, ComplexFlag<ComplexArgument<T>, T> {
   constructor(longForm: String, shortForm: Byte, isRequired: Boolean, argument: ComplexArgument<T>)

@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.wrapper.impl.flag
 
-import io.foxcapades.lib.cli.wrapper.flag.CharFlag
 import io.foxcapades.lib.cli.wrapper.arg.CharArgument
+import io.foxcapades.lib.cli.wrapper.flag.CharFlag
 
 internal class CharFlagImpl : AbstractFlagImpl<CharArgument, Char>, CharFlag {
   constructor(longForm: String, shortForm: Byte, isRequired: Boolean, argument: CharArgument)

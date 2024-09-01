@@ -2,7 +2,6 @@ package io.foxcapades.lib.cli.wrapper.flag
 
 import io.foxcapades.lib.cli.wrapper.arg.ShortArgs
 import io.foxcapades.lib.cli.wrapper.arg.ShortArgument
-import io.foxcapades.lib.cli.wrapper.flag.ShortFlag
 import io.foxcapades.lib.cli.wrapper.impl.flag.ShortFlagImpl
 import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
 

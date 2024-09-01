@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.wrapper.impl.flag
 
-import io.foxcapades.lib.cli.wrapper.flag.ByteFlag
 import io.foxcapades.lib.cli.wrapper.arg.ByteArgument
+import io.foxcapades.lib.cli.wrapper.flag.ByteFlag
 
 internal class ByteFlagImpl : AbstractFlagImpl<ByteArgument, Byte>, ByteFlag {
   constructor(longForm: String, shortForm: Byte, isRequired: Boolean, argument: ByteArgument)

@@ -1,8 +1,8 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.impl.flag.MultiFlagImpl
 import io.foxcapades.lib.cli.wrapper.arg.MultiArgs
 import io.foxcapades.lib.cli.wrapper.arg.MultiArgument
+import io.foxcapades.lib.cli.wrapper.impl.flag.MultiFlagImpl
 import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
 
 object MultiFlags {

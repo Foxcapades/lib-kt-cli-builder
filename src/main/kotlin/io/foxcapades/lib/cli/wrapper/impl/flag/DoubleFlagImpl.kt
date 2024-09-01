@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.wrapper.impl.flag
 
-import io.foxcapades.lib.cli.wrapper.flag.DoubleFlag
 import io.foxcapades.lib.cli.wrapper.arg.DoubleArgument
+import io.foxcapades.lib.cli.wrapper.flag.DoubleFlag
 
 internal class DoubleFlagImpl : AbstractFlagImpl<DoubleArgument, Double>, DoubleFlag {
   constructor(longForm: String, shortForm: Byte, isRequired: Boolean, argument: DoubleArgument)

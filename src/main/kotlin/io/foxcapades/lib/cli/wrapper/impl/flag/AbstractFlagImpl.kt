@@ -4,7 +4,6 @@ package io.foxcapades.lib.cli.wrapper.impl.flag
 
 import io.foxcapades.lib.cli.wrapper.Argument
 import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.serial.CliStringBuilder
 import io.foxcapades.lib.cli.wrapper.utils.*
 import kotlin.experimental.and

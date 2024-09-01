@@ -1,8 +1,8 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.impl.flag.LongFlagImpl
 import io.foxcapades.lib.cli.wrapper.arg.LongArgs
 import io.foxcapades.lib.cli.wrapper.arg.LongArgument
+import io.foxcapades.lib.cli.wrapper.impl.flag.LongFlagImpl
 import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
 
 object LongFlags {
