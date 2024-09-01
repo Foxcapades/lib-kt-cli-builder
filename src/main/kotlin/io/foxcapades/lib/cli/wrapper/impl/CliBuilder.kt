@@ -6,9 +6,7 @@ import io.foxcapades.lib.cli.wrapper.impl.flag.FauxFlag
 import io.foxcapades.lib.cli.wrapper.meta.CliCommand
 import io.foxcapades.lib.cli.wrapper.meta.CliFlag
 import io.foxcapades.lib.cli.wrapper.meta.validateConfig
-import io.foxcapades.lib.cli.wrapper.serial.CliCallComponent
-import io.foxcapades.lib.cli.wrapper.serial.CliCallSerializable
-import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.wrapper.serial.*
 import io.foxcapades.lib.cli.wrapper.serial.CliStringBuilderImpl
 import io.foxcapades.lib.cli.wrapper.utils.findInstance
 import io.foxcapades.lib.cli.wrapper.utils.safeName
@@ -72,7 +70,33 @@ internal class CliBuilder<T : Any>(
   }
 
   private fun stringify(component: CliCallComponent): String {
-    component.writeToString(builder)
+    if (component is Flag<*, *>) {
+      if (component.isRequired) {
+        if (component.isDefault) {
+          // FIXME: get info about the flag to show an error!
+          throw IllegalArgumentException("bad flag, naughty naughty")
+        }
+
+        component.writeToString(builder)
+      } else if (component.isDefault) {
+        when (options.includeDefaultedFlags) {
+          IncludeDefault.Always -> component.writeToString(builder)
+
+          IncludeDefault.Never -> return ""
+
+          IncludeDefault.IfSetExplicitly ->
+            if (component.argument.isSet)
+              component.writeToString(builder)
+            else
+              return ""
+        }
+      } else {
+        component.writeToString(builder)
+      }
+    } else {
+      component.writeToString(builder)
+    }
+
     return builder.toString()
       .also { builder.clear() }
   }

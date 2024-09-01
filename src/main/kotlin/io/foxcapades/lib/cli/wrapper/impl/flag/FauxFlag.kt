@@ -13,10 +13,10 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
 internal class FauxFlag<T : Any>(
-  private val instance: T,
+  internal val instance: T,
   internal val annotation: CliFlag,
-  private val property: KProperty1<T, *>,
-  private val type: KClass<out T>,
+  internal val property: KProperty1<T, *>,
+  internal val type: KClass<out T>,
 ) : Flag<Argument<Any?>, Any?> {
   override val hasLongForm
     get() = annotation.hasLongForm

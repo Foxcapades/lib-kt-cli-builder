@@ -7,19 +7,21 @@ import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
 import io.foxcapades.lib.cli.wrapper.utils.BUG
 import kotlin.reflect.full.createInstance
 
-@JvmInline
-internal value class FauxArgument<T : Any>(private val flag: FauxFlag<T>) : Argument<Any?> {
+internal class FauxArgument<T : Any>(private val flag: FauxFlag<T>) : Argument<Any?> {
   override val default
-    get() = BUG()
+    get() = if (isDefault) flag.get() else BUG()
 
   override val hasDefault
     get() = BUG()
 
-  override val isDefault
-    get() = BUG()
+  override val isDefault by lazy {
+    // TODO: wrap this with try catch for bad instantiations
+    (flag.annotation.defaultValueTest.objectInstance ?: flag.annotation.defaultValueTest.createInstance())
+      .testValue(flag.get(), flag.annotation, flag.property)
+  }
 
   override val isSet
-    get() = BUG()
+    get() = !flag.isDefault
 
   override fun get() = flag.get()
 
