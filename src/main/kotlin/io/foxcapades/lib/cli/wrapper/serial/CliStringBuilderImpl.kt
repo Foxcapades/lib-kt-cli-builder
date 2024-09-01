@@ -11,7 +11,7 @@ internal class CliStringBuilderImpl(
   override fun append(rawChar: Char) = apply { buffer.append(rawChar) }
 
   override fun appendLongFlag(name: String, hasValue: Boolean): CliStringBuilderImpl {
-    buffer.append(' ').append(config.longFlagPrefix).append(name)
+    buffer.append(config.longFlagPrefix).append(name)
 
     if (hasValue)
       buffer.append(config.longFlagValueSeparator)
@@ -20,7 +20,7 @@ internal class CliStringBuilderImpl(
   }
 
   override fun appendShortFlag(name: Byte, hasValue: Boolean): CliStringBuilderImpl {
-    buffer.append(' ').append(config.shortFlagPrefix).append(name)
+    buffer.append(config.shortFlagPrefix).append(name)
 
     if (hasValue)
       buffer.append(config.shortFlagValueSeparator)

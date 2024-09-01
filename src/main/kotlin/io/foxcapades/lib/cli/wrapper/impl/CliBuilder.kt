@@ -43,14 +43,21 @@ internal class CliBuilder<T : Any>(
 
   private val builder by lazy { CliStringBuilderImpl(options) }
 
-  internal fun asSequence(): Sequence<String> = sequence {
+  internal fun asIterator() = iterator {
     for (leader in commandLeader)
       yield(leader)
 
-    yieldAll(siftProperties().map { stringify(it) })
+    for (prop in siftProperties()) {
+      when (val v = stringify(prop)) {
+        null -> {}
+        else -> yield(v)
+      }
+    }
   }
 
-  internal fun asIterable() = asSequence().asIterable()
+  internal fun asSequence() = Sequence { asIterator() }
+
+  internal fun asIterable() = Iterable { asIterator() }
 
   internal fun asList() = asSequence().toList()
 
@@ -58,7 +65,7 @@ internal class CliBuilder<T : Any>(
 
   internal fun asString(preSize: Int = 2048): String {
     val tmp = StringBuilder(preSize)
-    val it  = asSequence().iterator()
+    val it  = asIterator()
 
     tmp.append(it.next())
 
@@ -69,7 +76,7 @@ internal class CliBuilder<T : Any>(
     return tmp.toString()
   }
 
-  private fun stringify(component: CliCallComponent): String {
+  private fun stringify(component: CliCallComponent): String? {
     if (component is Flag<*, *>) {
       if (component.isRequired) {
         if (component.isDefault) {
@@ -82,13 +89,13 @@ internal class CliBuilder<T : Any>(
         when (options.includeDefaultedFlags) {
           IncludeDefault.Always -> component.writeToString(builder)
 
-          IncludeDefault.Never -> return ""
+          IncludeDefault.Never -> return null
 
           IncludeDefault.IfSetExplicitly ->
             if (component.argument.isSet)
               component.writeToString(builder)
             else
-              return ""
+              return null
         }
       } else {
         component.writeToString(builder)
