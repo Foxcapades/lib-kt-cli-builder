@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.UIntArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object UIntArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object UIntArgs {
     = UIntArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<UInt>): UIntArgument
+  fun required(formatter: ArgumentFormatter<UInt>): UIntArgument
     = UIntArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,6 +16,6 @@ object UIntArgs {
     = UIntArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: UInt, formatter: ValueFormatter<UInt>): UIntArgument
+  fun optional(default: UInt, formatter: ArgumentFormatter<UInt>): UIntArgument
     = UIntArgumentImpl(default, formatter)
 }

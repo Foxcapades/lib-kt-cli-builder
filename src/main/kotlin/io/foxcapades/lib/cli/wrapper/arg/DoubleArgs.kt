@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.DoubleArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object DoubleArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object DoubleArgs {
     = DoubleArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<Double>): DoubleArgument
+  fun required(formatter: ArgumentFormatter<Double>): DoubleArgument
     = DoubleArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,6 +16,6 @@ object DoubleArgs {
     = DoubleArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: Double, formatter: ValueFormatter<Double>): DoubleArgument
+  fun optional(default: Double, formatter: ArgumentFormatter<Double>): DoubleArgument
     = DoubleArgumentImpl(default, formatter)
 }

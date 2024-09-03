@@ -1,37 +1,47 @@
 package io.foxcapades.lib.cli.wrapper
 
-import io.foxcapades.lib.cli.wrapper.serial.CliCallComponent
-import kotlin.reflect.KProperty
+import io.foxcapades.lib.cli.wrapper.serial.CliArgumentAppender
+import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.wrapper.util.MutableProperty
 
 /**
  * Represents a single positional or flag argument.
  */
-interface Argument<T> : CliCallComponent {
+interface Argument<T> : MutableProperty<T>, CliCallComponent {
   @get:Throws(UnsetArgumentDefaultException::class)
   val default: T
 
   val hasDefault: Boolean
 
-  val isDefault: Boolean
-
   val isRequired get() = !hasDefault
 
-  val isSet: Boolean
-
-  @Throws(UnsetArgumentDefaultException::class)
-  fun get(): T
+  val shouldQuote: Boolean
 
   fun getOrNull() = if (isSet) get() else if (hasDefault) default else null
 
   fun getOrDefault(value: T) = getOrNull() ?: value
 
-  @Throws(UnsetArgumentDefaultException::class)
-  operator fun getValue(ref: Any?, property: KProperty<*>) = get()
+  /**
+   * Tests whether this `Argument` is currently set to its [default] value.
+   *
+   * If [hasDefault] is `false`, this method will also return `false`.
+   *
+   * If [isSet] is `false`, this method will always return the same value as
+   * [hasDefault].
+   *
+   * If [isSet] is `true`, this method will compare the set value to the default
+   * to determine the return value.
+   *
+   * @param config Serialization config.  Some implementations may require
+   * converting this [Argument]'s value to a string in order to test whether the
+   * value is the configured default.  In those cases, serialization config info
+   * may be required to correctly serialize the value.
+   *
+   * @return `true` if this `Argument` has a default set, and the current value
+   * of this `Argument` is equal to that default.
+   */
+  fun isDefault(config: CliSerializationConfig): Boolean
 
-  fun set(value: T)
-
-  operator fun setValue(ref: Any?, property: KProperty<*>, value: T) = set(value)
-
-  fun unset()
+  fun writeToString(builder: CliArgumentAppender)
 }
 

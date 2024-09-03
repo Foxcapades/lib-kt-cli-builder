@@ -1,6 +1,7 @@
 package io.foxcapades.lib.cli.wrapper
 
-import io.foxcapades.lib.cli.wrapper.utils.isASCII
+import io.foxcapades.lib.cli.wrapper.util.isPrintable
+import io.foxcapades.lib.cli.wrapper.util.safeName
 
 class InvalidFlagFormException(
   message: String,
@@ -11,16 +12,71 @@ class InvalidFlagFormException(
   inline val isAboutLongFlag get() = invalidForm.isLong || invalidForm.isBoth
 
   companion object {
+    fun invalidBothForms(flag: ResolvedFlag<*, *>): InvalidFlagFormException {
+      val msg = StringBuilder()
+        .append(flag.type.safeName)
+        .append("::")
+        .append(flag.property.name)
+        .append(" was configured with both invalid short-form and invalid long-form names: (short=")
+
+      if (flag.shortForm.isPrintable) {
+        msg.append(flag.shortForm)
+      } else {
+        msg.append("\\u%04x".format(flag.shortForm.code))
+      }
+
+      msg.append(", long='")
+
+      for (c in flag.longForm) {
+        if (c.isPrintable)
+          msg.append(c)
+        else
+          msg.append("\\u%04x".format(c.code))
+      }
+
+      msg.append("')")
+
+      return InvalidFlagFormException(msg.toString(), InvalidForm.Both)
+    }
+
     @JvmStatic
-    fun invalidShortForm(property: String, type: String, form: Char) =
-      InvalidFlagFormException(
-        "$type::$property was annotated with an invalid short-form flag name: " +
-          if (form.isASCII)
-            "ASCII character with code ${form.code}"
-          else
-            "non-ASCII character with code dec(%1\$d), hex(%1\$04x)".format(form.code),
-        InvalidForm.Short,
-      )
+    fun invalidShortForm(flag: ResolvedFlag<*, *>): InvalidFlagFormException {
+      val msg = startSharedMessage(flag, false)
+
+      if (flag.shortForm.isPrintable) {
+        msg.append(flag.shortForm)
+      } else {
+        msg.append("\\u%04x".format(flag.shortForm.code))
+      }
+
+      return InvalidFlagFormException(msg.toString(), InvalidForm.Short)
+    }
+
+    @JvmStatic
+    fun invalidLongForm(flag: ResolvedFlag<*, *>): InvalidFlagFormException {
+      val msg = startSharedMessage(flag, true).append('\'')
+
+      for (c in flag.longForm) {
+        if (c.isPrintable)
+          msg.append(c)
+        else
+          msg.append("\\u%04x".format(c.code))
+      }
+
+      msg.append('\'')
+
+      return InvalidFlagFormException(msg.toString(), InvalidForm.Long)
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun startSharedMessage(flag: ResolvedFlag<*, *>, long: Boolean) =
+      StringBuilder()
+        .append(flag.type.safeName)
+        .append("::")
+        .append(flag.property.name)
+        .append(" was configured with an invalid ")
+        .append(if (long) "long" else "short")
+        .append("form flag name: ")
   }
 
   enum class InvalidForm {

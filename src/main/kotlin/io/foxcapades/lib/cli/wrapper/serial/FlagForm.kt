@@ -5,7 +5,7 @@ enum class FlagForm {
   Long,
   ;
 
-  val isShort get() = this == Short
+  inline val isShort get() = this == Short
 
-  val isLong get() = this == Long
+  inline val isLong get() = this == Long
 }

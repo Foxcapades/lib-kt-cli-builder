@@ -1,6 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.serial.properties
 
-import io.foxcapades.lib.cli.wrapper.utils.toUppercase
+import io.foxcapades.lib.cli.wrapper.util.toUppercase
 import java.nio.CharBuffer
 
 internal class UpperSnakeCasePropertyNameFormatter : AbstractPropertyNameFormatter() {

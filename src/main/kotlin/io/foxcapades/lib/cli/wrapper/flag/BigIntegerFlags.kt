@@ -2,53 +2,52 @@ package io.foxcapades.lib.cli.wrapper.flag
 
 import io.foxcapades.lib.cli.wrapper.arg.BigIntegerArgs
 import io.foxcapades.lib.cli.wrapper.arg.BigIntegerArgument
-import io.foxcapades.lib.cli.wrapper.impl.flag.BigIntegerFlagImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 import java.math.BigInteger
 
 object BigIntegerFlags {
-  fun optional(longForm: String, shortForm: Byte, default: BigInteger, formatter: ValueFormatter<BigInteger>): BigIntegerFlag
+  fun optional(longForm: String, shortForm: Char, default: BigInteger, formatter: ArgumentFormatter<BigInteger>): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, shortForm, false, BigIntegerArgs.optional(default, formatter))
 
-  fun optional(longForm: String, shortForm: Byte, default: BigInteger): BigIntegerFlag
+  fun optional(longForm: String, shortForm: Char, default: BigInteger): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, shortForm, false, BigIntegerArgs.optional(default))
 
-  fun optional(longForm: String, default: BigInteger, formatter: ValueFormatter<BigInteger>): BigIntegerFlag
+  fun optional(longForm: String, default: BigInteger, formatter: ArgumentFormatter<BigInteger>): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, false, BigIntegerArgs.optional(default, formatter))
 
   fun optional(longForm: String, default: BigInteger): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, false, BigIntegerArgs.optional(default))
 
-  fun optional(shortForm: Byte, default: BigInteger, formatter: ValueFormatter<BigInteger>): BigIntegerFlag
+  fun optional(shortForm: Char, default: BigInteger, formatter: ArgumentFormatter<BigInteger>): BigIntegerFlag
     = BigIntegerFlagImpl(shortForm, false, BigIntegerArgs.optional(default, formatter))
 
-  fun optional(shortForm: Byte, default: BigInteger): BigIntegerFlag
+  fun optional(shortForm: Char, default: BigInteger): BigIntegerFlag
     = BigIntegerFlagImpl(shortForm, false, BigIntegerArgs.optional(default))
 
-  fun required(longForm: String, shortForm: Byte, formatter: ValueFormatter<BigInteger>): BigIntegerFlag
+  fun required(longForm: String, shortForm: Char, formatter: ArgumentFormatter<BigInteger>): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, shortForm, true, BigIntegerArgs.required(formatter))
 
-  fun required(longForm: String, shortForm: Byte): BigIntegerFlag
+  fun required(longForm: String, shortForm: Char): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, shortForm, true, BigIntegerArgs.required())
 
-  fun required(longForm: String, formatter: ValueFormatter<BigInteger>): BigIntegerFlag
+  fun required(longForm: String, formatter: ArgumentFormatter<BigInteger>): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, true, BigIntegerArgs.required(formatter))
 
   fun required(longForm: String): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, true, BigIntegerArgs.required())
 
-  fun required(shortForm: Byte, formatter: ValueFormatter<BigInteger>): BigIntegerFlag
+  fun required(shortForm: Char, formatter: ArgumentFormatter<BigInteger>): BigIntegerFlag
     = BigIntegerFlagImpl(shortForm, true, BigIntegerArgs.required(formatter))
 
-  fun required(shortForm: Byte): BigIntegerFlag
+  fun required(shortForm: Char): BigIntegerFlag
     = BigIntegerFlagImpl(shortForm, true, BigIntegerArgs.required())
 
-  fun of(longForm: String, shortForm: Byte, isRequired: Boolean, arg: BigIntegerArgument): BigIntegerFlag
+  fun of(longForm: String, shortForm: Char, isRequired: Boolean, arg: BigIntegerArgument): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, shortForm, isRequired, arg)
 
   fun of(longForm: String, isRequired: Boolean, arg: BigIntegerArgument): BigIntegerFlag
     = BigIntegerFlagImpl(longForm, isRequired, arg)
 
-  fun of(shortForm: Byte, isRequired: Boolean, arg: BigIntegerArgument): BigIntegerFlag
+  fun of(shortForm: Char, isRequired: Boolean, arg: BigIntegerArgument): BigIntegerFlag
     = BigIntegerFlagImpl(shortForm, isRequired, arg)
 }

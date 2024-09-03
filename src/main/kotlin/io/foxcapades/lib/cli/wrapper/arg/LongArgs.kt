@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.LongArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object LongArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object LongArgs {
     = LongArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<Long>): LongArgument
+  fun required(formatter: ArgumentFormatter<Long>): LongArgument
     = LongArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,6 +16,6 @@ object LongArgs {
     = LongArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: Long, formatter: ValueFormatter<Long>): LongArgument
+  fun optional(default: Long, formatter: ArgumentFormatter<Long>): LongArgument
     = LongArgumentImpl(default, formatter)
 }

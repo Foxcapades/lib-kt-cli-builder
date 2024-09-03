@@ -1,14 +1,15 @@
 package io.foxcapades.lib.cli.wrapper
 
-import io.foxcapades.lib.cli.wrapper.serial.CliCallComponent
-import kotlin.reflect.KProperty
+import io.foxcapades.lib.cli.wrapper.serial.CliAppender
+import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.wrapper.util.MutableProperty
 
 /**
  * Represents a command line flag option.
  *
  * @since v1.0.0
  */
-interface Flag<A: Argument<V>, V> : CliCallComponent {
+interface Flag<A: Argument<V>, V> : MutableProperty<V>, CliCallComponent {
   /**
    * Indicates whether this flag has a long form.
    */
@@ -27,7 +28,7 @@ interface Flag<A: Argument<V>, V> : CliCallComponent {
   /**
    * Short form of this flag.
    */
-  val shortForm: Byte
+  val shortForm: Char
 
   /**
    * Argument for this flag.
@@ -42,21 +43,7 @@ interface Flag<A: Argument<V>, V> : CliCallComponent {
   /**
    * Indicates whether this flag has been set to a value.
    */
-  val isSet get() = argument.isSet
-
-  /**
-   * Indicates whether this flag is currently equivalent to its default value.
-   *
-   * If [isSet] returns `true` then the value that has been set for the
-   * [Argument] attached to this [Flag] is equal to the default provided when
-   * the `Flag` instance was created.
-   *
-   * If [isSet] returns `false`, then a default value was provided, and no value
-   * has been explicitly set.
-   *
-   * If [hasDefault] is `false`, this property will also be `false`.
-   */
-  val isDefault get() = argument.isDefault
+  override val isSet get() = argument.isSet
 
   /**
    * Indicates whether a default value has been set for this [Flag] instance's
@@ -66,29 +53,33 @@ interface Flag<A: Argument<V>, V> : CliCallComponent {
    * property will cause an [UnsetArgumentDefaultException] to be thrown.
    *
    * @see [Argument.hasDefault]
-   * @see [default]
    */
   val hasDefault get() = argument.hasDefault
 
   /**
-   * The default value set on this [Flag] instance's underlying [Argument].
+   * Tests whether this `Flag`'s underlying [Argument] is currently set to its
+   * default value.
    *
-   * If no default was set, accessing this property will cause an
-   * [UnsetArgumentDefaultException] to be thrown.
+   * See [Argument.isDefault] for additional information.
    *
-   * @see [hasDefault]
-   * @see [Argument.default]
+   * @param config Serialization config.  Some implementations may require
+   * converting this `Flag`'s underlying `Argument` value to a string in order
+   * to test whether the value is the configured default.  In those cases,
+   * serialization config info may be required to correctly serialize the value.
+   *
+   * @return `true` if this `Flag` has a default set, and the current value
+   * of this `Flag` is equal to that default.
+   *
+   * @see Argument.isDefault
    */
-  @get:Throws(UnsetArgumentDefaultException::class)
-  val default get() = argument.default
+  fun isDefault(config: CliSerializationConfig): Boolean =
+    argument.isDefault(config)
 
-  fun get(): V
+  override fun get() = argument.get()
 
-  operator fun getValue(ref: Any?, property: KProperty<*>): V
+  override fun set(value: V) = argument.set(value)
 
-  fun set(value: V)
+  override fun unset() = argument.unset()
 
-  operator fun setValue(ref: Any?, property: KProperty<*>, value: V)
-
-  fun unset()
+  fun writeToString(builder: CliAppender)
 }

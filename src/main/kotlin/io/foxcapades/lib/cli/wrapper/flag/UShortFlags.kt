@@ -2,52 +2,51 @@ package io.foxcapades.lib.cli.wrapper.flag
 
 import io.foxcapades.lib.cli.wrapper.arg.UShortArgs
 import io.foxcapades.lib.cli.wrapper.arg.UShortArgument
-import io.foxcapades.lib.cli.wrapper.impl.flag.UShortFlagImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object UShortFlags {
-  fun optional(longForm: String, shortForm: Byte, default: UShort, formatter: ValueFormatter<UShort>): UShortFlag
+  fun optional(longForm: String, shortForm: Char, default: UShort, formatter: ArgumentFormatter<UShort>): UShortFlag
     = UShortFlagImpl(longForm, shortForm, false, UShortArgs.optional(default, formatter))
 
-  fun optional(longForm: String, shortForm: Byte, default: UShort): UShortFlag
+  fun optional(longForm: String, shortForm: Char, default: UShort): UShortFlag
     = UShortFlagImpl(longForm, shortForm, false, UShortArgs.optional(default))
 
-  fun optional(longForm: String, default: UShort, formatter: ValueFormatter<UShort>): UShortFlag
+  fun optional(longForm: String, default: UShort, formatter: ArgumentFormatter<UShort>): UShortFlag
     = UShortFlagImpl(longForm, false, UShortArgs.optional(default, formatter))
 
   fun optional(longForm: String, default: UShort): UShortFlag
     = UShortFlagImpl(longForm, false, UShortArgs.optional(default))
 
-  fun optional(shortForm: Byte, default: UShort, formatter: ValueFormatter<UShort>): UShortFlag
+  fun optional(shortForm: Char, default: UShort, formatter: ArgumentFormatter<UShort>): UShortFlag
     = UShortFlagImpl(shortForm, false, UShortArgs.optional(default, formatter))
 
-  fun optional(shortForm: Byte, default: UShort): UShortFlag
+  fun optional(shortForm: Char, default: UShort): UShortFlag
     = UShortFlagImpl(shortForm, false, UShortArgs.optional(default))
 
-  fun required(longForm: String, shortForm: Byte, formatter: ValueFormatter<UShort>): UShortFlag
+  fun required(longForm: String, shortForm: Char, formatter: ArgumentFormatter<UShort>): UShortFlag
     = UShortFlagImpl(longForm, shortForm, true, UShortArgs.required(formatter))
 
-  fun required(longForm: String, shortForm: Byte): UShortFlag
+  fun required(longForm: String, shortForm: Char): UShortFlag
     = UShortFlagImpl(longForm, shortForm, true, UShortArgs.required())
 
-  fun required(longForm: String, formatter: ValueFormatter<UShort>): UShortFlag
+  fun required(longForm: String, formatter: ArgumentFormatter<UShort>): UShortFlag
     = UShortFlagImpl(longForm, true, UShortArgs.required(formatter))
 
   fun required(longForm: String): UShortFlag
     = UShortFlagImpl(longForm, true, UShortArgs.required())
 
-  fun required(shortForm: Byte, formatter: ValueFormatter<UShort>): UShortFlag
+  fun required(shortForm: Char, formatter: ArgumentFormatter<UShort>): UShortFlag
     = UShortFlagImpl(shortForm, true, UShortArgs.required(formatter))
 
-  fun required(shortForm: Byte): UShortFlag
+  fun required(shortForm: Char): UShortFlag
     = UShortFlagImpl(shortForm, true, UShortArgs.required())
 
-  fun of(longForm: String, shortForm: Byte, isRequired: Boolean, arg: UShortArgument): UShortFlag
+  fun of(longForm: String, shortForm: Char, isRequired: Boolean, arg: UShortArgument): UShortFlag
     = UShortFlagImpl(longForm, shortForm, isRequired, arg)
 
   fun of(longForm: String, isRequired: Boolean, arg: UShortArgument): UShortFlag
     = UShortFlagImpl(longForm, isRequired, arg)
 
-  fun of(shortForm: Byte, isRequired: Boolean, arg: UShortArgument): UShortFlag
+  fun of(shortForm: Char, isRequired: Boolean, arg: UShortArgument): UShortFlag
     = UShortFlagImpl(shortForm, isRequired, arg)
 }

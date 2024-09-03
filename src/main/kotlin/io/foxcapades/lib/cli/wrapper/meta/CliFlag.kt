@@ -3,9 +3,9 @@ package io.foxcapades.lib.cli.wrapper.meta
 import io.foxcapades.lib.cli.wrapper.Flag
 import io.foxcapades.lib.cli.wrapper.serial.NullableGeneralStringifier
 import io.foxcapades.lib.cli.wrapper.serial.properties.PropertyNameFormatter
-import io.foxcapades.lib.cli.wrapper.serial.values.DefaultTestReqDependent
-import io.foxcapades.lib.cli.wrapper.serial.values.DefaultValueTest
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagDefaultTest
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagDefaultTestReqDependent
 import kotlin.reflect.KClass
 
 /**
@@ -39,7 +39,7 @@ import kotlin.reflect.KClass
  * Cli.toCliString(foo) // my-command --input="hello" --output="goodbye" --some-enum="some-option"
  * ```
  *
- * @see [CliFlag.isRequired]
+ * @see [CliFlag.required]
  */
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
@@ -68,7 +68,7 @@ annotation class CliFlag(
    *
    * ## Required Flags
    *
-   * When [isRequired] is set to `true`, the following applies:
+   * When [required] is set to `true`, the following applies:
    *
    * 1. [includeDefault] is ignored
    * 2. [defaultValueTest] is used to indicate whether a value has been set,
@@ -79,7 +79,7 @@ annotation class CliFlag(
    *     b. Non-nullable fields will be treated with the rules outlined by
    *        [DefaultValueTests.Default].
    *
-   * *Example: Standard Test - Nullable Field* (see [DefaultValueTests.Null])
+   * *Example: Standard Test - Nullable Field* (see [FlagDefaultTests.Null])
    * ```kt
    * @CliCommand("my-command")
    * data class Command(
@@ -94,7 +94,7 @@ annotation class CliFlag(
    * Cli.toCliString(com) // my-command --my-flag="hello"
    * ```
    *
-   * *Example: Standard Test - Non-Nullable Field* (see [DefaultValueTests.Default])
+   * *Example: Standard Test - Non-Nullable Field* (see [FlagDefaultTests.Default])
    * ```kt
    * @CliCommand("my-command")
    * data class Command(
@@ -131,14 +131,14 @@ annotation class CliFlag(
    *
    * ## Optional Flags
    *
-   * When [isRequired] is set to `false`, the following applies:
+   * When [required] is set to `false`, the following applies:
    *
    * 1. [defaultValueTest] is used to indicate whether a value is considered as
    *    being its default value.
    * 2. The default [defaultValueTest] implementation will follow the rules
    *    outlined by [DefaultValueTests.Default].
 
-   * *Example: Standard Test* (see [DefaultValueTests.Default])
+   * *Example: Standard Test* (see [FlagDefaultTests.Default])
    * ```kt
    * @CliCommand("my-command")
    * data class Command(
@@ -176,24 +176,26 @@ annotation class CliFlag(
    * Cli.toCliString(com) // my-command --my-flag=69
    * ```
    */
-  val isRequired: Boolean = false,
+  val required: Boolean = false,
 
   /**
    * Used to test the property value to determine if it should be considered as
    * set to its "default" value.
    *
-   * * When [isRequired] is set to `true`, a test result of `true` (is default)
+   * * When [required] is set to `true`, a test result of `true` (is default)
    * indicates that the value has not been set, which would result in a
    * validation error.  A test result value of `false` (not default) indicates
    * that the value has been set.
    *
-   * * When [isRequired] is set to `false`, a test result of `true` (is default)
+   * * When [required] is set to `false`, a test result of `true` (is default)
    * indicates that the value may be omitted from the generated CLI call based
    * on the value of [includeDefault].  A test result value of `false` (not
    * default) indicates that the value has been changed and must be included
    * in the CLI call.
    */
-  val defaultValueTest: KClass<out DefaultValueTest> = DefaultTestReqDependent::class,
+  val defaultValueTest: KClass<out FlagDefaultTest<*>> = FlagDefaultTestReqDependent::class,
+
+  val default: String = CliComponentUnsetDefault,
 
   /**
    * Configures whether optional flags that are set to their default value
@@ -206,5 +208,5 @@ annotation class CliFlag(
    *
    * This will only be used or instantiated if the flag is printed.
    */
-  val formatter: KClass<out ValueFormatter<*>> = NullableGeneralStringifier::class,
+  val formatter: KClass<out ArgumentFormatter<*>> = NullableGeneralStringifier::class,
 )

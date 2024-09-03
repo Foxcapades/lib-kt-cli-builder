@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.UByteArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object UByteArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object UByteArgs {
     = UByteArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<UByte>): UByteArgument
+  fun required(formatter: ArgumentFormatter<UByte>): UByteArgument
     = UByteArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,6 +16,6 @@ object UByteArgs {
     = UByteArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: UByte, formatter: ValueFormatter<UByte>): UByteArgument
+  fun optional(default: UByte, formatter: ArgumentFormatter<UByte>): UByteArgument
     = UByteArgumentImpl(default, formatter)
 }

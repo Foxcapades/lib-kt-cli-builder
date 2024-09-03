@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.BooleanArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object BooleanArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object BooleanArgs {
     = BooleanArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<Boolean>): BooleanArgument
+  fun required(formatter: ArgumentFormatter<Boolean>): BooleanArgument
     = BooleanArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,7 +16,7 @@ object BooleanArgs {
     = BooleanArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: Boolean, formatter: ValueFormatter<Boolean>): BooleanArgument
+  fun optional(default: Boolean, formatter: ArgumentFormatter<Boolean>): BooleanArgument
     = BooleanArgumentImpl(default, formatter)
 
   @JvmStatic

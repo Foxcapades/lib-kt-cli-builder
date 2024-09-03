@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.IntArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object IntArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object IntArgs {
     = IntArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<Int>): IntArgument
+  fun required(formatter: ArgumentFormatter<Int>): IntArgument
     = IntArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,6 +16,6 @@ object IntArgs {
     = IntArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: Int, formatter: ValueFormatter<Int>): IntArgument
+  fun optional(default: Int, formatter: ArgumentFormatter<Int>): IntArgument
     = IntArgumentImpl(default, formatter)
 }

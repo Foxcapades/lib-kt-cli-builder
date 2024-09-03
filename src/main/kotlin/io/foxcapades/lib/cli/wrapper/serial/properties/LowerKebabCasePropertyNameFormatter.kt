@@ -1,6 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.serial.properties
 
-import io.foxcapades.lib.cli.wrapper.utils.toLowercase
+import io.foxcapades.lib.cli.wrapper.util.toLowercase
 import java.nio.CharBuffer
 
 internal class LowerKebabCasePropertyNameFormatter : AbstractPropertyNameFormatter() {

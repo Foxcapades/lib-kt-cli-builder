@@ -1,8 +1,9 @@
 package io.foxcapades.lib.cli.wrapper.serial
 
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
-class NonNullGeneralStringifier : ValueFormatter<Any> {
-  override fun invoke(value: Any, serializationConfig: CliSerializationConfig) =
-    value.toString()
+object NonNullGeneralStringifier : ArgumentFormatter<Any> {
+  override fun formatValue(value: Any, builder: CliArgumentAppender) {
+    builder.appendString(value.toString())
+  }
 }

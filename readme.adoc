@@ -1,0 +1,65 @@
+= CLI Call Builder
+:version-actual: 0.1.0
+:version-feature: 0.1.0
+:source-highlighter: highlightjs
+
+Provides delegates, annotations, and tools to generate CLI calls from
+classes, making it easier to define type-safe, validating wrappers around
+external CLI tools.
+
+image:https://img.shields.io/github/license/foxcapades/lib-kt-cli-builder[GitHub License]
+image:https://img.shields.io/badge/docs-dokka-%230e86d4[API Documentation, link="https://foxcapades.github.io/lib-kt-cli-builder/{version-feature}"]
+image:https://img.shields.io/badge/kotlin-2.0.20-%237F52FF[Kotlin Version]
+image:https://img.shields.io/badge/jvm-8-%23f90[Target JVM Version]
+
+== Usage
+
+.build.gradle.kts
+[source, kotlin, subs="attributes"]
+----
+  implementation("io.foxcapades.kt:cli-builder:{version-actual}")
+----
+
+=== Examples
+
+==== Delegates
+
+Flags and arguments may be defined on a type by use of the `Flag` or `Argument`
+delegate types.
+
+[source, kotlin]
+----
+@CliCommand("my-command")
+class MyCommandConfig {
+  // creates a required `-i` flag with
+  val input by StringFlags.required('i')
+
+  // creates an optional `-o` flag with a default value of "-"
+  val output by StringFlags.optional('o', "-")
+
+  // creates an optional `--threads/-t` flag with a default value of "1"
+  val threads by IntFlags.optional("threads", 't', 1)
+}
+----
+
+==== Annotations
+
+Flags and arguments may be defined on a type by use of the `@CliFlag` or
+`@CliArgument` annotations.
+
+[source, kotlin]
+----
+@CliCommand("my-command")
+data class MyCommandConfig(
+  // creates a required `-i` flag with
+  @CliFlag(shortForm='i', required=true)
+  val input: String,
+
+  // creates an optional `-o` flag
+  @CliFlag(shortForm='o')
+  val output: String,
+
+  // creates an optional `--threads/-t` flag with a default value of "1"
+  val threads by IntFlags.optional("threads", 't', 1)
+}
+----

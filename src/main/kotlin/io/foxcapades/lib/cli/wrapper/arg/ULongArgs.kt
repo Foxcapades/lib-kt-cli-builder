@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.ULongArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object ULongArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object ULongArgs {
     = ULongArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<ULong>): ULongArgument
+  fun required(formatter: ArgumentFormatter<ULong>): ULongArgument
     = ULongArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,6 +16,6 @@ object ULongArgs {
     = ULongArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: ULong, formatter: ValueFormatter<ULong>): ULongArgument
+  fun optional(default: ULong, formatter: ArgumentFormatter<ULong>): ULongArgument
     = ULongArgumentImpl(default, formatter)
 }

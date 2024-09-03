@@ -1,7 +1,9 @@
 package io.foxcapades.lib.cli.wrapper.serial
 
+import io.foxcapades.lib.cli.wrapper.Shell
 import io.foxcapades.lib.cli.wrapper.serial.properties.PropertyNameFormatter
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
+import io.foxcapades.lib.cli.wrapper.shell.SH
 
 /**
  * Command line call building configuration.
@@ -76,13 +78,15 @@ data class CliSerializationConfig(
    * `null` values.
    *
    * **WARNING**: This serializer is only used when the default argument
-   * [ValueFormatter] is not capable of handling `null` values.
+   * [ArgumentFormatter] is not capable of handling `null` values.
    */
   val nullSerializer: NullSerializer,
 
   val propertyNameFormatter: PropertyNameFormatter,
 
-  val fallbackSerializer: ValueFormatter<in Any>,
+  val fallbackSerializer: ArgumentFormatter<in Any>,
+
+  val targetShell: Shell,
 ) {
   object Defaults {
     @JvmStatic
@@ -109,7 +113,11 @@ data class CliSerializationConfig(
     val PropertyNameFormatter get() = io.foxcapades.lib.cli.wrapper.serial.properties.PropertyNameFormatter.KebabCase
 
     @JvmStatic
-    val FallbackSerializer get() = NonNullGeneralStringifier()
+    val FallbackSerializer get() = NonNullGeneralStringifier
+
+    // TODO: determine default based on OS
+    @JvmStatic
+    val TargetShell: Shell get() = SH()
   }
 
   constructor() : this(
@@ -123,6 +131,7 @@ data class CliSerializationConfig(
     nullSerializer                 = Defaults.NullSerializer,
     propertyNameFormatter          = Defaults.PropertyNameFormatter,
     fallbackSerializer             = Defaults.FallbackSerializer,
+    targetShell                    = Defaults.TargetShell,
   )
 
   constructor(builder: Builder) : this(
@@ -136,6 +145,7 @@ data class CliSerializationConfig(
     nullSerializer                 = builder.nullSerializer,
     propertyNameFormatter          = builder.propertyNameFormatter,
     fallbackSerializer             = builder.fallbackSerializer,
+    targetShell                    = builder.targetShell,
   )
 
   constructor(action: Builder.() -> Unit) : this(Builder().apply(action))
@@ -150,7 +160,8 @@ data class CliSerializationConfig(
     var includeDefaultedPositionalArgs: IncludeDefault,
     var nullSerializer: NullSerializer,
     var propertyNameFormatter: PropertyNameFormatter,
-    var fallbackSerializer: ValueFormatter<in Any>,
+    var fallbackSerializer: ArgumentFormatter<in Any>,
+    var targetShell: Shell,
   ) {
     constructor() : this(
       preferredFlagForm              = Defaults.PreferredFlagForm,
@@ -163,6 +174,7 @@ data class CliSerializationConfig(
       nullSerializer                 = Defaults.NullSerializer,
       propertyNameFormatter          = Defaults.PropertyNameFormatter,
       fallbackSerializer             = Defaults.FallbackSerializer,
+      targetShell                    = Defaults.TargetShell,
     )
 
     constructor(action: Builder.() -> Unit) : this() {
@@ -187,7 +199,9 @@ data class CliSerializationConfig(
 
     fun propertyNameFormatter(value: PropertyNameFormatter) = apply { propertyNameFormatter = value }
 
-    fun fallbackSerializer(value: ValueFormatter<in Any>) = apply { fallbackSerializer = value }
+    fun fallbackSerializer(value: ArgumentFormatter<in Any>) = apply { fallbackSerializer = value }
+
+    fun targetShell(value: Shell) = apply { targetShell = value }
 
     fun build() = CliSerializationConfig(this)
   }

@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.ByteArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object ByteArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object ByteArgs {
     = ByteArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<Byte>): ByteArgument
+  fun required(formatter: ArgumentFormatter<Byte>): ByteArgument
     = ByteArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,7 +16,7 @@ object ByteArgs {
     = ByteArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: Byte, formatter: ValueFormatter<Byte>): ByteArgument
+  fun optional(default: Byte, formatter: ArgumentFormatter<Byte>): ByteArgument
     = ByteArgumentImpl(default, formatter)
 
   @JvmStatic

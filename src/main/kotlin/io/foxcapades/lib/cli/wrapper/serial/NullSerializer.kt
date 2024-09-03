@@ -1,20 +1,26 @@
 package io.foxcapades.lib.cli.wrapper.serial
 
-fun interface NullSerializer {
-  operator fun invoke(serializationConfig: CliSerializationConfig): String
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
+
+fun interface NullSerializer : ArgumentFormatter<Any?> {
+  override fun formatValue(value: Any?, builder: CliArgumentAppender) = formatValue(builder)
+
+  fun formatValue(builder: CliArgumentAppender)
+
+  operator fun invoke(builder: CliArgumentAppender) = formatValue(builder)
 
   companion object {
     @JvmStatic
-    fun useEmptyString() = NullSerializer { "''" }
+    fun useEmptyString() = NullSerializer { it.appendString("") }
 
     @JvmStatic
-    fun useDigitZero() = NullSerializer { "0" }
+    fun useDigitZero() = NullSerializer { it.appendChar('0') }
 
     @JvmStatic
-    fun useStringNull() = NullSerializer { "null" }
+    fun useStringNull() = NullSerializer { it.appendString("null") }
 
     @JvmStatic
-    fun useLiteralText(value: String) = NullSerializer { value }
+    fun useLiteralText(value: String) = NullSerializer { it.appendString(value) }
   }
 }
 

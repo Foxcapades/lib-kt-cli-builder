@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
-import io.foxcapades.lib.cli.wrapper.impl.arg.ShortArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.values.ValueFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object ShortArgs {
   @JvmStatic
@@ -9,7 +8,7 @@ object ShortArgs {
     = ShortArgumentImpl()
 
   @JvmStatic
-  fun required(formatter: ValueFormatter<Short>): ShortArgument
+  fun required(formatter: ArgumentFormatter<Short>): ShortArgument
     = ShortArgumentImpl(formatter)
 
   @JvmStatic
@@ -17,6 +16,6 @@ object ShortArgs {
     = ShortArgumentImpl(default)
 
   @JvmStatic
-  fun optional(default: Short, formatter: ValueFormatter<Short>): ShortArgument
+  fun optional(default: Short, formatter: ArgumentFormatter<Short>): ShortArgument
     = ShortArgumentImpl(default, formatter)
 }

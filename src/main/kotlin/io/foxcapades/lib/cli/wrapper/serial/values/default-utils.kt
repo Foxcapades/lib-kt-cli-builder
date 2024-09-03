@@ -1,5 +1,9 @@
 package io.foxcapades.lib.cli.wrapper.serial.values
 
+import io.foxcapades.lib.cli.wrapper.ResolvedArgument
+import io.foxcapades.lib.cli.wrapper.ResolvedFlag
+import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
+
 internal inline val ByteZero: Byte get() = 0.toByte()
 internal inline val ShortZero: Short get() = 0.toShort()
 internal inline val IntZero: Int get() = 0
@@ -23,3 +27,11 @@ internal inline val LongNeg1: Long get() = -1L
 internal inline val FloatNeg1: Float get() = -1.0F
 internal inline val DoubleNeg1: Double get() = -1.0
 
+
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <V> FlagDefaultTest<V>.invoke(value: V, flag: ResolvedFlag<*, V>, config: CliSerializationConfig) =
+  valueIsDefault(value, flag, config)
+
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <V> ArgumentDefaultTest<V>.invoke(value: V, arg: ResolvedArgument<*, V>, config: CliSerializationConfig) =
+  valueIsDefault(value, arg, config)

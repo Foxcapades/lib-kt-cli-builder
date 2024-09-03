@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.wrapper.serial.properties
 
-import io.foxcapades.lib.cli.wrapper.utils.toLowercase
-import io.foxcapades.lib.cli.wrapper.utils.toUppercase
+import io.foxcapades.lib.cli.wrapper.util.toLowercase
+import io.foxcapades.lib.cli.wrapper.util.toUppercase
 import java.nio.CharBuffer
 
 internal class CamelCasePropertyNameFormatter : AbstractPropertyNameFormatter() {
