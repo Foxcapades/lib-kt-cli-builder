@@ -116,6 +116,16 @@ typealias FlagOptionConfigurator<T> = FlagOptions<T>.() -> Unit
 /**
  * Creates a new [Flag] delegate instance for the target type ([T]).
  *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input: String by flag { longForm = "input" }
+ *
+ *   // registers `-o` string flag
+ *   var output by flag<String> { shortForm = 'o' }
+ * }
+ * ```
+ *
  * @param T Flag value type.
  *
  * @param action Configuration that will be called on a new [FlagOptions]
