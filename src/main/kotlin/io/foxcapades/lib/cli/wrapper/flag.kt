@@ -113,6 +113,16 @@ open class NullableFlagOptions<T: Any>(type: KClass<out T>) : BaseFlagOptions<T,
 
 typealias FlagOptionConfigurator<T> = FlagOptions<T>.() -> Unit
 
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * @param T Flag value type.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
 @OptIn(ExperimentalContracts::class)
 inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T> {
   contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
