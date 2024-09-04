@@ -6,6 +6,16 @@ import io.foxcapades.lib.cli.wrapper.serial.values.ComponentDefaultTest
 import io.foxcapades.lib.cli.wrapper.util.SimpleProperty
 import kotlin.reflect.KClass
 
+
+sealed interface CliCallComponent
+
+/**
+ * @param T Component container class type.
+ *
+ * @param V Component value type.
+ */
+sealed interface ResolvedComponent<T : Any, V> : CliCallComponent, PropertyReference<T, V>
+
 /**
  * @param V Safe, concrete value type.
  *
@@ -13,7 +23,7 @@ import kotlin.reflect.KClass
  *
  * @param P Target resolved component type.
  */
-sealed class BaseComponentOptions<V : Any, O : V?, P>(internal val type: KClass<out V>) where P : CliCallComponent, P : PropertyReference<*, O> {
+abstract class BaseComponentOptions<V : Any, O : V?, P>(internal val type: KClass<out V>) where P : CliCallComponent, P : PropertyReference<*, O> {
   var defaultValueTest: ComponentDefaultTest<O, P> by SimpleProperty()
   var default: O by SimpleProperty()
   var includeDefault: Boolean by SimpleProperty()

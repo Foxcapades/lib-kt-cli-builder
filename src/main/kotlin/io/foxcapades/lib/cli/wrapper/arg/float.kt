@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface FloatArgument : ScalarArgument<Float>
 
-object FloatArgs {
-  @JvmStatic
-  fun required(): FloatArgument =
-    FloatArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<Float>): FloatArgument =
-    FloatArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): FloatArgument =
-    FloatArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: Float): FloatArgument =
-    FloatArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<Float>): FloatArgument =
-    FloatArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: Float, formatter: ArgumentFormatter<Float>): FloatArgument =
-    FloatArgumentImpl(default, false, formatter)
-}
-
 fun floatArg(action: ArgOptions<Float>.() -> Unit): FloatArgument {
   val opts = ArgOptions(Float::class).also(action)
 

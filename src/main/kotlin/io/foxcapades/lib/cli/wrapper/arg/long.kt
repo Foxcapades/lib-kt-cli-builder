@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface LongArgument : ScalarArgument<Long>
 
-object LongArgs {
-  @JvmStatic
-  fun required(): LongArgument =
-    LongArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<Long>): LongArgument =
-    LongArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): LongArgument =
-    LongArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: Long): LongArgument =
-    LongArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<Long>): LongArgument =
-    LongArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: Long, formatter: ArgumentFormatter<Long>): LongArgument =
-    LongArgumentImpl(default, false, formatter)
-}
-
 fun longArg(action: ArgOptions<Long>.() -> Unit): LongArgument {
   val opts = ArgOptions(Long::class).also(action)
 

@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface UByteArgument : ScalarArgument<UByte>
 
-object UByteArgs {
-  @JvmStatic
-  fun required(): UByteArgument =
-    UByteArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<UByte>): UByteArgument =
-    UByteArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): UByteArgument =
-    UByteArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<UByte>): UByteArgument =
-    UByteArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: UByte): UByteArgument =
-    UByteArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(default: UByte, formatter: ArgumentFormatter<UByte>): UByteArgument =
-    UByteArgumentImpl(default, false, formatter)
-}
-
 fun ubyteArg(action: ArgOptions<UByte>.() -> Unit): UByteArgument {
   val opts = ArgOptions(UByte::class).also(action)
 

@@ -9,32 +9,6 @@ import java.math.BigInteger
 
 interface BigIntegerArgument : ScalarArgument<BigInteger>
 
-object BigIntegerArgs {
-  @JvmStatic
-  fun required(): BigIntegerArgument =
-    BigIntegerArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<BigInteger>): BigIntegerArgument =
-    BigIntegerArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): BigIntegerArgument =
-    BigIntegerArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: BigInteger): BigIntegerArgument =
-    BigIntegerArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<BigInteger>): BigIntegerArgument =
-    BigIntegerArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: BigInteger, formatter: ArgumentFormatter<BigInteger>): BigIntegerArgument =
-    BigIntegerArgumentImpl(default, false, formatter)
-}
-
 fun bigIntegerArg(action: ArgOptions<BigInteger>.() -> Unit): BigIntegerArgument {
   val opts = ArgOptions(BigInteger::class).also(action)
 

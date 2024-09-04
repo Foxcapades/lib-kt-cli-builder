@@ -9,6 +9,9 @@ import io.foxcapades.lib.cli.wrapper.arg.BooleanArgumentImpl
 import io.foxcapades.lib.cli.wrapper.arg.GeneralArgumentImpl
 import io.foxcapades.lib.cli.wrapper.serial.CliAppender
 import io.foxcapades.lib.cli.wrapper.util.*
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 interface BooleanFlag : ScalarFlag<BooleanArgument, Boolean> {
   val isToggleFlag: Boolean
@@ -26,7 +29,10 @@ inline fun booleanFlag(longForm: String, noinline action: BooleanFlagOptions.() 
 inline fun booleanFlag(shortForm: Char, noinline action: BooleanFlagOptions.() -> Unit = {}) =
   booleanFlag { this.shortForm = shortForm; action() }
 
+@OptIn(ExperimentalContracts::class)
 fun booleanFlag(action: BooleanFlagOptions.() -> Unit): BooleanFlag {
+  contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
+
   val flag = BooleanFlagOptions().also(action)
 
   return BooleanFlagImpl(
@@ -43,7 +49,10 @@ fun booleanFlag(action: BooleanFlagOptions.() -> Unit): BooleanFlag {
   )
 }
 
+@OptIn(ExperimentalContracts::class)
 fun nullableBooleanFlag(action: NullableFlagOptions<Boolean>.() -> Unit): Flag<Argument<Boolean?>, Boolean?> {
+  contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
+
   val flag = NullableFlagOptions(Boolean::class).also(action)
 
   return GeneralFlagImpl(

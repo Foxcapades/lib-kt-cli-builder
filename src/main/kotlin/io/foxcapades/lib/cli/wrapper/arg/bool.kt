@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface BooleanArgument : ScalarArgument<Boolean>
 
-object BooleanArgs {
-  @JvmStatic
-  fun required(): BooleanArgument =
-    BooleanArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<Boolean>): BooleanArgument =
-    BooleanArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): BooleanArgument =
-    BooleanArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: Boolean): BooleanArgument =
-    BooleanArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<Boolean>): BooleanArgument =
-    BooleanArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: Boolean, formatter: ArgumentFormatter<Boolean>): BooleanArgument =
-    BooleanArgumentImpl(default, false, formatter)
-}
-
 fun booleanArg(action: ArgOptions<Boolean>.() -> Unit): BooleanArgument {
   val opts = ArgOptions(Boolean::class).also(action)
 

@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface CharArgument : ScalarArgument<Char>
 
-object CharArgs {
-  @JvmStatic
-  fun required(): CharArgument =
-    CharArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<Char>): CharArgument =
-    CharArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): CharArgument =
-    CharArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: Char): CharArgument =
-    CharArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<Char>): CharArgument =
-    CharArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: Char, formatter: ArgumentFormatter<Char>): CharArgument =
-    CharArgumentImpl(default, false, formatter)
-}
-
 fun charArg(action: ArgOptions<Char>.() -> Unit): CharArgument {
   val opts = ArgOptions(Char::class).also(action)
 

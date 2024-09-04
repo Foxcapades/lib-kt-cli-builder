@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface DoubleArgument : ScalarArgument<Double>
 
-object DoubleArgs {
-  @JvmStatic
-  fun required(): DoubleArgument =
-    DoubleArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<Double>): DoubleArgument =
-    DoubleArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): DoubleArgument =
-    DoubleArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: Double): DoubleArgument =
-    DoubleArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<Double>): DoubleArgument =
-    DoubleArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: Double, formatter: ArgumentFormatter<Double>): DoubleArgument =
-    DoubleArgumentImpl(default, false, formatter)
-}
-
 fun doubleArg(action: ArgOptions<Double>.() -> Unit): DoubleArgument {
   val opts = ArgOptions(Double::class).also(action)
 

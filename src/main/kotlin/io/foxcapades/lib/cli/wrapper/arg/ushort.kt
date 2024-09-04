@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface UShortArgument : ScalarArgument<UShort>
 
-object UShortArgs {
-  @JvmStatic
-  fun required(): UShortArgument =
-    UShortArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<UShort>): UShortArgument =
-    UShortArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): UShortArgument =
-    UShortArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: UShort): UShortArgument =
-    UShortArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<UShort>): UShortArgument =
-    UShortArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: UShort, formatter: ArgumentFormatter<UShort>): UShortArgument =
-    UShortArgumentImpl(default, false, formatter)
-}
-
 fun ushortArg(action: ArgOptions<UShort>.() -> Unit): UShortArgument {
   val opts = ArgOptions(UShort::class).also(action)
 

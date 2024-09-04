@@ -3,6 +3,7 @@ package io.foxcapades.lib.cli.wrapper
 import io.foxcapades.lib.cli.wrapper.serial.CliArgumentAppender
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.util.MutableProperty
+import kotlin.reflect.KClass
 
 /**
  * Represents a single positional or flag argument.
@@ -40,3 +41,17 @@ interface Argument<T> : MutableProperty<T>, CliCallComponent {
 
   fun writeToString(builder: CliArgumentAppender)
 }
+
+/**
+ * @param T Argument container class type.
+ *
+ * @param V Argument value type.
+ */
+interface ResolvedArgument<T : Any, V> : ResolvedComponent<T, V>, Argument<V>
+
+abstract class BaseArgOptions<T : Any, O : T?>(type: KClass<out T>)
+  : BaseComponentOptions<T, O, ResolvedArgument<*, O>>(type)
+
+open class ArgOptions<T : Any>(type: KClass<out T>) : BaseArgOptions<T, T>(type)
+
+open class NullableArgOptions<T : Any>(type: KClass<out T>) : BaseArgOptions<T, T?>(type)

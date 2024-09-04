@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface UIntArgument : ScalarArgument<UInt>
 
-object UIntArgs {
-  @JvmStatic
-  fun required(): UIntArgument =
-    UIntArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<UInt>): UIntArgument =
-    UIntArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): UIntArgument =
-    UIntArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: UInt): UIntArgument
-    = UIntArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<UInt>): UIntArgument =
-    UIntArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: UInt, formatter: ArgumentFormatter<UInt>): UIntArgument =
-    UIntArgumentImpl(default, false, formatter)
-}
-
 fun uintArg(action: ArgOptions<UInt>.() -> Unit): UIntArgument {
   val opts = ArgOptions(UInt::class).also(action)
 

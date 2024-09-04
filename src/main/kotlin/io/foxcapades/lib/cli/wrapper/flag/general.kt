@@ -41,20 +41,21 @@ internal class GeneralFlagImpl<T>(
   }
 
   companion object {
-    fun <T : Any> of(config: FlagOptions<T>): Flag<Argument<T>, T> =
-      GeneralFlagImpl(
-        longForm     = FlagOptions<T>::longForm.property(config),
-        shortForm    = FlagOptions<T>::shortForm.property(config),
-        isRequired   = FlagOptions<T>::requireFlag.property(config),
-        argument     = GeneralArgumentImpl(
+    fun <T : Any> of(config: FlagOptions<T>): Flag<Argument<T>, T> {
+      return GeneralFlagImpl(
+        longForm = FlagOptions<T>::longForm.property(config),
+        shortForm = FlagOptions<T>::shortForm.property(config),
+        isRequired = FlagOptions<T>::requireFlag.property(config),
+        argument = GeneralArgumentImpl(
           config.type,
           false,
-          default     = FlagOptions<T>::default.property(config),
+          default = FlagOptions<T>::default.property(config),
           shouldQuote = FlagOptions<T>::shouldQuote.property(config),
-          isRequired  = FlagOptions<T>::requireArg.property(config),
-          formatter   = FlagOptions<T>::formatter.property(config),
+          isRequired = FlagOptions<T>::requireArg.property(config),
+          formatter = FlagOptions<T>::formatter.property(config),
         ),
       )
+    }
 
     fun <T : Any> of(config: NullableFlagOptions<T>): Flag<Argument<T?>, T?> =
       GeneralFlagImpl(

@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface IntArgument : ScalarArgument<Int>
 
-object IntArgs {
-  @JvmStatic
-  fun required(): IntArgument =
-    IntArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<Int>): IntArgument =
-    IntArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): IntArgument =
-    IntArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: Int): IntArgument =
-    IntArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<Int>): IntArgument =
-    IntArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: Int, formatter: ArgumentFormatter<Int>): IntArgument =
-    IntArgumentImpl(default, false, formatter)
-}
-
 fun intArg(action: ArgOptions<Int>.() -> Unit): IntArgument {
   val opts = ArgOptions(Int::class).also(action)
 

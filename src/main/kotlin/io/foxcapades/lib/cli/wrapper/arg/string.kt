@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface StringArgument : ComplexArgument<String>, ScalarArgument<String>
 
-object StringArgs {
-  @JvmStatic
-  fun required(): StringArgument =
-    StringArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<String>): StringArgument =
-    StringArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): StringArgument =
-    StringArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: String): StringArgument =
-    StringArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<String>): StringArgument =
-    StringArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: String, formatter: ArgumentFormatter<String>): StringArgument =
-    StringArgumentImpl(default, false, formatter)
-}
-
 fun stringArg(action: ArgOptions<String>.() -> Unit): StringArgument {
   val opts = ArgOptions(String::class).also(action)
 

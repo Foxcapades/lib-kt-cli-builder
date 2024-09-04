@@ -8,32 +8,6 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface ByteArgument : ScalarArgument<Byte>
 
-object ByteArgs {
-  @JvmStatic
-  fun required(): ByteArgument =
-    ByteArgumentImpl(true)
-
-  @JvmStatic
-  fun required(formatter: ArgumentFormatter<Byte>): ByteArgument =
-    ByteArgumentImpl(true, formatter)
-
-  @JvmStatic
-  fun optional(): ByteArgument =
-    ByteArgumentImpl(false)
-
-  @JvmStatic
-  fun optional(default: Byte): ByteArgument =
-    ByteArgumentImpl(default, false)
-
-  @JvmStatic
-  fun optional(formatter: ArgumentFormatter<Byte>): ByteArgument =
-    ByteArgumentImpl(false, formatter)
-
-  @JvmStatic
-  fun optional(default: Byte, formatter: ArgumentFormatter<Byte>): ByteArgument =
-    ByteArgumentImpl(default, false, formatter)
-}
-
 fun byteArg(action: ArgOptions<Byte>.() -> Unit): ByteArgument {
   val opts = ArgOptions(Byte::class).also(action)
 
