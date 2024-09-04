@@ -29,9 +29,17 @@ internal inline val DoubleNeg1: Double get() = -1.0
 
 
 @Suppress("NOTHING_TO_INLINE")
-inline operator fun <V> FlagDefaultTest<V>.invoke(value: V, flag: ResolvedFlag<*, V>, config: CliSerializationConfig) =
+inline operator fun <V> FlagDefaultTest<V>.invoke(
+  value: V,
+  flag: ResolvedFlag<*, V>,
+  config: CliSerializationConfig
+) =
   valueIsDefault(value, flag, config)
 
 @Suppress("NOTHING_TO_INLINE")
-inline operator fun <V> ArgumentDefaultTest<V>.invoke(value: V, arg: ResolvedArgument<*, V>, config: CliSerializationConfig) =
+inline operator fun <V> ArgumentDefaultTest<V>.invoke(
+  value: V,
+  arg: ResolvedArgument<*, V>,
+  config: CliSerializationConfig,
+) =
   valueIsDefault(value, arg, config)

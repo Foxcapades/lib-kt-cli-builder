@@ -9,8 +9,6 @@ import kotlin.reflect.KFunction1
 fun interface ArgumentFormatter<V> {
   fun formatValue(value: V, builder: CliArgumentAppender)
 
-  operator fun invoke(value: V, builder: CliArgumentAppender) = formatValue(value, builder)
-
   companion object {
     @JvmStatic
     fun <T: Any> ofToString() = ArgumentFormatter<T> { v, b -> b.appendString(v.toString()) }

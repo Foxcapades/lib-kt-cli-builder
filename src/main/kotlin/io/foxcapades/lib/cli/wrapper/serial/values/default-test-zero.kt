@@ -37,6 +37,10 @@ internal sealed class ZeroDefaultTest<P>
     }
 }
 
-internal data object ArgZeroDefaultTest : ZeroDefaultTest<ResolvedArgument<*, Any?>>(), ArgumentDefaultTest<Any?>
+internal object ArgZeroDefaultTest
+  : ZeroDefaultTest<ResolvedArgument<*, Any?>>()
+  , ArgumentDefaultTest<Any?>
 
-internal data object FlagZeroDefaultTest : ZeroDefaultTest<ResolvedFlag<*, Any?>>(), FlagDefaultTest<Any?>
+internal object FlagZeroDefaultTest
+  : ZeroDefaultTest<ResolvedFlag<*, Any?>>()
+  , FlagDefaultTest<Any?>

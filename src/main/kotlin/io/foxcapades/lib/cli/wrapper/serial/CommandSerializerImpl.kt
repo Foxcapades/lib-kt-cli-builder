@@ -138,12 +138,13 @@ internal class CommandSerializerImpl<T : Any>(
 
   private fun ResolvedFlag<T, Any?>.isUsable() =
     if (isRequired) {
-      if (isDefault(config)) {
-        // FIXME: get info about the flag to show an error!
+      if (isSet) {
+        true
+      } else if (hasDefault) {
+        true
+      } else {
         throw IllegalArgumentException("bad flag, naughty naughty")
       }
-
-      true
     } else if (isDefault(config)) {
       when (config.includeDefaultedFlags) {
         IncludeDefault.Always          -> true
@@ -151,7 +152,7 @@ internal class CommandSerializerImpl<T : Any>(
         IncludeDefault.IfSetExplicitly -> argument.isSet
       }
     } else {
-      true
+      isSet
     }
 
   private fun filterRelevantProperties() =

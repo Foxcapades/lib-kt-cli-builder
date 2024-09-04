@@ -1,6 +1,6 @@
 package io.foxcapades.lib.cli.wrapper
 
-import io.foxcapades.lib.cli.wrapper.flag.StringFlags
+import io.foxcapades.lib.cli.wrapper.flag.stringFlag
 import io.foxcapades.lib.cli.wrapper.meta.CliCommand
 import io.foxcapades.lib.cli.wrapper.meta.CliFlag
 import org.junit.jupiter.api.DisplayName
@@ -26,7 +26,7 @@ class CliTest {
 
       @Test
       fun t1() {
-        println(Cli.toCliString(Foo("world")))
+        assertEquals("goodbye --cruel='world'", Cli.toCliString(Foo("world")))
       }
     }
 
@@ -35,7 +35,7 @@ class CliTest {
     inner class WithDelegateFlags {
       @CliCommand("goodbye")
       private inner class Foo {
-        var cruel: String by StringFlags.optional("cruel", "")
+        var cruel by stringFlag { longForm = "cruel" }
       }
 
       @Test

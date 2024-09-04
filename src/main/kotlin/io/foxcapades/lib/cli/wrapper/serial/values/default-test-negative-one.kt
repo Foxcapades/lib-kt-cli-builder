@@ -30,6 +30,10 @@ internal sealed class NegativeOneDefaultTest<P>
     }
 }
 
-internal data object ArgNegativeOneDefaultTest : NegativeOneDefaultTest<ResolvedArgument<*, Any?>>(), ArgumentDefaultTest<Any?>
+internal object ArgNegativeOneDefaultTest
+  : NegativeOneDefaultTest<ResolvedArgument<*, Any?>>()
+  , ArgumentDefaultTest<Any?>
 
-internal data object FlagNegativeOneDefaultTest : NegativeOneDefaultTest<ResolvedFlag<*, Any?>>(), FlagDefaultTest<Any?>
+internal object FlagNegativeOneDefaultTest
+  : NegativeOneDefaultTest<ResolvedFlag<*, Any?>>()
+  , FlagDefaultTest<Any?>

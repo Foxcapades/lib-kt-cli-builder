@@ -1,12 +1,15 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 plugins {
   kotlin("jvm") version "2.0.20"
   id("org.jetbrains.dokka") version "1.9.20"
   `maven-publish`
   signing
+  id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 group = "io.foxcapades.kt"
-version = "0.1.0"
+version = "0.2.0"
 
 val featureVersion = (version as String).let { it.substring(0, it.lastIndexOf('.') + 1) + "0" }
 
@@ -34,6 +37,14 @@ dependencies {
 
 tasks.test {
   useJUnitPlatform()
+
+  testLogging {
+    events(
+      TestLogEvent.PASSED,
+      TestLogEvent.FAILED,
+      TestLogEvent.SKIPPED,
+    )
+  }
 }
 
 tasks.dokkaHtml {
@@ -46,27 +57,18 @@ tasks.dokkaHtml {
   }
 }
 
-publishing {
+nexusPublishing {
   repositories {
-    maven {
-      name = "GitHub"
-      url = uri("https://maven.pkg.github.com/foxcapades/lib-kt-cli-builder")
-      credentials {
-        username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-        password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
-      }
-    }
-
-    maven {
-      name = "Sonatype"
-      url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-      credentials {
-        username = project.findProperty("nexus.user") as String? ?: System.getenv("NEXUS_USER")
-        password = project.findProperty("nexus.pass") as String? ?: System.getenv("NEXUS_PASS")
-      }
+    sonatype {
+      nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")
+      snapshotRepositoryUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+      username = project.findProperty("nexus.user") as String? ?: System.getenv("NEXUS_USER")
+      password = project.findProperty("nexus.pass") as String? ?: System.getenv("NEXUS_PASS")
     }
   }
+}
 
+publishing {
   publications {
     create<MavenPublication>("gpr") {
       from(components["java"])

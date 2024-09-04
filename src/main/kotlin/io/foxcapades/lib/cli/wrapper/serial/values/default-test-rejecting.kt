@@ -15,6 +15,10 @@ internal sealed class AlwaysFalseDefaultTest<P>
   override fun valueIsDefault(value: Any?, reference: P, config: CliSerializationConfig) = false
 }
 
-internal data object ArgAlwaysFalseDefaultTest : AlwaysFalseDefaultTest<ResolvedArgument<*, Any?>>(), ArgumentDefaultTest<Any?>
+internal object ArgAlwaysFalseDefaultTest
+  : AlwaysFalseDefaultTest<ResolvedArgument<*, Any?>>()
+  , ArgumentDefaultTest<Any?>
 
-internal data object FlagAlwaysFalseDefaultTest : AlwaysFalseDefaultTest<ResolvedFlag<*, Any?>>(), FlagDefaultTest<Any?>
+internal object FlagAlwaysFalseDefaultTest
+  : AlwaysFalseDefaultTest<ResolvedFlag<*, Any?>>()
+  , FlagDefaultTest<Any?>

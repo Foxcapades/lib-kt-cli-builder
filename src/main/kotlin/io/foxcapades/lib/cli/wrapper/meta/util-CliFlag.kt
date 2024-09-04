@@ -34,7 +34,7 @@ internal fun <V> CliFlagAnnotation.defaultCheck(
     try {
       // TODO: what happens if the default checker expects a different type of
       //       value than the annotated property?
-      (formatter.getOrCreate() as ArgumentFormatter<Any?>).invoke(value, it)
+      (formatter.getOrCreate() as ArgumentFormatter<Any?>).formatValue(value, it)
     } catch (e: NullPointerException) {
       config.nullSerializer(it)
     }
