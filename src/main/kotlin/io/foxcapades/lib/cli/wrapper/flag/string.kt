@@ -13,7 +13,7 @@ import io.foxcapades.lib.cli.wrapper.util.setIfAbsent
 
 interface StringFlag : ScalarFlag<StringArgument, String>
 
-fun stringFlag(action: FlagOptions<String>.() -> Unit): StringFlag {
+fun stringFlag(action: FlagOptions<String>.() -> Unit = {}): StringFlag {
   val flag = FlagOptions(String::class).also(action)
 
   return StringFlagImpl(
@@ -29,7 +29,7 @@ fun stringFlag(action: FlagOptions<String>.() -> Unit): StringFlag {
   )
 }
 
-fun nullableStringFlag(action: NullableFlagOptions<String>.() -> Unit): Flag<Argument<String?>, String?> {
+fun nullableStringFlag(action: NullableFlagOptions<String>.() -> Unit = {}): Flag<Argument<String?>, String?> {
   val flag = NullableFlagOptions(String::class).also(action)
 
   return GeneralFlagImpl(

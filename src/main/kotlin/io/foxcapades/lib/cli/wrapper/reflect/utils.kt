@@ -2,13 +2,12 @@
 
 package io.foxcapades.lib.cli.wrapper.reflect
 
+import io.foxcapades.lib.cli.wrapper.util.takeAs
 import java.math.BigDecimal
 import java.math.BigInteger
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
-import kotlin.reflect.cast
+import kotlin.reflect.*
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.isSuperclassOf
 
 internal inline fun KProperty<*>.hasAnnotation(type: KClass<out Annotation>) =
   annotations.any { type.isInstance(it) }
@@ -16,14 +15,18 @@ internal inline fun KProperty<*>.hasAnnotation(type: KClass<out Annotation>) =
 internal inline fun KProperty<*>.findAnnotation(type: KClass<out Annotation>) =
   annotations.find { type.isInstance(it) }
 
-internal inline fun <T> KProperty1<T, *>.isDelegateType(value: T, type: KClass<*>) =
-  type.isInstance(getDelegate(value))
+@Suppress("UNCHECKED_CAST")
+internal inline fun <T, R : Any> KProperty1<T, *>.asDelegateType(instance: T, delegateType: KClass<R>): R? {
+  return if (returnType.classifier?.takeAs<KClassifier, KClass<*>>()?.let(delegateType::isSuperclassOf) == true)
+    get(instance) as R?
+  else
+    getDelegate(instance)
+      ?.takeIf { delegateType.isInstance(it) }
+      ?.let { delegateType.cast(it) }
+}
 
-internal inline fun <T, R : Any> KProperty1<T, *>.asDelegateType(value: T, type: KClass<R>) =
-  getDelegate(value)?.takeIf { type.isInstance(it) }?.let { type.cast(it) }
-
-internal inline fun <T, reified R : Any> KProperty1<T, *>.asDelegateType(value: T) =
-  asDelegateType(value, R::class)
+internal inline fun <T, reified R : Any> KProperty1<T, *>.asDelegateType(instance: T) =
+  asDelegateType(instance, R::class)
 
 internal inline fun KClass<*>.shouldQuote() =
   when (this) {

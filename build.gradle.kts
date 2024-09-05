@@ -19,7 +19,7 @@ repositories {
 
 kotlin {
   jvmToolchain {
-    languageVersion = JavaLanguageVersion.of(8)
+    languageVersion = JavaLanguageVersion.of(21)
     vendor = JvmVendorSpec.AMAZON
   }
 
@@ -32,6 +32,9 @@ kotlin {
 dependencies {
   implementation(kotlin("reflect"))
 
+  testImplementation("org.mockito:mockito-junit-jupiter:5.13.0")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+  testImplementation("org.mockito:mockito-core:5.13.0")
   testImplementation(kotlin("test"))
 }
 
