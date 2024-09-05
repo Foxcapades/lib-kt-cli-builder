@@ -111,8 +111,6 @@ open class FlagOptions<T: Any>(type: KClass<out T>) : BaseFlagOptions<T, T>(type
 
 open class NullableFlagOptions<T: Any>(type: KClass<out T>) : BaseFlagOptions<T, T?>(type)
 
-typealias FlagOptionConfigurator<T> = FlagOptions<T>.() -> Unit
-
 /**
  * Creates a new [Flag] delegate instance for the target type ([T]).
  *
@@ -128,33 +126,181 @@ typealias FlagOptionConfigurator<T> = FlagOptions<T>.() -> Unit
  *
  * @param T Flag value type.
  *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor      |
+ * |--------------|------------------|
+ * | [BigDecimal] | [bigDecimalFlag] |
+ * | [BigInteger] | [bigIntegerFlag] |
+ * | [Boolean]    | [booleanFlag]    |
+ * | [Byte]       | [byteFlag]       |
+ * | [Char]       | [charFlag]       |
+ * | [Double]     | [doubleFlag]     |
+ * | [Float]      | [floatFlag]      |
+ * | [Int]        | [intFlag]        |
+ * | [Long]       | [longFlag]       |
+ * | [Short]      | [shortFlag]      |
+ * | [String]     | [stringFlag]     |
+ * | [UByte]      | [ubyteFlag]      |
+ * | [UInt]       | [uintFlag]       |
+ * | [ULong]      | [ulongFlag]      |
+ * | [UShort]     | [ushortFlag]     |
+ *
  * @param action Configuration that will be called on a new [FlagOptions]
  * instance which will then be used to configure the newly created `Flag`.
  *
  * @return New `Flag` instance configured by the given [action].
  */
 @OptIn(ExperimentalContracts::class)
-inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T> {
+inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit = {}): Flag<Argument<T>, T> {
   contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
   return flag(T::class, action)
 }
 
+/**
+ * Creates a new [Flag] delegate instance for a nullable value of the target
+ * type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input: String? by nullableFlag { longForm = "input" }
+ *
+ *   // registers `-o` string flag
+ *   var output by nullableFlag<String?> { shortForm = 'o' }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor              |
+ * |--------------|--------------------------|
+ * | [BigDecimal] | [nullableBigDecimalFlag] |
+ * | [BigInteger] | [nullableBigIntegerFlag] |
+ * | [Boolean]    | [nullableBooleanFlag]    |
+ * | [Byte]       | [nullableByteFlag]       |
+ * | [Char]       | [nullableCharFlag]       |
+ * | [Double]     | [nullableDoubleFlag]     |
+ * | [Float]      | [nullableFloatFlag]      |
+ * | [Int]        | [nullableIntFlag]        |
+ * | [Long]       | [nullableLongFlag]       |
+ * | [Short]      | [nullableShortFlag]      |
+ * | [String]     | [nullableStringFlag]     |
+ * | [UByte]      | [nullableUByteFlag]      |
+ * | [UInt]       | [nullableUIntFlag]       |
+ * | [ULong]      | [nullableULongFlag]      |
+ * | [UShort]     | [nullableUShortFlag]     |
+ *
+ * @param action Configuration that will be called on a new
+ * [NullableFlagOptions] instance which will then be used to configure the newly
+ * created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
 @OptIn(ExperimentalContracts::class)
-inline fun <reified T : Any> nullableFlag(noinline action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> {
+inline fun <reified T : Any> nullableFlag(
+  noinline action: NullableFlagOptions<T>.() -> Unit = {}
+): Flag<Argument<T?>, T?> {
   contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
   return nullableFlag(T::class, action)
 }
 
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input by flag(String::class) { longForm = "input" }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor      |
+ * |--------------|------------------|
+ * | [BigDecimal] | [bigDecimalFlag] |
+ * | [BigInteger] | [bigIntegerFlag] |
+ * | [Boolean]    | [booleanFlag]    |
+ * | [Byte]       | [byteFlag]       |
+ * | [Char]       | [charFlag]       |
+ * | [Double]     | [doubleFlag]     |
+ * | [Float]      | [floatFlag]      |
+ * | [Int]        | [intFlag]        |
+ * | [Long]       | [longFlag]       |
+ * | [Short]      | [shortFlag]      |
+ * | [String]     | [stringFlag]     |
+ * | [UByte]      | [ubyteFlag]      |
+ * | [UInt]       | [uintFlag]       |
+ * | [ULong]      | [ulongFlag]      |
+ * | [UShort]     | [ushortFlag]     |
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
 @OptIn(ExperimentalContracts::class)
-fun <T : Any> flag(type: KClass<out T>, action: FlagOptionConfigurator<T>): Flag<Argument<T>, T> {
+fun <T : Any> flag(type: KClass<out T>, action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T> {
   contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
   return type.tryTyped(action) ?: GeneralFlagImpl.of(FlagOptions(type).also(action))
 }
 
+/**
+ * Creates a new [Flag] delegate instance for a nullable value of the target
+ * type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input by nullableFlag(String::class) { longForm = "input" }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor              |
+ * |--------------|--------------------------|
+ * | [BigDecimal] | [nullableBigDecimalFlag] |
+ * | [BigInteger] | [nullableBigIntegerFlag] |
+ * | [Boolean]    | [nullableBooleanFlag]    |
+ * | [Byte]       | [nullableByteFlag]       |
+ * | [Char]       | [nullableCharFlag]       |
+ * | [Double]     | [nullableDoubleFlag]     |
+ * | [Float]      | [nullableFloatFlag]      |
+ * | [Int]        | [nullableIntFlag]        |
+ * | [Long]       | [nullableLongFlag]       |
+ * | [Short]      | [nullableShortFlag]      |
+ * | [String]     | [nullableStringFlag]     |
+ * | [UByte]      | [nullableUByteFlag]      |
+ * | [UInt]       | [nullableUIntFlag]       |
+ * | [ULong]      | [nullableULongFlag]      |
+ * | [UShort]     | [nullableUShortFlag]     |
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new
+ * [NullableFlagOptions] instance which will then be used to configure the newly
+ * created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
 @OptIn(ExperimentalContracts::class)
 fun <T : Any> nullableFlag(type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> {
   contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
-  return GeneralFlagImpl.of(NullableFlagOptions(type).also(action))
+  return type.tryNullableTyped(action) ?: GeneralFlagImpl.of(NullableFlagOptions(type).also(action))
 }
 
 internal fun Flag<*, *>.safeName(config: CliSerializationConfig) =
@@ -163,53 +309,102 @@ internal fun Flag<*, *>.safeName(config: CliSerializationConfig) =
   else
     config.shortFlagPrefix + shortForm
 
-
 @OptIn(ExperimentalContracts::class)
-internal fun <T : Any> KClass<*>.tryTyped(action: FlagOptionConfigurator<T>): Flag<Argument<T>, T>? {
+internal fun <T : Any> KClass<*>.tryTyped(action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T>? {
   contract { callsInPlace(action, InvocationKind.AT_MOST_ONCE) }
 
   @Suppress("UNCHECKED_CAST")
   return when (java.`package`?.name) {
 
     null -> when (this) {
-      Boolean::class -> booleanFlag { (action as FlagOptionConfigurator<Boolean>)(this) }
-      Int::class     -> intFlag(action as FlagOptionConfigurator<Int>)
-      Double::class  -> doubleFlag(action as FlagOptionConfigurator<Double>)
-      Long::class    -> longFlag(action as FlagOptionConfigurator<Long>)
-      Float::class   -> floatFlag(action as FlagOptionConfigurator<Float>)
-      Byte::class    -> byteFlag(action as FlagOptionConfigurator<Byte>)
-      Char::class    -> charFlag(action as FlagOptionConfigurator<Char>)
-      Short::class   -> shortFlag(action as FlagOptionConfigurator<Short>)
+      Boolean::class -> booleanFlag { (action as FlagOptions<Boolean>.() -> Unit)(this) }
+      Int::class     -> intFlag(action as FlagOptions<Int>.() -> Unit)
+      Double::class  -> doubleFlag(action as FlagOptions<Double>.() -> Unit)
+      Long::class    -> longFlag(action as FlagOptions<Long>.() -> Unit)
+      Float::class   -> floatFlag(action as FlagOptions<Float>.() -> Unit)
+      Byte::class    -> byteFlag(action as FlagOptions<Byte>.() -> Unit)
+      Char::class    -> charFlag(action as FlagOptions<Char>.() -> Unit)
+      Short::class   -> shortFlag(action as FlagOptions<Short>.() -> Unit)
       else           -> null
     }
 
     "java.lang" -> when (this) {
-      String::class  -> stringFlag(action as FlagOptionConfigurator<String>)
-      Boolean::class -> booleanFlag { (action as FlagOptionConfigurator<Boolean>)(this) }
-      Int::class     -> intFlag(action as FlagOptionConfigurator<Int>)
-      Double::class  -> doubleFlag(action as FlagOptionConfigurator<Double>)
-      Long::class    -> longFlag(action as FlagOptionConfigurator<Long>)
-      Float::class   -> floatFlag(action as FlagOptionConfigurator<Float>)
-      Byte::class    -> byteFlag(action as FlagOptionConfigurator<Byte>)
-      Char::class    -> charFlag(action as FlagOptionConfigurator<Char>)
-      Short::class   -> shortFlag(action as FlagOptionConfigurator<Short>)
+      String::class  -> stringFlag(action as FlagOptions<String>.() -> Unit)
+      Boolean::class -> booleanFlag { (action as FlagOptions<Boolean>.() -> Unit)(this) }
+      Int::class     -> intFlag(action as FlagOptions<Int>.() -> Unit)
+      Double::class  -> doubleFlag(action as FlagOptions<Double>.() -> Unit)
+      Long::class    -> longFlag(action as FlagOptions<Long>.() -> Unit)
+      Float::class   -> floatFlag(action as FlagOptions<Float>.() -> Unit)
+      Byte::class    -> byteFlag(action as FlagOptions<Byte>.() -> Unit)
+      Char::class    -> charFlag(action as FlagOptions<Char>.() -> Unit)
+      Short::class   -> shortFlag(action as FlagOptions<Short>.() -> Unit)
       else          -> null
     }
 
     "kotlin" -> when (this) {
-      UInt::class   -> uintFlag(action as FlagOptionConfigurator<UInt>)
-      ULong::class  -> ulongFlag(action as FlagOptionConfigurator<ULong>)
-      UByte::class  -> ubyteFlag(action as FlagOptionConfigurator<UByte>)
-      UShort::class -> ushortFlag(action as FlagOptionConfigurator<UShort>)
+      UInt::class   -> uintFlag(action as FlagOptions<UInt>.() -> Unit)
+      ULong::class  -> ulongFlag(action as FlagOptions<ULong>.() -> Unit)
+      UByte::class  -> ubyteFlag(action as FlagOptions<UByte>.() -> Unit)
+      UShort::class -> ushortFlag(action as FlagOptions<UShort>.() -> Unit)
       else          -> null
     }
 
     "java.math" -> when (this) {
-      BigInteger::class -> bigIntegerFlag(action as FlagOptionConfigurator<BigInteger>)
-      BigDecimal::class -> bigDecimalFlag(action as FlagOptionConfigurator<BigDecimal>)
+      BigInteger::class -> bigIntegerFlag(action as FlagOptions<BigInteger>.() -> Unit)
+      BigDecimal::class -> bigDecimalFlag(action as FlagOptions<BigDecimal>.() -> Unit)
       else              -> null
     }
 
     else -> null
   } as Flag<Argument<T>, T>?
+}
+
+@OptIn(ExperimentalContracts::class)
+internal fun <T : Any> KClass<out T>.tryNullableTyped(action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?>? {
+  contract { callsInPlace(action, InvocationKind.AT_MOST_ONCE) }
+
+  @Suppress("UNCHECKED_CAST")
+  return when (java.`package`?.name) {
+
+    null -> when (this) {
+      Boolean::class -> nullableBooleanFlag { (action as NullableFlagOptions<Boolean>.() -> Unit)(this) }
+      Int::class     -> nullableIntFlag(action as NullableFlagOptions<Int>.() -> Unit)
+      Double::class  -> nullableDoubleFlag(action as NullableFlagOptions<Double>.() -> Unit)
+      Long::class    -> nullableLongFlag(action as NullableFlagOptions<Long>.() -> Unit)
+      Float::class   -> nullableFloatFlag(action as NullableFlagOptions<Float>.() -> Unit)
+      Byte::class    -> nullableByteFlag(action as NullableFlagOptions<Byte>.() -> Unit)
+      Char::class    -> nullableCharFlag(action as NullableFlagOptions<Char>.() -> Unit)
+      Short::class   -> nullableShortFlag(action as NullableFlagOptions<Short>.() -> Unit)
+      else           -> null
+    }
+
+    "java.lang" -> when (this) {
+      String::class  -> nullableStringFlag(action as NullableFlagOptions<String>.() -> Unit)
+      Boolean::class -> nullableBooleanFlag { (action as NullableFlagOptions<Boolean>.() -> Unit)(this) }
+      Int::class     -> nullableIntFlag(action as NullableFlagOptions<Int>.() -> Unit)
+      Double::class  -> nullableDoubleFlag(action as NullableFlagOptions<Double>.() -> Unit)
+      Long::class    -> nullableLongFlag(action as NullableFlagOptions<Long>.() -> Unit)
+      Float::class   -> nullableFloatFlag(action as NullableFlagOptions<Float>.() -> Unit)
+      Byte::class    -> nullableByteFlag(action as NullableFlagOptions<Byte>.() -> Unit)
+      Char::class    -> nullableCharFlag(action as NullableFlagOptions<Char>.() -> Unit)
+      Short::class   -> nullableShortFlag(action as NullableFlagOptions<Short>.() -> Unit)
+      else          -> null
+    }
+
+    "kotlin" -> when (this) {
+      UInt::class   -> nullableUIntFlag(action as NullableFlagOptions<UInt>.() -> Unit)
+      ULong::class  -> nullableULongFlag(action as NullableFlagOptions<ULong>.() -> Unit)
+      UByte::class  -> nullableUByteFlag(action as NullableFlagOptions<UByte>.() -> Unit)
+      UShort::class -> nullableUShortFlag(action as NullableFlagOptions<UShort>.() -> Unit)
+      else          -> null
+    }
+
+    "java.math" -> when (this) {
+      BigInteger::class -> nullableBigIntegerFlag(action as NullableFlagOptions<BigInteger>.() -> Unit)
+      BigDecimal::class -> nullableBigDecimalFlag(action as NullableFlagOptions<BigDecimal>.() -> Unit)
+      else              -> null
+    }
+
+    else -> null
+  } as Flag<Argument<T?>, T?>?
 }
