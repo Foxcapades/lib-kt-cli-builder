@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "io.foxcapades.kt"
-version = "0.2.0"
+version = "0.3.0"
 
 val featureVersion = (version as String).let { it.substring(0, it.lastIndexOf('.') + 1) + "0" }
 
