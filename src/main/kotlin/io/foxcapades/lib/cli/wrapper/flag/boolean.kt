@@ -1,17 +1,11 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.FlagOptions
-import io.foxcapades.lib.cli.wrapper.NullableFlagOptions
+import io.foxcapades.lib.cli.wrapper.*
 import io.foxcapades.lib.cli.wrapper.arg.BooleanArgument
 import io.foxcapades.lib.cli.wrapper.arg.BooleanArgumentImpl
-import io.foxcapades.lib.cli.wrapper.arg.GeneralArgumentImpl
 import io.foxcapades.lib.cli.wrapper.serial.CliAppender
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.*
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 
 interface BooleanFlag : ScalarFlag<BooleanArgument, Boolean> {
   val isToggleFlag: Boolean
@@ -29,70 +23,46 @@ inline fun booleanFlag(longForm: String, noinline action: BooleanFlagOptions.() 
 inline fun booleanFlag(shortForm: Char, noinline action: BooleanFlagOptions.() -> Unit = {}) =
   booleanFlag { this.shortForm = shortForm; action() }
 
-@OptIn(ExperimentalContracts::class)
 fun booleanFlag(action: BooleanFlagOptions.() -> Unit): BooleanFlag {
-  contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
-
   val flag = BooleanFlagOptions().also(action)
 
   return BooleanFlagImpl(
     longForm   = BooleanFlagOptions::longForm.property(flag),
     shortForm  = BooleanFlagOptions::shortForm.property(flag),
-    isRequired = BooleanFlagOptions::requireFlag.property(flag),
+    isRequired = BooleanFlagOptions::required.property(flag),
+    filter     = BooleanFlagOptions::flagFilter.property(flag),
     isToggle   = BooleanFlagOptions::isToggleFlag.property<Boolean>(flag).getOr(false),
     argument   = BooleanArgumentImpl(
-      default     = BooleanFlagOptions::default.property(flag),
-      isRequired  = BooleanFlagOptions::requireArg.property(flag),
-      shouldQuote = BooleanFlagOptions::shouldQuote.property(flag),
-      formatter   = BooleanFlagOptions::formatter.property(flag),
+      default     = ArgOptions<Boolean>::default.property(flag.argument),
+      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
+      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
+      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
+      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
     )
   )
 }
 
-@OptIn(ExperimentalContracts::class)
-fun nullableBooleanFlag(action: NullableFlagOptions<Boolean>.() -> Unit): Flag<Argument<Boolean?>, Boolean?> {
-  contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
-
-  val flag = NullableFlagOptions(Boolean::class).also(action)
-
-  return GeneralFlagImpl(
-    longForm   = NullableFlagOptions<Boolean>::longForm.property(flag),
-    shortForm  = NullableFlagOptions<Boolean>::shortForm.property(flag),
-    isRequired = NullableFlagOptions<Boolean>::requireFlag.property(flag),
-    argument   = GeneralArgumentImpl(
-      Boolean::class,
-      true,
-      default     = NullableFlagOptions<Boolean>::default.property(flag),
-      shouldQuote = NullableFlagOptions<Boolean>::shouldQuote.property(flag),
-      isRequired  = NullableFlagOptions<Boolean>::requireArg.property(flag),
-      formatter   = NullableFlagOptions<Boolean>::formatter.property(flag),
-    )
-  )
-}
+fun nullableBooleanFlag(action: NullableFlagOptions<Boolean>.() -> Unit): Flag<Argument<Boolean?>, Boolean?> =
+  GeneralFlagImpl.of(NullableFlagOptions(Boolean::class).also(action))
 
 internal class BooleanFlagImpl(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  isToggle: Boolean,
-  argument: BooleanArgument
+  filter:     Property<FlagPredicate<BooleanFlag, BooleanArgument, Boolean>>,
+  isToggle:   Boolean,
+  argument:   BooleanArgument
 )
-  : AbstractFlagImpl<BooleanArgument, Boolean>(longForm, shortForm, isRequired, argument)
+  : AbstractFlagImpl<BooleanFlag, BooleanArgument, Boolean>(longForm, shortForm, isRequired, filter, argument)
   , BooleanFlag
 {
   override val isToggleFlag: Boolean = isToggle
 
-  override fun writeToString(builder: CliAppender) {
+  override fun writeToString(builder: CliAppender<*, Boolean>) {
     if (!isToggleFlag)
       return super.writeToString(builder)
 
-    if (argument.isDefault(builder.config))
-      return
-
-    if (!hasLongForm || builder.config.preferredFlagForm.isShort && hasShortForm) {
-      builder.putShortFlag(shortForm, false)
-    } else {
-      builder.putLongFlag(longForm, false)
-    }
+    if (argument.isSet)
+      builder.putPreferredFlagForm(this, false)
   }
 }

@@ -1,40 +1,32 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
 import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.UnsetArgumentDefaultException
+import io.foxcapades.lib.cli.wrapper.ResolvedComponent
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
+import io.foxcapades.lib.cli.wrapper.util.BasicMutableDefaultableProperty
 import io.foxcapades.lib.cli.wrapper.util.Property
-import io.foxcapades.lib.cli.wrapper.util.SimpleProperty
 import io.foxcapades.lib.cli.wrapper.util.getOrNull
-import io.foxcapades.lib.cli.wrapper.util.getOrThrow
 
-internal sealed class AbstractArgument<T>(
-  default: Property<T>,
-  override val isRequired: Boolean,
-  override val shouldQuote: Boolean,
-) : Argument<T> {
-  private val hiddenDefault: Property<T> = default
+internal sealed class AbstractArgument<out A : Argument<V>, V>(
+  default:     Property<V>,
+  isRequired:  Boolean,
+  shouldQuote: Boolean,
+  filter:      ArgumentPredicate<A, V>
+) : BasicMutableDefaultableProperty<V>(
+  if (default.isSet) 2 else 0,
+  default.getOrNull(),
+  null,
+), Argument<V> {
+  private val filter = filter
 
-  protected val value = SimpleProperty<T>()
+  @Suppress("UNCHECKED_CAST")
+  protected inline val self get() = this as A
 
-  override val default
-    get() = hiddenDefault.getOrThrow(::UnsetArgumentDefaultException)
+  override val isRequired = isRequired
 
-  override val hasDefault
-    get() = hiddenDefault.isSet
+  override val shouldQuote = shouldQuote
 
-  override val isSet by value::isSet
-
-  override fun isDefault(config: CliSerializationConfig) =
-    hasDefault && (!isSet || value.get() == default)
-
-  override fun get() =
-    if (hasDefault)
-      value.getOrNull() ?: default
-    else
-      value.get()
-
-  override fun set(value: T) = this.value.set(value)
-
-  override fun unset() = value.unset()
+  override fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedComponent<*, V>) =
+    filter.shouldInclude(self, reference, config)
 }

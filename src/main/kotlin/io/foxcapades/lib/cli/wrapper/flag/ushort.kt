@@ -1,16 +1,21 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.FlagOptions
-import io.foxcapades.lib.cli.wrapper.NullableFlagOptions
-import io.foxcapades.lib.cli.wrapper.arg.GeneralArgumentImpl
+import io.foxcapades.lib.cli.wrapper.*
 import io.foxcapades.lib.cli.wrapper.arg.UShortArgument
 import io.foxcapades.lib.cli.wrapper.arg.UShortArgumentImpl
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.property
 
 interface UShortFlag : ScalarFlag<UShortArgument, UShort>
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun ushortFlag(longForm: String, noinline action: FlagOptions<UShort>.() -> Unit = {}) =
+  ushortFlag { this.longForm = longForm; action() }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun ushortFlag(shortForm: Char, noinline action: FlagOptions<UShort>.() -> Unit = {}) =
+  ushortFlag { this.shortForm = shortForm; action() }
 
 fun ushortFlag(action: FlagOptions<UShort>.() -> Unit): UShortFlag {
   val flag = FlagOptions(UShort::class).also(action)
@@ -18,39 +23,27 @@ fun ushortFlag(action: FlagOptions<UShort>.() -> Unit): UShortFlag {
   return UShortFlagImpl(
     longForm   = FlagOptions<UShort>::longForm.property(flag),
     shortForm  = FlagOptions<UShort>::shortForm.property(flag),
-    isRequired = FlagOptions<UShort>::requireFlag.property(flag),
+    isRequired = FlagOptions<UShort>::required.property(flag),
+    filter     = FlagOptions<UShort>::flagFilter.property(flag),
     argument   = UShortArgumentImpl(
-      default     = FlagOptions<UShort>::default.property(flag),
-      isRequired  = FlagOptions<UShort>::requireArg.property(flag),
-      shouldQuote = FlagOptions<UShort>::shouldQuote.property(flag),
-      formatter   = FlagOptions<UShort>::formatter.property(flag),
+      default     = ArgOptions<Boolean>::default.property(flag.argument),
+      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
+      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
+      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
+      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
     )
   )
 }
 
-fun nullableUShortFlag(action: NullableFlagOptions<UShort>.() -> Unit): Flag<Argument<UShort?>, UShort?> {
-  val flag = NullableFlagOptions(UShort::class).also(action)
-
-  return GeneralFlagImpl(
-    longForm   = NullableFlagOptions<UShort>::longForm.property(flag),
-    shortForm  = NullableFlagOptions<UShort>::shortForm.property(flag),
-    isRequired = NullableFlagOptions<UShort>::requireFlag.property(flag),
-    argument   = GeneralArgumentImpl(
-      UShort::class,
-      true,
-      default     = NullableFlagOptions<UShort>::default.property(flag),
-      shouldQuote = NullableFlagOptions<UShort>::shouldQuote.property(flag),
-      isRequired  = NullableFlagOptions<UShort>::requireArg.property(flag),
-      formatter   = NullableFlagOptions<UShort>::formatter.property(flag),
-    )
-  )
-}
+fun nullableUShortFlag(action: NullableFlagOptions<UShort>.() -> Unit): Flag<Argument<UShort?>, UShort?> =
+  GeneralFlagImpl.of(NullableFlagOptions(UShort::class).also(action))
 
 internal class UShortFlagImpl(
   longForm:   Property<String>,
   shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
+  filter:     Property<FlagPredicate<UShortFlag, UShortArgument, UShort>>,
   argument:   UShortArgument
 )
-  : AbstractFlagImpl<UShortArgument, UShort>(longForm, shortForm, isRequired, argument)
+  : AbstractFlagImpl<UShortFlag, UShortArgument, UShort>(longForm, shortForm, isRequired, filter, argument)
   , UShortFlag

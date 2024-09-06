@@ -1,16 +1,21 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.FlagOptions
-import io.foxcapades.lib.cli.wrapper.NullableFlagOptions
-import io.foxcapades.lib.cli.wrapper.arg.GeneralArgumentImpl
+import io.foxcapades.lib.cli.wrapper.*
 import io.foxcapades.lib.cli.wrapper.arg.UIntArgument
 import io.foxcapades.lib.cli.wrapper.arg.UIntArgumentImpl
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.property
 
 interface UIntFlag : ScalarFlag<UIntArgument, UInt>
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun uintFlag(longForm: String, noinline action: FlagOptions<UInt>.() -> Unit = {}) =
+  uintFlag { this.longForm = longForm; action() }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun uintFlag(shortForm: Char, noinline action: FlagOptions<UInt>.() -> Unit = {}) =
+  uintFlag { this.shortForm = shortForm; action() }
 
 fun uintFlag(action: FlagOptions<UInt>.() -> Unit): UIntFlag {
   val flag = FlagOptions(UInt::class).also(action)
@@ -18,38 +23,27 @@ fun uintFlag(action: FlagOptions<UInt>.() -> Unit): UIntFlag {
   return UIntFlagImpl(
     longForm   = FlagOptions<UInt>::longForm.property(flag),
     shortForm  = FlagOptions<UInt>::shortForm.property(flag),
-    isRequired = FlagOptions<UInt>::requireFlag.property(flag),
+    isRequired = FlagOptions<UInt>::required.property(flag),
+    filter     = FlagOptions<UInt>::flagFilter.property(flag),
     argument   = UIntArgumentImpl(
-      default     = FlagOptions<UInt>::default.property(flag),
-      isRequired  = FlagOptions<UInt>::requireArg.property(flag),
-      shouldQuote = FlagOptions<UInt>::shouldQuote.property(flag),
-      formatter   = FlagOptions<UInt>::formatter.property(flag),
+      default     = ArgOptions<Boolean>::default.property(flag.argument),
+      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
+      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
+      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
+      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
     )
   )
 }
 
-fun nullableUIntFlag(action: NullableFlagOptions<UInt>.() -> Unit): Flag<Argument<UInt?>, UInt?> {
-  val flag = NullableFlagOptions(UInt::class).also(action)
+fun nullableUIntFlag(action: NullableFlagOptions<UInt>.() -> Unit): Flag<Argument<UInt?>, UInt?> =
+  GeneralFlagImpl.of(NullableFlagOptions(UInt::class).also(action))
 
-  return GeneralFlagImpl(
-    longForm   = NullableFlagOptions<UInt>::longForm.property(flag),
-    shortForm  = NullableFlagOptions<UInt>::shortForm.property(flag),
-    isRequired = NullableFlagOptions<UInt>::requireFlag.property(flag),
-    argument   = GeneralArgumentImpl(
-      UInt::class,
-      true,
-      default     = NullableFlagOptions<UInt>::default.property(flag),
-      shouldQuote = NullableFlagOptions<UInt>::shouldQuote.property(flag),
-      isRequired  = NullableFlagOptions<UInt>::requireArg.property(flag),
-      formatter   = NullableFlagOptions<UInt>::formatter.property(flag),
-    )
-  )
-}
 internal class UIntFlagImpl(
   longForm:   Property<String>,
   shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
+  filter:     Property<FlagPredicate<UIntFlag, UIntArgument, UInt>>,
   argument:   UIntArgument
 )
-  : AbstractFlagImpl<UIntArgument, UInt>(longForm, shortForm, isRequired, argument)
+  : AbstractFlagImpl<UIntFlag, UIntArgument, UInt>(longForm, shortForm, isRequired, filter, argument)
   , UIntFlag

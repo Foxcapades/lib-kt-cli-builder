@@ -3,8 +3,9 @@ package io.foxcapades.lib.cli.wrapper
 import io.foxcapades.lib.cli.wrapper.flag.*
 import io.foxcapades.lib.cli.wrapper.serial.CliAppender
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.MutableProperty
-import io.foxcapades.lib.cli.wrapper.util.SimpleProperty
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.contracts.ExperimentalContracts
@@ -12,12 +13,14 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
 
+// region Flag Base
+
 /**
  * Represents a command line flag option.
  *
  * @since v1.0.0
  */
-interface Flag<A: Argument<V>, V> : MutableProperty<V>, CliCallComponent {
+interface Flag<out A : Argument<V>, V> : CliCallComponent {
   /**
    * Indicates whether this flag has a long form.
    */
@@ -49,48 +52,66 @@ interface Flag<A: Argument<V>, V> : MutableProperty<V>, CliCallComponent {
   val isRequired: Boolean
 
   /**
-   * Indicates whether this flag has been set to a value.
+   * Method used to indicate whether a [Flag] instance should be included in
+   * serialization based on customizable logic.
+   *
+   * Different implementations may provide varying default serialization
+   * inclusion rules, however the default behavior provided by this interface is
+   * to always include flags whose arguments return `true` on calls to
+   * [Argument.shouldSerialize].
+   *
+   * `Flag` instances that are marked with [isRequired] = `true` will be always
+   * be included in serialization.  For such instances, this method will not be
+   * called.
+   *
+   * Implementers should indicate if/when they do not make use of a call to
+   * [Argument.shouldSerialize].
+   *
+   * @param config Current serialization configuration.
+   *
+   * @return `true` if this `Flag` instance should be included in serialization
+   * output, otherwise `false` if this `Flag` should be omitted.
    */
-  override val isSet get() = argument.isSet
+  fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedFlag<*, V>): Boolean =
+    argument.shouldSerialize(config, reference)
 
-  /**
-   * Indicates whether a default value has been set for this [Flag] instance's
-   * underlying [Argument].
-   *
-   * If this value is `false`, attempting to access the `Flag`'s [default]
-   * property will cause an [UnsetArgumentDefaultException] to be thrown.
-   *
-   * @see [Argument.hasDefault]
-   */
-  val hasDefault get() = argument.hasDefault
-
-  /**
-   * Tests whether this `Flag`'s underlying [Argument] is currently set to its
-   * default value.
-   *
-   * See [Argument.isDefault] for additional information.
-   *
-   * @param config Serialization config.  Some implementations may require
-   * converting this `Flag`'s underlying `Argument` value to a string in order
-   * to test whether the value is the configured default.  In those cases,
-   * serialization config info may be required to correctly serialize the value.
-   *
-   * @return `true` if this `Flag` has a default set, and the current value
-   * of this `Flag` is equal to that default.
-   *
-   * @see Argument.isDefault
-   */
-  fun isDefault(config: CliSerializationConfig): Boolean =
-    argument.isDefault(config)
-
-  override fun get() = argument.get()
-
-  override fun set(value: V) = argument.set(value)
-
-  override fun unset() = argument.unset()
-
-  fun writeToString(builder: CliAppender)
+  fun writeToString(builder: CliAppender<*, V>)
 }
+
+/**
+ * Convenience shortcut for `Flag.argument.isSet`.
+ *
+ * @see Flag.argument
+ * @see Argument.isSet
+ */
+inline val Flag<*, *>.isSet get() = argument.isSet
+
+/**
+ * Convenience shortcut for `Flag.argument.hasDefault`.
+ *
+ * @see Flag.argument
+ * @see Argument.hasDefault
+ */
+inline val Flag<*, *>.hasDefault get() = argument.hasDefault
+
+@Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
+inline fun Flag<*, *>.unsafeAnyType() =
+  this as Flag<Argument<Any?>, Any?>
+
+fun <V> CliAppender<*, V>.putPreferredFlagForm(flag: Flag<*, V>, withValue: Boolean) = apply {
+  if (flag.hasLongForm) {
+    if (config.preferredFlagForm.isLong || !flag.hasShortForm)
+      putLongFlag(flag.longForm, withValue)
+    else
+      putShortFlag(flag.shortForm, withValue)
+  } else if (flag.hasShortForm) {
+    putShortFlag(flag.shortForm, withValue)
+  } else {
+    putLongFlag(config.propertyNameFormatter.format(reference.property.name, config), withValue)
+  }
+}
+
+// endregion Flag Base
 
 /**
  * @param T Flag container class type.
@@ -99,17 +120,85 @@ interface Flag<A: Argument<V>, V> : MutableProperty<V>, CliCallComponent {
  */
 interface ResolvedFlag<T : Any, V> : ResolvedComponent<T, V>, Flag<Argument<V>, V>
 
-sealed class BaseFlagOptions<T : Any, O : T?>(type: KClass<out T>)
-  : BaseComponentOptions<T, O, ResolvedFlag<*, O>>(type)
+// region Flag Options
+
+sealed class BaseFlagOptions<V : Any, O : V?, A : BaseArgOptions<V, O>>(
+  type: KClass<out V>,
+  arg: A,
+)
+  : BaseComponentOptions<V>(type)
 {
-  var longForm: String by SimpleProperty()
-  var shortForm: Char by SimpleProperty()
-  var requireFlag: Boolean by SimpleProperty()
+  /**
+   * Sets the long-form name of the flag being configured.
+   */
+  var longForm by MutableProperty<String>()
+
+  /**
+   * Sets the short-form name of the flag being configured.
+   */
+  var shortForm by MutableProperty<Char>()
+
+  /**
+   * Sets whether this flag's presence is required in a CLI generated call.
+   */
+  var required by MutableProperty<Boolean>()
+
+  /**
+   * Defines a predicate which will is used to determine when a non-required
+   * flag should be included or omitted from a CLI call.
+   *
+   * Flags marked as being [required] will always be included without any call
+   * to this filter.
+   */
+  var flagFilter by MutableProperty<FlagPredicate<out Flag<out Argument<O>, O>, out Argument<O>, O>>()
+
+  /**
+   * Argument configuration
+   */
+  val argument: A = arg
+
+  /**
+   * Argument configuration action.
+   *
+   * Calls the given action on the value of [argument].
+   */
+  inline fun argument(crossinline action: A.() -> Unit) = argument.action()
+
+  /**
+   * Convenience shortcut to set `argument.required`.
+   *
+   * @see [BaseArgOptions.required]
+   */
+  inline var argRequired: Boolean
+    get() = argument.required
+    set(value) { argument.required = value }
+
+  /**
+   * Convenience shortcut to set `argument.filter`
+   *
+   * @see [BaseArgOptions.filter]
+   */
+  inline var argFilter: ArgumentPredicate<out Argument<O>, O>
+    get() = argument.filter
+    set(value) { argument.filter = value }
+
+  /**
+   * Convenience shortcut to set `argument.default`
+   *
+   * @see [BaseArgOptions.default]
+   */
+  inline var default: O
+    get() = argument.default
+    set(value) { argument.default = value }
 }
 
-open class FlagOptions<T: Any>(type: KClass<out T>) : BaseFlagOptions<T, T>(type)
+open class FlagOptions<T: Any>(type: KClass<out T>)
+  : BaseFlagOptions<T, T, ArgOptions<T>>(type, ArgOptions(type))
 
-open class NullableFlagOptions<T: Any>(type: KClass<out T>) : BaseFlagOptions<T, T?>(type)
+open class NullableFlagOptions<T: Any>(type: KClass<out T>)
+  : BaseFlagOptions<T, T?, NullableArgOptions<T>>(type, NullableArgOptions(type))
+
+// endregion Flag Options
 
 /**
  * Creates a new [Flag] delegate instance for the target type ([T]).

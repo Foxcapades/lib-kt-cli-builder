@@ -3,7 +3,10 @@ package io.foxcapades.lib.cli.wrapper.arg
 import io.foxcapades.lib.cli.wrapper.ArgOptions
 import io.foxcapades.lib.cli.wrapper.Argument
 import io.foxcapades.lib.cli.wrapper.NullableArgOptions
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgSetFilter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
+import io.foxcapades.lib.cli.wrapper.serial.values.unsafeCast
 import io.foxcapades.lib.cli.wrapper.util.*
 import java.math.BigInteger
 
@@ -14,9 +17,10 @@ fun bigIntegerArg(action: ArgOptions<BigInteger>.() -> Unit): BigIntegerArgument
 
   return BigIntegerArgumentImpl(
     default     = ArgOptions<BigInteger>::default.property(opts),
-    isRequired  = ArgOptions<BigInteger>::requireArg.property(opts),
+    isRequired  = ArgOptions<BigInteger>::required.property(opts),
     shouldQuote = ArgOptions<BigInteger>::shouldQuote.property(opts),
     formatter   = ArgOptions<BigInteger>::formatter.property(opts),
+    filter      = ArgOptions<BigInteger>::filter.property(opts),
   )
 }
 
@@ -28,34 +32,33 @@ fun nullableBigIntegerArg(action: NullableArgOptions<BigInteger>.() -> Unit): Ar
     nullable    = true,
     default     = NullableArgOptions<BigInteger>::default.property(opts),
     shouldQuote = NullableArgOptions<BigInteger>::shouldQuote.property<Boolean>(opts).setIfAbsent(false),
-    isRequired  = NullableArgOptions<BigInteger>::requireArg.property(opts),
-    formatter   = NullableArgOptions<BigInteger>::formatter.property(opts)
+    isRequired  = NullableArgOptions<BigInteger>::required.property(opts),
+    formatter   = NullableArgOptions<BigInteger>::formatter.property(opts),
+    filter      = NullableArgOptions<BigInteger>::filter.property(opts)
   )
 }
 
-internal class BigIntegerArgumentImpl : AbstractScalarArgument<BigInteger>, BigIntegerArgument {
+internal class BigIntegerArgumentImpl : AbstractScalarArgument<BigIntegerArgument, BigInteger>, BigIntegerArgument {
   constructor(
     default:     Property<BigInteger>,
     isRequired:  Property<Boolean>,
     shouldQuote: Property<Boolean>,
-    formatter:   Property<ArgumentFormatter<BigInteger>>
+    formatter:   Property<ArgumentFormatter<BigInteger>>,
+    filter:      Property<ArgumentPredicate<BigIntegerArgument, BigInteger>>
   ) : super(
     default     = default,
     isRequired  = isRequired.getOr(!default.isSet),
     shouldQuote = shouldQuote.getOr(false),
-    formatter   = formatter.getOr(ArgumentFormatter(BigInteger::toString))
+    filter      = filter,
+    formatter   = formatter.getOr(ArgumentFormatter(BigInteger::toString)),
   )
 
-  constructor(default: BigInteger, isRequired: Boolean, formatter: ArgumentFormatter<BigInteger>)
-    : super(default.asProperty(), isRequired, false, formatter)
-
-  constructor(default: BigInteger, isRequired: Boolean)
-    : super(default.asProperty(), isRequired, false, ArgumentFormatter(BigInteger::toString))
-
-  constructor(isRequired: Boolean, formatter: ArgumentFormatter<BigInteger>)
-    : super(Property.empty(), isRequired, false, formatter)
-
-  constructor(isRequired: Boolean)
-    : super(Property.empty(), false, false, ArgumentFormatter(BigInteger::toString))
+  constructor(isRequired: Boolean) : super(
+    default     = Property(),
+    isRequired  = isRequired,
+    shouldQuote = false,
+    filter      = Property(ArgSetFilter.unsafeCast()),
+    formatter   = ArgumentFormatter(BigInteger::toString),
+  )
 }
 

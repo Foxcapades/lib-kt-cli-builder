@@ -3,7 +3,10 @@ package io.foxcapades.lib.cli.wrapper.arg
 import io.foxcapades.lib.cli.wrapper.ArgOptions
 import io.foxcapades.lib.cli.wrapper.Argument
 import io.foxcapades.lib.cli.wrapper.NullableArgOptions
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgSetFilter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
+import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
+import io.foxcapades.lib.cli.wrapper.serial.values.unsafeCast
 import io.foxcapades.lib.cli.wrapper.util.*
 import java.math.BigDecimal
 
@@ -14,9 +17,10 @@ fun bigDecimalArg(action: ArgOptions<BigDecimal>.() -> Unit): BigDecimalArgument
 
   return BigDecimalArgumentImpl(
     default     = ArgOptions<BigDecimal>::default.property(opts),
-    isRequired  = ArgOptions<BigDecimal>::requireArg.property(opts),
+    isRequired  = ArgOptions<BigDecimal>::required.property(opts),
     shouldQuote = ArgOptions<BigDecimal>::shouldQuote.property(opts),
     formatter   = ArgOptions<BigDecimal>::formatter.property(opts),
+    filter      = ArgOptions<BigDecimal>::filter.property(opts)
   )
 }
 
@@ -28,24 +32,32 @@ fun nullableBigDecimalArg(action: NullableArgOptions<BigDecimal>.() -> Unit): Ar
     nullable    = true,
     default     = NullableArgOptions<BigDecimal>::default.property(opts),
     shouldQuote = NullableArgOptions<BigDecimal>::shouldQuote.property<Boolean>(opts).setIfAbsent(false),
-    isRequired  = NullableArgOptions<BigDecimal>::requireArg.property(opts),
-    formatter   = NullableArgOptions<BigDecimal>::formatter.property(opts)
+    isRequired  = NullableArgOptions<BigDecimal>::required.property(opts),
+    formatter   = NullableArgOptions<BigDecimal>::formatter.property(opts),
+    filter      = NullableArgOptions<BigDecimal>::filter.property(opts)
   )
 }
 
-internal class BigDecimalArgumentImpl : AbstractScalarArgument<BigDecimal>, BigDecimalArgument {
+internal class BigDecimalArgumentImpl : AbstractScalarArgument<BigDecimalArgument, BigDecimal>, BigDecimalArgument {
   constructor(
     default:     Property<BigDecimal>,
     isRequired:  Property<Boolean>,
     shouldQuote: Property<Boolean>,
     formatter:   Property<ArgumentFormatter<BigDecimal>>,
+    filter:      Property<ArgumentPredicate<BigDecimalArgument, BigDecimal>>
   ) : super(
     default     = default,
     isRequired  = isRequired.getOr(!default.isSet),
     shouldQuote = shouldQuote.getOr(false),
-    formatter   = formatter.getOr(ArgumentFormatter(BigDecimal::toPlainString))
+    filter      = filter,
+    formatter   = formatter.getOr(ArgumentFormatter(BigDecimal::toPlainString)),
   )
 
-  constructor(isRequired: Boolean)
-    : super(Property.empty(), isRequired, false, ArgumentFormatter(BigDecimal::toPlainString))
+  constructor(isRequired: Boolean) : super(
+    Property(),
+    isRequired,
+    false,
+    Property(ArgSetFilter.unsafeCast()),
+    ArgumentFormatter(BigDecimal::toPlainString),
+  )
 }

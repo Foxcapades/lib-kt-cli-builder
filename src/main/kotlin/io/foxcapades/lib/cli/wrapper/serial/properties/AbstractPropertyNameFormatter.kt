@@ -15,7 +15,7 @@ internal abstract class AbstractPropertyNameFormatter : PropertyNameFormatter {
   protected abstract fun subsequentWord(word: String, buffer: CharBuffer)
 
   @Suppress("FoldInitializerAndIfToElvis")
-  override fun invoke(name: String, serializationConfig: CliSerializationConfig): String {
+  override fun format(name: String, serializationConfig: CliSerializationConfig): String {
     if (name.isEmpty())
       return name
 

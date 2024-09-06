@@ -1,12 +1,9 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.FlagOptions
-import io.foxcapades.lib.cli.wrapper.NullableFlagOptions
+import io.foxcapades.lib.cli.wrapper.*
 import io.foxcapades.lib.cli.wrapper.arg.DoubleArgument
 import io.foxcapades.lib.cli.wrapper.arg.DoubleArgumentImpl
-import io.foxcapades.lib.cli.wrapper.arg.GeneralArgumentImpl
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.property
 
@@ -26,39 +23,27 @@ fun doubleFlag(action: FlagOptions<Double>.() -> Unit): DoubleFlag {
   return DoubleFlagImpl(
     longForm   = FlagOptions<Double>::longForm.property(flag),
     shortForm  = FlagOptions<Double>::shortForm.property(flag),
-    isRequired = FlagOptions<Double>::requireFlag.property(flag),
+    isRequired = FlagOptions<Double>::required.property(flag),
+    filter     = FlagOptions<Double>::flagFilter.property(flag),
     argument   = DoubleArgumentImpl(
-      default     = FlagOptions<Double>::default.property(flag),
-      isRequired  = FlagOptions<Double>::requireArg.property(flag),
-      shouldQuote = FlagOptions<Double>::shouldQuote.property(flag),
-      formatter   = FlagOptions<Double>::formatter.property(flag),
+      default     = ArgOptions<Boolean>::default.property(flag.argument),
+      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
+      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
+      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
+      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
     )
   )
 }
 
-fun nullableDoubleFlag(action: NullableFlagOptions<Double>.() -> Unit): Flag<Argument<Double?>, Double?> {
-  val flag = NullableFlagOptions(Double::class).also(action)
-
-  return GeneralFlagImpl(
-    longForm   = NullableFlagOptions<Double>::longForm.property(flag),
-    shortForm  = NullableFlagOptions<Double>::shortForm.property(flag),
-    isRequired = NullableFlagOptions<Double>::requireFlag.property(flag),
-    argument   = GeneralArgumentImpl(
-      Double::class,
-      true,
-      default     = NullableFlagOptions<Double>::default.property(flag),
-      shouldQuote = NullableFlagOptions<Double>::shouldQuote.property(flag),
-      isRequired  = NullableFlagOptions<Double>::requireArg.property(flag),
-      formatter   = NullableFlagOptions<Double>::formatter.property(flag),
-    )
-  )
-}
+fun nullableDoubleFlag(action: NullableFlagOptions<Double>.() -> Unit): Flag<Argument<Double?>, Double?> =
+  GeneralFlagImpl.of(NullableFlagOptions(Double::class).also(action))
 
 internal class DoubleFlagImpl(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  argument: DoubleArgument
+  filter:     Property<FlagPredicate<DoubleFlag, DoubleArgument, Double>>,
+  argument:   DoubleArgument
 )
-  : AbstractFlagImpl<DoubleArgument, Double>(longForm, shortForm, isRequired, argument)
+  : AbstractFlagImpl<DoubleFlag, DoubleArgument, Double>(longForm, shortForm, isRequired, filter, argument)
   , DoubleFlag

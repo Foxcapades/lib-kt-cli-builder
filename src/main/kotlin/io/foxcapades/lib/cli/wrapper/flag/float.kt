@@ -1,10 +1,9 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.FlagOptions
-import io.foxcapades.lib.cli.wrapper.NullableFlagOptions
-import io.foxcapades.lib.cli.wrapper.arg.*
+import io.foxcapades.lib.cli.wrapper.*
+import io.foxcapades.lib.cli.wrapper.arg.FloatArgument
+import io.foxcapades.lib.cli.wrapper.arg.FloatArgumentImpl
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.property
 
@@ -24,39 +23,27 @@ fun floatFlag(action: FlagOptions<Float>.() -> Unit): FloatFlag {
   return FloatFlagImpl(
     longForm   = FlagOptions<Float>::longForm.property(flag),
     shortForm  = FlagOptions<Float>::shortForm.property(flag),
-    isRequired = FlagOptions<Float>::requireFlag.property(flag),
+    isRequired = FlagOptions<Float>::required.property(flag),
+    filter     = FlagOptions<Float>::flagFilter.property(flag),
     argument   = FloatArgumentImpl(
-      default     = FlagOptions<Float>::default.property(flag),
-      isRequired  = FlagOptions<Float>::requireArg.property(flag),
-      shouldQuote = FlagOptions<Float>::shouldQuote.property(flag),
-      formatter   = FlagOptions<Float>::formatter.property(flag),
+      default     = ArgOptions<Boolean>::default.property(flag.argument),
+      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
+      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
+      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
+      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
     )
   )
 }
 
-fun nullableFloatFlag(action: NullableFlagOptions<Float>.() -> Unit): Flag<Argument<Float?>, Float?> {
-  val flag = NullableFlagOptions(Float::class).also(action)
-
-  return GeneralFlagImpl(
-    longForm   = NullableFlagOptions<Float>::longForm.property(flag),
-    shortForm  = NullableFlagOptions<Float>::shortForm.property(flag),
-    isRequired = NullableFlagOptions<Float>::requireFlag.property(flag),
-    argument   = GeneralArgumentImpl(
-      Float::class,
-      true,
-      default     = NullableFlagOptions<Float>::default.property(flag),
-      shouldQuote = NullableFlagOptions<Float>::shouldQuote.property(flag),
-      isRequired  = NullableFlagOptions<Float>::requireArg.property(flag),
-      formatter   = NullableFlagOptions<Float>::formatter.property(flag),
-    )
-  )
-}
+fun nullableFloatFlag(action: NullableFlagOptions<Float>.() -> Unit): Flag<Argument<Float?>, Float?> =
+  GeneralFlagImpl.of(NullableFlagOptions(Float::class).also(action))
 
 internal class FloatFlagImpl(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  argument: FloatArgument
+  filter:     Property<FlagPredicate<FloatFlag, FloatArgument, Float>>,
+  argument:   FloatArgument
 )
-  : AbstractFlagImpl<FloatArgument, Float>(longForm, shortForm, isRequired, argument)
+  : AbstractFlagImpl<FloatFlag, FloatArgument, Float>(longForm, shortForm, isRequired, filter, argument)
   , FloatFlag

@@ -2,38 +2,44 @@ package io.foxcapades.lib.cli.wrapper.flag
 
 import io.foxcapades.lib.cli.wrapper.Argument
 import io.foxcapades.lib.cli.wrapper.Flag
+import io.foxcapades.lib.cli.wrapper.putPreferredFlagForm
 import io.foxcapades.lib.cli.wrapper.serial.CliAppender
-import io.foxcapades.lib.cli.wrapper.util.CHAR_NULL
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagSetFilter
+import io.foxcapades.lib.cli.wrapper.serial.values.unsafeCast
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.getOr
 
-internal sealed class AbstractFlagImpl<A: Argument<V>, V> private constructor(
-  override val hasLongForm: Boolean,
-  override val longForm: String,
-  override val hasShortForm: Boolean,
-  override val shortForm: Char,
-  override val isRequired: Boolean,
-  override val argument: A,
+internal sealed class AbstractFlagImpl<Self : Flag<A, V>, A: Argument<V>, V>(
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
+  isRequired: Property<Boolean>,
+  filter:     Property<FlagPredicate<Self, A, V>>,
+  argument:   A,
 ) : Flag<A, V> {
-  constructor(lf: Property<String>, sf: Property<Char>, isRequired: Property<Boolean>, argument: A)
-    : this(lf.isSet, lf.getOr(""), sf.isSet, sf.getOr(CHAR_NULL), isRequired.getOr(false), argument)
+  private val lf = longForm
+  private val sf = shortForm
 
-  constructor(longForm: String, shortForm: Char, isRequired: Boolean, argument: A)
-    : this(true, longForm, true, shortForm, isRequired, argument)
+  protected val filter = filter.getOr(FlagSetFilter.unsafeCast())
 
-  constructor(longForm: String, isRequired: Boolean, argument: A)
-    : this(true, longForm, false, CHAR_NULL, isRequired, argument)
+  override val hasLongForm
+    get() = lf.isSet
 
-  constructor(shortForm: Char, isRequired: Boolean, argument: A)
-    : this(false, "", true, shortForm, isRequired, argument)
+  override val longForm
+    get() = lf.get()
 
-  override fun writeToString(builder: CliAppender) {
-    if (!hasLongForm || builder.config.preferredFlagForm.isShort && hasShortForm) {
-      builder.putShortFlag(shortForm, true)
-    } else {
-      builder.putLongFlag(longForm, true)
-    }
+  override val hasShortForm
+    get() = sf.isSet
 
-    builder.putArgument(argument)
+  override val shortForm
+    get() = sf.get()
+
+  override val isRequired = isRequired.getOr(false)
+
+  override val argument = argument
+
+  override fun writeToString(builder: CliAppender<*, V>) {
+    // TODO: handle optional arguments
+    builder.putPreferredFlagForm(this, true).putArgument(argument)
   }
 }

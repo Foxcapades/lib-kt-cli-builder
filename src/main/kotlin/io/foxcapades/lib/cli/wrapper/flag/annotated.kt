@@ -1,24 +1,26 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.ResolvedFlag
+import io.foxcapades.lib.cli.wrapper.*
 import io.foxcapades.lib.cli.wrapper.meta.CliFlagAnnotation
-import io.foxcapades.lib.cli.wrapper.meta.defaultCheck
 import io.foxcapades.lib.cli.wrapper.reflect.AnnotatedPropertyReference
+import io.foxcapades.lib.cli.wrapper.reflect.getOrCreate
 import io.foxcapades.lib.cli.wrapper.serial.CliAppender
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
+import io.foxcapades.lib.cli.wrapper.serial.values.unsafeCast
 import io.foxcapades.lib.cli.wrapper.util.BUG
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
 internal class AnnotatedFlag<T : Any>(
   override val type: KClass<out T>,
   override val property: KProperty1<T, *>,
   override val annotation: CliFlagAnnotation,
-  private val delegate: Flag<*, *>,
+  private val delegate: Flag<Argument<Any?>, Any?>,
 ) : ResolvedFlag<T, Any?>, AnnotatedPropertyReference<T, Any?, CliFlagAnnotation> {
+  private inline val filter: FlagPredicate<Flag<Argument<Any?>, Any?>, Argument<Any?>, Any?>
+    get() = annotation.filter.getOrCreate().unsafeCast()
+
   override val hasLongForm
     get() = annotation.hasLongForm || delegate.hasLongForm
 
@@ -39,50 +41,34 @@ internal class AnnotatedFlag<T : Any>(
       else                    -> BUG()
     }
 
-  @Suppress("UNCHECKED_CAST")
-  override val argument: Argument<Any?>
-    get() = delegate.argument as Argument<Any?>
+  override val argument
+    get() = delegate.argument
 
-  override val isRequired: Boolean
+  override val isRequired
     get() = annotation.required || delegate.isRequired
 
-  override fun get() = delegate.get()
+  override fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedFlag<*, Any?>) =
+    if (annotation.hasFilter)
+      filter.shouldInclude(delegate, this, config)
+    else
+      delegate.shouldSerialize(config, reference)
 
-  override fun getValue(thisRef: Any?, property: KProperty<*>) = delegate.getValue(thisRef, property)
-
-  override fun set(value: Any?) = BUG()
-
-  override fun setValue(thisRef: Any?, property: KProperty<*>, value: Any?) = BUG()
-
-  override fun unset() = BUG()
-
-  override fun isDefault(config: CliSerializationConfig): Boolean {
-    if (delegate.hasDefault)
-      return delegate.isDefault(config)
-
-    return annotation.defaultCheck(get(), this, config)
-  }
-
-  override fun writeToString(builder: CliAppender) {
+  override fun writeToString(builder: CliAppender<*, Any?>) {
     if (delegate is BooleanFlag && delegate.isToggleFlag) {
-      // TODO: if a default value is set on both the annotation and the delegate
-      //       throw an exception.
-      if (isDefault(builder.config))
+
+      // Filter out flags that are not set, or are set to false.
+      // TODO: this should be the job of the toggle flag
+      if (!delegate.isSet || !delegate.argument.get())
         return
 
-      if (!hasLongForm || builder.config.preferredFlagForm.isShort && hasShortForm) {
-        builder.putShortFlag(shortForm, false)
-      } else {
-        builder.putLongFlag(longForm, false)
-      }
+      builder.putPreferredFlagForm(delegate.unsafeAnyType(), false)
     } else {
-      if (!hasLongForm || builder.config.preferredFlagForm.isShort && hasShortForm) {
-        builder.putShortFlag(shortForm, true)
-      } else {
-        builder.putLongFlag(longForm, true)
-      }
+      val withArg = delegate.argument.shouldSerialize(builder.config, builder.reference)
 
-      builder.putArgument(argument)
+      builder.putPreferredFlagForm(delegate.unsafeAnyType(), withArg)
+
+      if (withArg)
+        builder.putArgument(argument)
     }
   }
 }

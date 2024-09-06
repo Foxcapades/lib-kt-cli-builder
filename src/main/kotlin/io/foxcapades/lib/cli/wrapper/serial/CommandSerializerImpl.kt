@@ -138,6 +138,7 @@ internal class CommandSerializerImpl<T : Any>(
 
   private fun ResolvedFlag<T, Any?>.isUsable() =
     if (isRequired) {
+      // TODO: interplay: flag vs argument requirements
       if (isSet) {
         true
       } else if (hasDefault) {

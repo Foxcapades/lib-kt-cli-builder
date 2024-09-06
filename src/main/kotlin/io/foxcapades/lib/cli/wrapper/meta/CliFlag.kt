@@ -1,11 +1,9 @@
 package io.foxcapades.lib.cli.wrapper.meta
 
 import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.serial.NullableGeneralStringifier
 import io.foxcapades.lib.cli.wrapper.serial.properties.PropertyNameFormatter
-import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
-import io.foxcapades.lib.cli.wrapper.serial.values.FlagDefaultTest
-import io.foxcapades.lib.cli.wrapper.serial.values.FlagDefaultTestReqDependent
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
+import io.foxcapades.lib.cli.wrapper.serial.values.InvalidFlagFilter
 import kotlin.reflect.KClass
 
 /**
@@ -63,150 +61,9 @@ annotation class CliFlag(
    */
   val shortForm: Char = '\u0000',
 
-  /**
-   * Whether this CLI flag should be considered required.
-   *
-   * ## Required Flags
-   *
-   * When [required] is set to `true`, the following applies:
-   *
-   * 1. [includeDefault] is ignored
-   * 2. [defaultValueTest] is used to indicate whether a value has been set,
-   *    meaning property values for which `defaultValueTest` returns true will
-   *    be considered as "unset" and result in a validation error.
-   * 3. The default [defaultValueTest] implementation will follow these rules:
-   *     a. Nullable fields will be tested with [DefaultValueTests.Null].
-   *     b. Non-nullable fields will be treated with the rules outlined by
-   *        [DefaultValueTests.Default].
-   *
-   * *Example: Standard Test - Nullable Field* (see [FlagDefaultTests.Null])
-   * ```kt
-   * @CliCommand("my-command")
-   * data class Command(
-   *   @CliFlag(isRequired = true)
-   *   var myFlag: String? = null
-   * )
-   *
-   * val com = Command()
-   * Cli.toCliString(com) // Validation error, `--my-flag` is required but not set
-   *
-   * com.myFlag = "hello"
-   * Cli.toCliString(com) // my-command --my-flag="hello"
-   * ```
-   *
-   * *Example: Standard Test - Non-Nullable Field* (see [FlagDefaultTests.Default])
-   * ```kt
-   * @CliCommand("my-command")
-   * data class Command(
-   *   @CliFlag(isRequired = true)
-   *   var myFlag: Double = 0.0
-   * )
-   *
-   * val com = Command()
-   * Cli.toCliString(com) // Validation error, `--my-flag` is required but not set
-   *
-   * com.myFlag = 1.0
-   * Cli.toCliString(com) // my-command --my-flag=1.0
-   * ```
-   *
-   * *Example: Customized Test*
-   * ```kt
-   * class MyTest : DefaultValueTest {
-   *   fun testValue(value: Any?, annotation: CliFlag, prop: KProperty1<*, *>) =
-   *     value == 42
-   * }
-   *
-   * @CliCommand("my-command")
-   * data class Command(
-   *   @CliFlag(isRequired = true, defaultValueTest = MyTest::class)
-   *   var myFlag: Int = 42
-   * )
-   *
-   * val com = Command()
-   * Cli.toCliString(com) // Validation error, `--my-flag` is required but not set
-   *
-   * com.myFlag = 69
-   * Cli.toCliString(com) // my-command --my-flag=69
-   * ```
-   *
-   * ## Optional Flags
-   *
-   * When [required] is set to `false`, the following applies:
-   *
-   * 1. [defaultValueTest] is used to indicate whether a value is considered as
-   *    being its default value.
-   * 2. The default [defaultValueTest] implementation will follow the rules
-   *    outlined by [DefaultValueTests.Default].
-
-   * *Example: Standard Test* (see [FlagDefaultTests.Default])
-   * ```kt
-   * @CliCommand("my-command")
-   * data class Command(
-   *   @CliFlag
-   *   var myFlag: String? = null
-   * )
-   *
-   * val com = Command()
-   * Cli.toCliString(com) // my-command
-   *
-   * com.myFlag = ""
-   * Cli.toCliString(com) // my-command
-   *
-   * com.myFlag = "hello"
-   * Cli.toCliString(com) // my-command --my-flag="hello"
-   * ```
-   *
-   * *Example: Customized Test*
-   * ```kt
-   * class MyTest : DefaultValueTest {
-   *   fun testValue(value: Any?, annotation: CliFlag, prop: KProperty1<*, *>) =
-   *     value == 42
-   * }
-   *
-   * @CliCommand("my-command")
-   * data class Command(
-   *   @CliFlag(defaultValueTest = MyTest::class)
-   *   var myFlag: Int = 42
-   * )
-   *
-   * val com = Command()
-   * Cli.toCliString(com) // my-command
-   *
-   * com.myFlag = 69
-   * Cli.toCliString(com) // my-command --my-flag=69
-   * ```
-   */
   val required: Boolean = false,
 
-  /**
-   * Used to test the property value to determine if it should be considered as
-   * set to its "default" value.
-   *
-   * * When [required] is set to `true`, a test result of `true` (is default)
-   * indicates that the value has not been set, which would result in a
-   * validation error.  A test result value of `false` (not default) indicates
-   * that the value has been set.
-   *
-   * * When [required] is set to `false`, a test result of `true` (is default)
-   * indicates that the value may be omitted from the generated CLI call based
-   * on the value of [includeDefault].  A test result value of `false` (not
-   * default) indicates that the value has been changed and must be included
-   * in the CLI call.
-   */
-  val defaultValueTest: KClass<out FlagDefaultTest<*>> = FlagDefaultTestReqDependent::class,
+  val inclusionTest: KClass<out FlagPredicate<*, *, *>> = InvalidFlagFilter::class,
 
-  val default: String = CliComponentUnsetDefault,
-
-  /**
-   * Configures whether optional flags that are set to their default value
-   * should be included in generated CLI calls.
-   */
-  val includeDefault: Boolean = false,
-
-  /**
-   * Sets a custom formatter to use to convert the property value to a string.
-   *
-   * This will only be used or instantiated if the flag is printed.
-   */
-  val formatter: KClass<out ArgumentFormatter<*>> = NullableGeneralStringifier::class,
+  val argument: CliArgument = CliArgument()
 )

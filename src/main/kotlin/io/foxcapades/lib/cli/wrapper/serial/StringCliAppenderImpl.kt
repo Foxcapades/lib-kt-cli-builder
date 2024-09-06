@@ -10,13 +10,16 @@ import io.foxcapades.lib.cli.wrapper.util.dump
 /**
  * @param T Top level CLI command config class containing components to be
  * serialized.
+ *
+ * TODO: this should not directly implement [CliAppender], it should have an
+ *       internal instance that it passes to components.
  */
 internal class StringCliAppenderImpl<T : Any>(
   command: Array<String>,
   private val components: Iterator<ResolvedComponent<T, Any?>>,
   override val config: CliSerializationConfig,
   initSize: Int = 2048,
-) : CliAppender {
+) : CliAppender<T, Any?> {
   private val buffer = StringBuilder(initSize)
     .apply {
       append(command[0])
@@ -27,6 +30,9 @@ internal class StringCliAppenderImpl<T : Any>(
   private val appender by lazy { CliArgumentAppenderImpl(config, buffer) }
 
   private var lastType = CliSegment.Type.SimpleValue
+
+  override lateinit var reference: ResolvedComponent<T, Any?>
+    private set
 
   override fun putLongFlag(name: String, hasValue: Boolean) =
     also {
@@ -68,12 +74,15 @@ internal class StringCliAppenderImpl<T : Any>(
     }
 
   override fun toString(): String {
-    for (component in components)
+    for (component in components) {
+      reference = component
+
       when (component) {
         is ResolvedFlag     -> component.writeToString(this)
         is ResolvedArgument -> putArgument(component)
         else                -> BUG()
       }
+    }
 
     appendEmptyIfNeeded()
 

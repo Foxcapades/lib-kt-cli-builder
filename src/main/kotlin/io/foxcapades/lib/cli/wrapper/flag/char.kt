@@ -1,12 +1,9 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.FlagOptions
-import io.foxcapades.lib.cli.wrapper.NullableFlagOptions
+import io.foxcapades.lib.cli.wrapper.*
 import io.foxcapades.lib.cli.wrapper.arg.CharArgument
 import io.foxcapades.lib.cli.wrapper.arg.CharArgumentImpl
-import io.foxcapades.lib.cli.wrapper.arg.GeneralArgumentImpl
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.property
 
@@ -26,40 +23,27 @@ fun charFlag(action: FlagOptions<Char>.() -> Unit): CharFlag {
   return CharFlagImpl(
     longForm   = FlagOptions<Char>::longForm.property(flag),
     shortForm  = FlagOptions<Char>::shortForm.property(flag),
-    isRequired = FlagOptions<Char>::requireFlag.property(flag),
+    isRequired = FlagOptions<Char>::required.property(flag),
+    filter     = FlagOptions<Char>::flagFilter.property(flag),
     argument   = CharArgumentImpl(
-      default     = FlagOptions<Char>::default.property(flag),
-      isRequired  = FlagOptions<Char>::requireArg.property(flag),
-      shouldQuote = FlagOptions<Char>::shouldQuote.property(flag),
-      formatter   = FlagOptions<Char>::formatter.property(flag),
+      default     = ArgOptions<Boolean>::default.property(flag.argument),
+      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
+      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
+      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
+      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
     )
   )
 }
 
-fun nullableCharFlag(action: NullableFlagOptions<Char>.() -> Unit): Flag<Argument<Char?>, Char?> {
-  val flag = NullableFlagOptions(Char::class).also(action)
-
-  return GeneralFlagImpl(
-    longForm   = NullableFlagOptions<Char>::longForm.property(flag),
-    shortForm  = NullableFlagOptions<Char>::shortForm.property(flag),
-    isRequired = NullableFlagOptions<Char>::requireFlag.property(flag),
-    argument   = GeneralArgumentImpl(
-      Char::class,
-      true,
-      default     = NullableFlagOptions<Char>::default.property(flag),
-      shouldQuote = NullableFlagOptions<Char>::shouldQuote.property(flag),
-      isRequired  = NullableFlagOptions<Char>::requireArg.property(flag),
-      formatter   = NullableFlagOptions<Char>::formatter.property(flag),
-    )
-  )
-}
-
+fun nullableCharFlag(action: NullableFlagOptions<Char>.() -> Unit): Flag<Argument<Char?>, Char?> =
+  GeneralFlagImpl.of(NullableFlagOptions(Char::class).also(action))
 
 internal class CharFlagImpl(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  argument: CharArgument
+  filter:     Property<FlagPredicate<CharFlag, CharArgument, Char>>,
+  argument:   CharArgument
 )
-  : AbstractFlagImpl<CharArgument, Char>(longForm, shortForm, isRequired, argument)
+  : AbstractFlagImpl<CharFlag, CharArgument, Char>(longForm, shortForm, isRequired, filter, argument)
   , CharFlag

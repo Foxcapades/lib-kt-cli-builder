@@ -1,31 +1,30 @@
 package io.foxcapades.lib.cli.wrapper.meta
 
+import io.foxcapades.lib.cli.wrapper.serial.values.InvalidFlagFilter
+
 @JvmInline
 internal value class CliFlagAnnotation(val annotation: CliFlag) : CliComponentAnnotation {
-  val hasLongForm
+  inline val hasLongForm
     get() = annotation.hasLongForm
 
-  val longForm
+  inline val longForm
     get() = annotation.longForm
 
-  val hasShortForm
+  inline val hasShortForm
     get() = annotation.hasShortForm
 
-  val shortForm
+  inline val shortForm
     get() = annotation.shortForm
+
+  inline val hasFilter
+    get() = annotation.inclusionTest != InvalidFlagFilter::class
+
+  inline val filter
+    get() = annotation.inclusionTest
+
+  inline val argument
+    get() = annotation.argument
 
   override val required
     get() = annotation.required
-
-  override val defaultValueTest
-    get() = annotation.defaultValueTest
-
-  override val default
-    get() = annotation.default
-
-  override val includeDefault
-    get() = annotation.includeDefault
-
-  override val formatter
-    get() = annotation.formatter
 }

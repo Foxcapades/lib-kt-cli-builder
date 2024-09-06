@@ -5,15 +5,9 @@ internal value class CliArgumentAnnotation(val annotation: CliArgument) : CliCom
   override val required
     get() = annotation.required
 
-  override val defaultValueTest
-    get() = annotation.defaultValueTest
+  inline val inclusionTest get() = annotation.inclusionTest
 
-  override val default
-    get() = annotation.default
+  inline val shouldQuote get() = annotation.shouldQuote
 
-  override val includeDefault
-    get() = annotation.includeDefault
-
-  override val formatter
-    get() = annotation.formatter
+  inline val formatter get() = annotation.formatter
 }

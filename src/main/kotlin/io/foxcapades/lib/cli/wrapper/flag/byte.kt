@@ -1,12 +1,9 @@
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.FlagOptions
-import io.foxcapades.lib.cli.wrapper.NullableFlagOptions
+import io.foxcapades.lib.cli.wrapper.*
 import io.foxcapades.lib.cli.wrapper.arg.ByteArgument
 import io.foxcapades.lib.cli.wrapper.arg.ByteArgumentImpl
-import io.foxcapades.lib.cli.wrapper.arg.GeneralArgumentImpl
+import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.property
 
@@ -26,39 +23,27 @@ fun byteFlag(action: FlagOptions<Byte>.() -> Unit): ByteFlag {
   return ByteFlagImpl(
     longForm   = FlagOptions<Byte>::longForm.property(flag),
     shortForm  = FlagOptions<Byte>::shortForm.property(flag),
-    isRequired = FlagOptions<Byte>::requireFlag.property(flag),
+    isRequired = FlagOptions<Byte>::required.property(flag),
+    filter     = FlagOptions<Byte>::flagFilter.property(flag),
     argument   = ByteArgumentImpl(
-      default     = FlagOptions<Byte>::default.property(flag),
-      isRequired  = FlagOptions<Byte>::requireArg.property(flag),
-      shouldQuote = FlagOptions<Byte>::shouldQuote.property(flag),
-      formatter   = FlagOptions<Byte>::formatter.property(flag),
+      default     = ArgOptions<Boolean>::default.property(flag.argument),
+      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
+      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
+      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
+      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
     )
   )
 }
 
-fun nullableByteFlag(action: NullableFlagOptions<Byte>.() -> Unit): Flag<Argument<Byte?>, Byte?> {
-  val flag = NullableFlagOptions(Byte::class).also(action)
-
-  return GeneralFlagImpl(
-    longForm   = NullableFlagOptions<Byte>::longForm.property(flag),
-    shortForm  = NullableFlagOptions<Byte>::shortForm.property(flag),
-    isRequired = NullableFlagOptions<Byte>::requireFlag.property(flag),
-    argument   = GeneralArgumentImpl(
-      Byte::class,
-      true,
-      default     = NullableFlagOptions<Byte>::default.property(flag),
-      shouldQuote = NullableFlagOptions<Byte>::shouldQuote.property(flag),
-      isRequired  = NullableFlagOptions<Byte>::requireArg.property(flag),
-      formatter   = NullableFlagOptions<Byte>::formatter.property(flag),
-    )
-  )
-}
+fun nullableByteFlag(action: NullableFlagOptions<Byte>.() -> Unit): Flag<Argument<Byte?>, Byte?> =
+  GeneralFlagImpl.of(NullableFlagOptions(Byte::class).also(action))
 
 internal class ByteFlagImpl(
   longForm:   Property<String>,
   shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
+  filter:     Property<FlagPredicate<ByteFlag, ByteArgument, Byte>>,
   argument:   ByteArgument
 )
-  : AbstractFlagImpl<ByteArgument, Byte>(longForm, shortForm, isRequired, argument)
+  : AbstractFlagImpl<ByteFlag, ByteArgument, Byte>(longForm, shortForm, isRequired, filter, argument)
   , ByteFlag

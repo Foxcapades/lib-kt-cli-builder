@@ -4,6 +4,7 @@ import io.foxcapades.lib.cli.wrapper.Argument
 import io.foxcapades.lib.cli.wrapper.Flag
 import io.foxcapades.lib.cli.wrapper.ResolvedFlag
 import io.foxcapades.lib.cli.wrapper.serial.CliAppender
+import io.foxcapades.lib.cli.wrapper.unsafeAnyType
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -31,5 +32,5 @@ internal class PinnedFlag<T : Any>(
   override val isRequired
     get() = actualFlag.isRequired
 
-  override fun writeToString(builder: CliAppender) = actualFlag.writeToString(builder)
+  override fun writeToString(builder: CliAppender<*, Any?>) = actualFlag.unsafeAnyType().writeToString(builder)
 }

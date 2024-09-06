@@ -20,7 +20,7 @@ fun interface PropertyNameFormatter {
    *
    * @return The formatted property name.
    */
-  operator fun invoke(name: String, serializationConfig: CliSerializationConfig): String
+  fun format(name: String, serializationConfig: CliSerializationConfig): String
 
   companion object {
     /**

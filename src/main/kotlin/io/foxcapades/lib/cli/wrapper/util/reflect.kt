@@ -12,3 +12,4 @@ internal inline fun <T> KProperty1<*, *>.property(instance: Any) =
   (this as KProperty1<Any, *>)
     .apply { isAccessible = true }
     .getDelegate(instance) as SimpleProperty<T>
+

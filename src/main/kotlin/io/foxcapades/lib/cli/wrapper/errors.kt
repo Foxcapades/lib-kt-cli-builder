@@ -1,6 +1,7 @@
 package io.foxcapades.lib.cli.wrapper
 
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.wrapper.util.NoSuchDefaultValueException
 import io.foxcapades.lib.cli.wrapper.util.isPrintable
 import io.foxcapades.lib.cli.wrapper.util.safeName
 import kotlin.reflect.KClass
@@ -93,7 +94,7 @@ class InvalidFlagFormException(
   }
 }
 
-class UnsetArgumentDefaultException(msg: String) : RuntimeException(msg) {
+open class UnsetArgumentDefaultException(msg: String) : NoSuchDefaultValueException(msg) {
   constructor() : this("attempted to fetch the default value for an argument that had none")
 }
 

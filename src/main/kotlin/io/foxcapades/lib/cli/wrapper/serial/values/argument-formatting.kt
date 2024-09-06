@@ -18,6 +18,10 @@ fun interface ArgumentFormatter<V> {
   }
 }
 
+@Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
+internal inline fun ArgumentFormatter<*>.forceAny() =
+  this as ArgumentFormatter<Any?>
+
 /**
  * Helper used to type a given function reference as a [ArgumentFormatter]
  * instance.
