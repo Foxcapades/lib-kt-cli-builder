@@ -17,14 +17,12 @@ data class SemVer(
 
   inline val gitTag get() = "v$major.$minor.$patch"
 
+  inline val sedExp get() = "SemVer(major = $major, minor = $minor, patch = $patch)"
+
   override fun toString() = "$major.$minor.$patch"
 }
 
-val projectVersion = SemVer(
-  major = 0,
-  minor = 4,
-  patch = 0,
-)
+val projectVersion = SemVer(major = 0, minor = 4, patch = 0)
 
 group = "io.foxcapades.kt"
 version = projectVersion.toString()
@@ -134,7 +132,26 @@ tasks.create("release") {
   group = "Custom"
 
   doFirst {
-    with(ProcessBuilder("git", ""))
+    with(ProcessBuilder("git", "diff-index", "--quiet", "HEAD")) {
+      if (start().waitFor() != 0) {
+        throw GradleException("git workspace is not clean!")
+      }
+    }
+
+    val newVersion = projectVersion.copy(minor = projectVersion.minor + 1, patch = 0)
+
+    with(ProcessBuilder("sed", "s/${projectVersion.sedExp}/${projectVersion.sedExp}/", "build.gradle.kts")) {
+      val tmp = file("build.gradle.kts.tmp")
+      redirectOutput(tmp)
+
+      if (start().waitFor() != 0) {
+        throw GradleException("failed to patch gradle file!")
+      }
+
+      val cur = file("build.gradle.kts")
+      cur.delete()
+      tmp.renameTo(cur)
+    }
   }
 
   dependsOn(
