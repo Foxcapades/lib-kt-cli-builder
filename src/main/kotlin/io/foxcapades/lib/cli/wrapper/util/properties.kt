@@ -453,6 +453,8 @@ inline fun <T> Property<T>.getOrNull() = if(isSet) get() else null
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T> Property<T>.getOr(fallback: T) = if (isSet) get() else fallback
 
+inline fun <T> Property<T>.mapAbsent(crossinline other: () -> T) = if (isSet) this else Property(other())
+
 @OptIn(ExperimentalContracts::class)
 inline fun <T> Property<T>.getOrCompute(fn: () -> T): T {
   contract { callsInPlace(fn, InvocationKind.AT_MOST_ONCE) }

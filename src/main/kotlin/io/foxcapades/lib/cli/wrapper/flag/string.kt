@@ -7,7 +7,7 @@ import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.property
 
-interface StringFlag : ScalarFlag<StringArgument, String>
+interface StringFlag : ScalarFlag<StringArgument, String>, ComplexFlag<StringArgument, String>
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun stringFlag(longForm: String, noinline action: FlagOptions<String>.() -> Unit = {}) =
