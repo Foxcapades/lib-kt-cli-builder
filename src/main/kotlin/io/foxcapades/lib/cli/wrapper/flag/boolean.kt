@@ -1,3 +1,5 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.foxcapades.lib.cli.wrapper.flag
 
 import io.foxcapades.lib.cli.wrapper.*
@@ -18,11 +20,36 @@ class BooleanFlagOptions : FlagOptions<Boolean>(Boolean::class) {
   var isToggleFlag by MutableProperty<Boolean>()
 }
 
-@Suppress("NOTHING_TO_INLINE")
+inline fun boolFlag(longForm: String, noinline action: BooleanFlagOptions.() -> Unit = {}) =
+  booleanFlag(longForm, action)
+
+inline fun boolFlag(shortForm: Char, noinline action: BooleanFlagOptions.() -> Unit = {}) =
+  booleanFlag(shortForm, action)
+
+inline fun boolFlag(noinline action: BooleanFlagOptions.() -> Unit = {}) =
+  booleanFlag(action)
+
+inline fun toggleFlag(longForm: String, noinline action: BooleanFlagOptions.() -> Unit = {}) =
+  booleanFlag(longForm) {
+    isToggleFlag = true
+    action()
+  }
+
+inline fun toggleFlag(shortForm: Char, noinline action: BooleanFlagOptions.() -> Unit = {}) =
+  booleanFlag(shortForm) {
+    isToggleFlag = true
+    action()
+  }
+
+inline fun toggleFlag(noinline action: BooleanFlagOptions.() -> Unit = {}) =
+  booleanFlag {
+    isToggleFlag = true
+    action()
+  }
+
 inline fun booleanFlag(longForm: String, noinline action: BooleanFlagOptions.() -> Unit = {}) =
   booleanFlag { this.longForm = longForm; action() }
 
-@Suppress("NOTHING_TO_INLINE")
 inline fun booleanFlag(shortForm: Char, noinline action: BooleanFlagOptions.() -> Unit = {}) =
   booleanFlag { this.shortForm = shortForm; action() }
 
