@@ -9,19 +9,10 @@ import io.foxcapades.lib.cli.wrapper.util.*
 
 interface ShortArgument : ScalarArgument<Short>
 
-fun shortArg(action: ArgOptions<Short>.() -> Unit): ShortArgument {
-  val opts = ArgOptions(Short::class).also(action)
+fun shortArg(action: ArgOptions<Short>.() -> Unit = {}): ShortArgument =
+  ShortArgumentImpl(ArgOptions(Short::class).also(action))
 
-  return ShortArgumentImpl(
-    default     = ArgOptions<Short>::default.property(opts),
-    isRequired  = ArgOptions<Short>::required.property(opts),
-    shouldQuote = ArgOptions<Short>::shouldQuote.property(opts),
-    formatter   = ArgOptions<Short>::formatter.property(opts),
-    filter      = ArgOptions<Short>::filter.property(opts),
-  )
-}
-
-fun nullableShortArg(action: NullableArgOptions<Short>.() -> Unit): Argument<Short?> {
+fun nullableShortArg(action: NullableArgOptions<Short>.() -> Unit = {}): Argument<Short?> {
   val opts = NullableArgOptions(Short::class).also(action)
 
   return GeneralArgumentImpl(
@@ -35,21 +26,24 @@ fun nullableShortArg(action: NullableArgOptions<Short>.() -> Unit): Argument<Sho
   )
 }
 
-internal class ShortArgumentImpl : AbstractScalarArgument<ShortArgument, Short>, ShortArgument {
-  constructor(
-    default:     Property<Short>,
-    isRequired:  Property<Boolean>,
-    shouldQuote: Property<Boolean>,
-    formatter:   Property<ArgumentFormatter<Short>>,
-    filter:      Property<ArgumentPredicate<ShortArgument, Short>>,
-  ) : super(
-    default     = default,
-    isRequired  = isRequired.getOr(!default.isSet),
-    shouldQuote = shouldQuote.getOr(false),
-    filter      = filter,
-    formatter   = formatter.getOr(ArgumentFormatter(Short::toString))
+internal class ShortArgumentImpl(
+  default:     Property<Short>,
+  isRequired:  Property<Boolean>,
+  shouldQuote: Property<Boolean>,
+  formatter:   Property<ArgumentFormatter<Short>>,
+  filter:      Property<ArgumentPredicate<ShortArgument, Short>>,
+) : AbstractScalarArgument<ShortArgument, Short>(
+  default     = default,
+  isRequired  = isRequired.getOr(!default.isSet),
+  shouldQuote = shouldQuote.getOr(false),
+  filter      = filter,
+  formatter   = formatter.getOr(ArgumentFormatter(Short::toString))
+), ShortArgument {
+  constructor(opts: ArgOptions<Short>) : this(
+    default     = ArgOptions<Short>::default.property(opts),
+    isRequired  = ArgOptions<Short>::required.property(opts),
+    shouldQuote = ArgOptions<Short>::shouldQuote.property(opts),
+    formatter   = ArgOptions<Short>::formatter.property(opts),
+    filter      = ArgOptions<Short>::filter.property(opts),
   )
-
-  constructor(isRequired: Boolean)
-    : super(Property(), isRequired, false, Property(), ArgumentFormatter(Short::toString))
 }

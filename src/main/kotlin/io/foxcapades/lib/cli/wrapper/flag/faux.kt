@@ -3,6 +3,7 @@ package io.foxcapades.lib.cli.wrapper.flag
 import io.foxcapades.lib.cli.wrapper.ResolvedFlag
 import io.foxcapades.lib.cli.wrapper.arg.FauxArgument
 import io.foxcapades.lib.cli.wrapper.meta.CliFlagAnnotation
+import io.foxcapades.lib.cli.wrapper.putPreferredFlagForm
 import io.foxcapades.lib.cli.wrapper.reflect.AnnotatedPropertyReference
 import io.foxcapades.lib.cli.wrapper.serial.CliAppender
 import kotlin.reflect.KClass
@@ -26,18 +27,13 @@ internal class FauxFlag<T : Any>(
   override val shortForm
     get() = annotation.shortForm
 
-  override val argument by lazy { FauxArgument(this) }
-
   override val isRequired
     get() = annotation.required
 
-  override fun writeToString(builder: CliAppender) {
-    if (!hasLongForm || builder.config.preferredFlagForm.isShort && hasShortForm) {
-      builder.putShortFlag(shortForm, true)
-    } else {
-      builder.putLongFlag(longForm, true)
-    }
+  override val argument = FauxArgument(instance, this)
 
-    builder.putArgument(argument)
+  override fun writeToString(builder: CliAppender<*, Any?>) {
+    // TODO: handle optional arguments
+    builder.putPreferredFlagForm(this, true).putArgument(argument)
   }
 }

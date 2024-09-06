@@ -144,16 +144,11 @@ internal class CommandSerializerImpl<T : Any>(
       } else if (hasDefault) {
         true
       } else {
+        // TODO: make this error message actually useful
         throw IllegalArgumentException("bad flag, naughty naughty")
       }
-    } else if (isDefault(config)) {
-      when (config.includeDefaultedFlags) {
-        IncludeDefault.Always          -> true
-        IncludeDefault.Never           -> false
-        IncludeDefault.IfSetExplicitly -> argument.isSet
-      }
     } else {
-      isSet
+      shouldSerialize(config, this)
     }
 
   private fun filterRelevantProperties() =
@@ -171,7 +166,7 @@ internal class CommandSerializerImpl<T : Any>(
     return if (del != null) {
       if (ann != null) {
         if (del is Flag<*, *>)
-          AnnotatedFlag(type, prop, ann.wrap(), del)
+          AnnotatedFlag(type, prop, ann.wrap(), del.unsafeAnyType())
         else
           TODO("annotation + argument")
       } else if (del is Flag<*, *>) {

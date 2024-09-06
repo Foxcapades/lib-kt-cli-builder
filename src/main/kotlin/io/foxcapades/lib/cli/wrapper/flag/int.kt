@@ -17,25 +17,10 @@ inline fun intFlag(longForm: String, noinline action: FlagOptions<Int>.() -> Uni
 inline fun intFlag(shortForm: Char, noinline action: FlagOptions<Int>.() -> Unit = {}) =
   intFlag { this.shortForm = shortForm; action() }
 
-fun intFlag(action: FlagOptions<Int>.() -> Unit): IntFlag {
-  val flag = FlagOptions(Int::class).also(action)
+fun intFlag(action: FlagOptions<Int>.() -> Unit = {}): IntFlag =
+  IntFlagImpl(FlagOptions(Int::class).also(action))
 
-  return IntFlagImpl(
-    longForm   = FlagOptions<Int>::longForm.property(flag),
-    shortForm  = FlagOptions<Int>::shortForm.property(flag),
-    isRequired = FlagOptions<Int>::required.property(flag),
-    filter     = FlagOptions<Int>::flagFilter.property(flag),
-    argument   = IntArgumentImpl(
-      default     = ArgOptions<Boolean>::default.property(flag.argument),
-      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
-      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
-      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
-      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
-    )
-  )
-}
-
-fun nullableIntFlag(action: NullableFlagOptions<Int>.() -> Unit): Flag<Argument<Int?>, Int?> =
+fun nullableIntFlag(action: NullableFlagOptions<Int>.() -> Unit = {}): Flag<Argument<Int?>, Int?> =
   GeneralFlagImpl.of(NullableFlagOptions(Int::class).also(action))
 
 internal class IntFlagImpl(
@@ -47,3 +32,12 @@ internal class IntFlagImpl(
 )
   : AbstractFlagImpl<IntFlag, IntArgument, Int>(longForm, shortForm, isRequired, filter, argument)
   , IntFlag
+{
+  constructor(opts: FlagOptions<Int>) : this(
+    longForm   = FlagOptions<Int>::longForm.property(opts),
+    shortForm  = FlagOptions<Int>::shortForm.property(opts),
+    isRequired = FlagOptions<Int>::required.property(opts),
+    filter     = FlagOptions<Int>::flagFilter.property(opts),
+    argument   = IntArgumentImpl(opts.argument),
+  )
+}

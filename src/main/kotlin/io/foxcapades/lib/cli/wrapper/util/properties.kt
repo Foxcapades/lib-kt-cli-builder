@@ -413,7 +413,7 @@ internal value class BooleanProperty private constructor(private val value: Bool
 inline fun <T> T.asProperty(): Property<T> = Property(this)
 
 // TODO: rename this
-internal class SimpleProperty<T> : MutableProperty<T> {
+private class SimpleProperty<T> : MutableProperty<T> {
   private var value: T? = null
 
   constructor()

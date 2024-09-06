@@ -17,25 +17,10 @@ inline fun byteFlag(longForm: String, noinline action: FlagOptions<Byte>.() -> U
 inline fun byteFlag(shortForm: Char, noinline action: FlagOptions<Byte>.() -> Unit = {}) =
   byteFlag { this.shortForm = shortForm; action() }
 
-fun byteFlag(action: FlagOptions<Byte>.() -> Unit): ByteFlag {
-  val flag = FlagOptions(Byte::class).also(action)
+fun byteFlag(action: FlagOptions<Byte>.() -> Unit = {}): ByteFlag =
+  ByteFlagImpl(FlagOptions(Byte::class).also(action))
 
-  return ByteFlagImpl(
-    longForm   = FlagOptions<Byte>::longForm.property(flag),
-    shortForm  = FlagOptions<Byte>::shortForm.property(flag),
-    isRequired = FlagOptions<Byte>::required.property(flag),
-    filter     = FlagOptions<Byte>::flagFilter.property(flag),
-    argument   = ByteArgumentImpl(
-      default     = ArgOptions<Boolean>::default.property(flag.argument),
-      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
-      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
-      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
-      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
-    )
-  )
-}
-
-fun nullableByteFlag(action: NullableFlagOptions<Byte>.() -> Unit): Flag<Argument<Byte?>, Byte?> =
+fun nullableByteFlag(action: NullableFlagOptions<Byte>.() -> Unit = {}): Flag<Argument<Byte?>, Byte?> =
   GeneralFlagImpl.of(NullableFlagOptions(Byte::class).also(action))
 
 internal class ByteFlagImpl(
@@ -47,3 +32,12 @@ internal class ByteFlagImpl(
 )
   : AbstractFlagImpl<ByteFlag, ByteArgument, Byte>(longForm, shortForm, isRequired, filter, argument)
   , ByteFlag
+{
+  constructor(opts: FlagOptions<Byte>) : this(
+    longForm   = FlagOptions<Byte>::longForm.property(opts),
+    shortForm  = FlagOptions<Byte>::shortForm.property(opts),
+    isRequired = FlagOptions<Byte>::required.property(opts),
+    filter     = FlagOptions<Byte>::flagFilter.property(opts),
+    argument   = ByteArgumentImpl(opts.argument)
+  )
+}

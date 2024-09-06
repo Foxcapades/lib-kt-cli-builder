@@ -17,25 +17,10 @@ inline fun doubleFlag(longForm: String, noinline action: FlagOptions<Double>.() 
 inline fun doubleFlag(shortForm: Char, noinline action: FlagOptions<Double>.() -> Unit = {}) =
   doubleFlag { this.shortForm = shortForm; action() }
 
-fun doubleFlag(action: FlagOptions<Double>.() -> Unit): DoubleFlag {
-  val flag = FlagOptions(Double::class).also(action)
+fun doubleFlag(action: FlagOptions<Double>.() -> Unit = {}): DoubleFlag =
+  DoubleFlagImpl(FlagOptions(Double::class).also(action))
 
-  return DoubleFlagImpl(
-    longForm   = FlagOptions<Double>::longForm.property(flag),
-    shortForm  = FlagOptions<Double>::shortForm.property(flag),
-    isRequired = FlagOptions<Double>::required.property(flag),
-    filter     = FlagOptions<Double>::flagFilter.property(flag),
-    argument   = DoubleArgumentImpl(
-      default     = ArgOptions<Boolean>::default.property(flag.argument),
-      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
-      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
-      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
-      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
-    )
-  )
-}
-
-fun nullableDoubleFlag(action: NullableFlagOptions<Double>.() -> Unit): Flag<Argument<Double?>, Double?> =
+fun nullableDoubleFlag(action: NullableFlagOptions<Double>.() -> Unit = {}): Flag<Argument<Double?>, Double?> =
   GeneralFlagImpl.of(NullableFlagOptions(Double::class).also(action))
 
 internal class DoubleFlagImpl(
@@ -47,3 +32,12 @@ internal class DoubleFlagImpl(
 )
   : AbstractFlagImpl<DoubleFlag, DoubleArgument, Double>(longForm, shortForm, isRequired, filter, argument)
   , DoubleFlag
+{
+  constructor(opts: FlagOptions<Double>) : this(
+    longForm   = FlagOptions<Double>::longForm.property(opts),
+    shortForm  = FlagOptions<Double>::shortForm.property(opts),
+    isRequired = FlagOptions<Double>::required.property(opts),
+    filter     = FlagOptions<Double>::flagFilter.property(opts),
+    argument   = DoubleArgumentImpl(opts.argument),
+  )
+}

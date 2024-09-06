@@ -17,25 +17,10 @@ inline fun stringFlag(longForm: String, noinline action: FlagOptions<String>.() 
 inline fun stringFlag(shortForm: Char, noinline action: FlagOptions<String>.() -> Unit = {}) =
   stringFlag { this.shortForm = shortForm; action() }
 
-fun stringFlag(action: FlagOptions<String>.() -> Unit): StringFlag {
-  val flag = FlagOptions(String::class).also(action)
+fun stringFlag(action: FlagOptions<String>.() -> Unit = {}): StringFlag =
+  StringFlagImpl(FlagOptions(String::class).also(action))
 
-  return StringFlagImpl(
-    longForm   = FlagOptions<String>::longForm.property(flag),
-    shortForm  = FlagOptions<String>::shortForm.property(flag),
-    isRequired = FlagOptions<String>::required.property(flag),
-    filter     = FlagOptions<String>::flagFilter.property(flag),
-    argument   = StringArgumentImpl(
-      default     = ArgOptions<Boolean>::default.property(flag.argument),
-      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
-      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
-      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
-      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
-    )
-  )
-}
-
-fun nullableStringFlag(action: NullableFlagOptions<String>.() -> Unit): Flag<Argument<String?>, String?> =
+fun nullableStringFlag(action: NullableFlagOptions<String>.() -> Unit = {}): Flag<Argument<String?>, String?> =
   GeneralFlagImpl.of(NullableFlagOptions(String::class).also(action))
 
 internal class StringFlagImpl(
@@ -47,3 +32,12 @@ internal class StringFlagImpl(
 )
   : AbstractFlagImpl<StringFlag, StringArgument, String>(longForm, shortForm, isRequired, filter, argument)
   , StringFlag
+{
+  constructor(opts: FlagOptions<String>) : this(
+    longForm   = FlagOptions<String>::longForm.property(opts),
+    shortForm  = FlagOptions<String>::shortForm.property(opts),
+    isRequired = FlagOptions<String>::required.property(opts),
+    filter     = FlagOptions<String>::flagFilter.property(opts),
+    argument   = StringArgumentImpl(opts.argument),
+  )
+}

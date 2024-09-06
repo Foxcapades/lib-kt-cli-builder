@@ -17,25 +17,10 @@ inline fun floatFlag(longForm: String, noinline action: FlagOptions<Float>.() ->
 inline fun floatFlag(shortForm: Char, noinline action: FlagOptions<Float>.() -> Unit = {}) =
   floatFlag { this.shortForm = shortForm; action() }
 
-fun floatFlag(action: FlagOptions<Float>.() -> Unit): FloatFlag {
-  val flag = FlagOptions(Float::class).also(action)
+fun floatFlag(action: FlagOptions<Float>.() -> Unit = {}): FloatFlag =
+  FloatFlagImpl(FlagOptions(Float::class).also(action))
 
-  return FloatFlagImpl(
-    longForm   = FlagOptions<Float>::longForm.property(flag),
-    shortForm  = FlagOptions<Float>::shortForm.property(flag),
-    isRequired = FlagOptions<Float>::required.property(flag),
-    filter     = FlagOptions<Float>::flagFilter.property(flag),
-    argument   = FloatArgumentImpl(
-      default     = ArgOptions<Boolean>::default.property(flag.argument),
-      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
-      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
-      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
-      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
-    )
-  )
-}
-
-fun nullableFloatFlag(action: NullableFlagOptions<Float>.() -> Unit): Flag<Argument<Float?>, Float?> =
+fun nullableFloatFlag(action: NullableFlagOptions<Float>.() -> Unit = {}): Flag<Argument<Float?>, Float?> =
   GeneralFlagImpl.of(NullableFlagOptions(Float::class).also(action))
 
 internal class FloatFlagImpl(
@@ -47,3 +32,12 @@ internal class FloatFlagImpl(
 )
   : AbstractFlagImpl<FloatFlag, FloatArgument, Float>(longForm, shortForm, isRequired, filter, argument)
   , FloatFlag
+{
+  constructor(opts: FlagOptions<Float>) : this(
+    longForm   = FlagOptions<Float>::longForm.property(opts),
+    shortForm  = FlagOptions<Float>::shortForm.property(opts),
+    isRequired = FlagOptions<Float>::required.property(opts),
+    filter     = FlagOptions<Float>::flagFilter.property(opts),
+    argument   = FloatArgumentImpl(opts.argument),
+  )
+}

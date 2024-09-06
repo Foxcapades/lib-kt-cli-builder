@@ -17,25 +17,10 @@ inline fun charFlag(longForm: String, noinline action: FlagOptions<Char>.() -> U
 inline fun charFlag(shortForm: Char, noinline action: FlagOptions<Char>.() -> Unit = {}) =
   charFlag { this.shortForm = shortForm; action() }
 
-fun charFlag(action: FlagOptions<Char>.() -> Unit): CharFlag {
-  val flag = FlagOptions(Char::class).also(action)
+fun charFlag(action: FlagOptions<Char>.() -> Unit = {}): CharFlag =
+  CharFlagImpl(FlagOptions(Char::class).also(action))
 
-  return CharFlagImpl(
-    longForm   = FlagOptions<Char>::longForm.property(flag),
-    shortForm  = FlagOptions<Char>::shortForm.property(flag),
-    isRequired = FlagOptions<Char>::required.property(flag),
-    filter     = FlagOptions<Char>::flagFilter.property(flag),
-    argument   = CharArgumentImpl(
-      default     = ArgOptions<Boolean>::default.property(flag.argument),
-      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
-      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
-      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
-      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
-    )
-  )
-}
-
-fun nullableCharFlag(action: NullableFlagOptions<Char>.() -> Unit): Flag<Argument<Char?>, Char?> =
+fun nullableCharFlag(action: NullableFlagOptions<Char>.() -> Unit = {}): Flag<Argument<Char?>, Char?> =
   GeneralFlagImpl.of(NullableFlagOptions(Char::class).also(action))
 
 internal class CharFlagImpl(
@@ -47,3 +32,12 @@ internal class CharFlagImpl(
 )
   : AbstractFlagImpl<CharFlag, CharArgument, Char>(longForm, shortForm, isRequired, filter, argument)
   , CharFlag
+{
+  constructor(opts: FlagOptions<Char>) : this(
+    longForm   = FlagOptions<Char>::longForm.property(opts),
+    shortForm  = FlagOptions<Char>::shortForm.property(opts),
+    isRequired = FlagOptions<Char>::required.property(opts),
+    filter     = FlagOptions<Char>::flagFilter.property(opts),
+    argument   = CharArgumentImpl(opts.argument)
+  )
+}

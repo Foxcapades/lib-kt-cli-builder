@@ -5,12 +5,10 @@ import io.foxcapades.lib.cli.wrapper.serial.CliAppender
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
 import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
+import io.foxcapades.lib.cli.wrapper.util.MutableDefaultableProperty
 import io.foxcapades.lib.cli.wrapper.util.MutableProperty
 import java.math.BigDecimal
 import java.math.BigInteger
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 import kotlin.reflect.KClass
 
 // region Flag Base
@@ -20,7 +18,7 @@ import kotlin.reflect.KClass
  *
  * @since v1.0.0
  */
-interface Flag<out A : Argument<V>, V> : CliCallComponent {
+interface Flag<out A : Argument<V>, V> : MutableDefaultableProperty<V>, CliCallComponent {
   /**
    * Indicates whether this flag has a long form.
    */
@@ -76,23 +74,21 @@ interface Flag<out A : Argument<V>, V> : CliCallComponent {
     argument.shouldSerialize(config, reference)
 
   fun writeToString(builder: CliAppender<*, V>)
+
+  override val isSet: Boolean
+    get() = argument.isSet
+
+  override val hasDefault: Boolean
+    get() = argument.hasDefault
+
+  override fun get() = argument.get()
+
+  override fun set(value: V) = argument.set(value)
+
+  override fun unset() = argument.unset()
+
+  override fun getDefault() = argument.getDefault()
 }
-
-/**
- * Convenience shortcut for `Flag.argument.isSet`.
- *
- * @see Flag.argument
- * @see Argument.isSet
- */
-inline val Flag<*, *>.isSet get() = argument.isSet
-
-/**
- * Convenience shortcut for `Flag.argument.hasDefault`.
- *
- * @see Flag.argument
- * @see Argument.hasDefault
- */
-inline val Flag<*, *>.hasDefault get() = argument.hasDefault
 
 @Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
 inline fun Flag<*, *>.unsafeAnyType() =
@@ -150,7 +146,7 @@ sealed class BaseFlagOptions<V : Any, O : V?, A : BaseArgOptions<V, O>>(
    * Flags marked as being [required] will always be included without any call
    * to this filter.
    */
-  var flagFilter by MutableProperty<FlagPredicate<out Flag<out Argument<O>, O>, out Argument<O>, O>>()
+  var flagFilter by MutableProperty<FlagPredicate<out Flag<Argument<O>, O>, out Argument<O>, O>>()
 
   /**
    * Argument configuration
@@ -241,11 +237,9 @@ open class NullableFlagOptions<T: Any>(type: KClass<out T>)
  *
  * @return New `Flag` instance configured by the given [action].
  */
-@OptIn(ExperimentalContracts::class)
-inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit = {}): Flag<Argument<T>, T> {
-  contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
-  return flag(T::class, action)
-}
+inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit = {}): Flag<Argument<T>, T> =
+  flag(T::class, action)
+
 
 /**
  * Creates a new [Flag] delegate instance for a nullable value of the target
@@ -290,13 +284,10 @@ inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit = {
  *
  * @return New `Flag` instance configured by the given [action].
  */
-@OptIn(ExperimentalContracts::class)
 inline fun <reified T : Any> nullableFlag(
   noinline action: NullableFlagOptions<T>.() -> Unit = {}
-): Flag<Argument<T?>, T?> {
-  contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
-  return nullableFlag(T::class, action)
-}
+): Flag<Argument<T?>, T?> =
+  nullableFlag(T::class, action)
 
 /**
  * Creates a new [Flag] delegate instance for the target type ([T]).
@@ -338,11 +329,8 @@ inline fun <reified T : Any> nullableFlag(
  *
  * @return New `Flag` instance configured by the given [action].
  */
-@OptIn(ExperimentalContracts::class)
-fun <T : Any> flag(type: KClass<out T>, action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T> {
-  contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
-  return type.tryTyped(action) ?: GeneralFlagImpl.of(FlagOptions(type).also(action))
-}
+fun <T : Any> flag(type: KClass<out T>, action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T> =
+  type.tryTyped(action) ?: GeneralFlagImpl.of(FlagOptions(type).also(action))
 
 /**
  * Creates a new [Flag] delegate instance for a nullable value of the target
@@ -386,11 +374,8 @@ fun <T : Any> flag(type: KClass<out T>, action: FlagOptions<T>.() -> Unit): Flag
  *
  * @return New `Flag` instance configured by the given [action].
  */
-@OptIn(ExperimentalContracts::class)
-fun <T : Any> nullableFlag(type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> {
-  contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
-  return type.tryNullableTyped(action) ?: GeneralFlagImpl.of(NullableFlagOptions(type).also(action))
-}
+fun <T : Any> nullableFlag(type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> =
+  type.tryNullableTyped(action) ?: GeneralFlagImpl.of(NullableFlagOptions(type).also(action))
 
 internal fun Flag<*, *>.safeName(config: CliSerializationConfig) =
   if (hasLongForm)
@@ -398,10 +383,7 @@ internal fun Flag<*, *>.safeName(config: CliSerializationConfig) =
   else
     config.shortFlagPrefix + shortForm
 
-@OptIn(ExperimentalContracts::class)
 internal fun <T : Any> KClass<*>.tryTyped(action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T>? {
-  contract { callsInPlace(action, InvocationKind.AT_MOST_ONCE) }
-
   @Suppress("UNCHECKED_CAST")
   return when (java.`package`?.name) {
 
@@ -448,10 +430,7 @@ internal fun <T : Any> KClass<*>.tryTyped(action: FlagOptions<T>.() -> Unit): Fl
   } as Flag<Argument<T>, T>?
 }
 
-@OptIn(ExperimentalContracts::class)
 internal fun <T : Any> KClass<out T>.tryNullableTyped(action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?>? {
-  contract { callsInPlace(action, InvocationKind.AT_MOST_ONCE) }
-
   @Suppress("UNCHECKED_CAST")
   return when (java.`package`?.name) {
 

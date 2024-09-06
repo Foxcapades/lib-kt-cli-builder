@@ -17,25 +17,10 @@ inline fun longFlag(longForm: String, noinline action: FlagOptions<Long>.() -> U
 inline fun longFlag(shortForm: Char, noinline action: FlagOptions<Long>.() -> Unit = {}) =
   longFlag { this.shortForm = shortForm; action() }
 
-fun longFlag(action: FlagOptions<Long>.() -> Unit): LongFlag {
-  val flag = FlagOptions(Long::class).also(action)
+fun longFlag(action: FlagOptions<Long>.() -> Unit = {}): LongFlag =
+  LongFlagImpl(FlagOptions(Long::class).also(action))
 
-  return LongFlagImpl(
-    longForm   = FlagOptions<Long>::longForm.property(flag),
-    shortForm  = FlagOptions<Long>::shortForm.property(flag),
-    isRequired = FlagOptions<Long>::required.property(flag),
-    filter     = FlagOptions<Long>::flagFilter.property(flag),
-    argument   = LongArgumentImpl(
-      default     = ArgOptions<Boolean>::default.property(flag.argument),
-      isRequired  = ArgOptions<Boolean>::required.property(flag.argument),
-      shouldQuote = ArgOptions<Boolean>::shouldQuote.property(flag.argument),
-      formatter   = ArgOptions<Boolean>::formatter.property(flag.argument),
-      filter      = ArgOptions<Boolean>::filter.property(flag.argument),
-    )
-  )
-}
-
-fun nullableLongFlag(action: NullableFlagOptions<Long>.() -> Unit): Flag<Argument<Long?>, Long?> =
+fun nullableLongFlag(action: NullableFlagOptions<Long>.() -> Unit = {}): Flag<Argument<Long?>, Long?> =
   GeneralFlagImpl.of(NullableFlagOptions(Long::class).also(action))
 
 internal class LongFlagImpl(
@@ -47,3 +32,12 @@ internal class LongFlagImpl(
 )
   : AbstractFlagImpl<LongFlag, LongArgument, Long>(longForm, shortForm, isRequired, filter, argument)
   , LongFlag
+{
+  constructor(opts: FlagOptions<Long>) : this(
+    longForm   = FlagOptions<Long>::longForm.property(opts),
+    shortForm  = FlagOptions<Long>::shortForm.property(opts),
+    isRequired = FlagOptions<Long>::required.property(opts),
+    filter     = FlagOptions<Long>::flagFilter.property(opts),
+    argument   = LongArgumentImpl(opts.argument),
+  )
+}
