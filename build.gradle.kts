@@ -8,10 +8,26 @@ plugins {
   id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
-group = "io.foxcapades.kt"
-version = "0.3.0"
+data class SemVer(
+  val major: Int,
+  val minor: Int,
+  val patch: Int,
+) {
+  inline val featureVersion get() = "$major.$minor.0"
 
-val featureVersion = (version as String).let { it.substring(0, it.lastIndexOf('.') + 1) + "0" }
+  inline val gitTag get() = "v$major.$minor.$patch"
+
+  override fun toString() = "$major.$minor.$patch"
+}
+
+val projectVersion = SemVer(
+  major = 0,
+  minor = 4,
+  patch = 0,
+)
+
+group = "io.foxcapades.kt"
+version = projectVersion.toString()
 
 repositories {
   mavenCentral()
@@ -51,7 +67,7 @@ tasks.test {
 }
 
 tasks.dokkaHtml {
-  val targetDir = file("docs/dokka/$featureVersion")
+  val targetDir = file("docs/dokka/${projectVersion.featureVersion}")
 
   outputDirectory = targetDir
 
@@ -114,7 +130,32 @@ signing {
   sign(publishing.publications["gpr"])
 }
 
+tasks.create("release") {
+  group = "Custom"
+
+  doFirst {
+    with(ProcessBuilder("git", ""))
+  }
+
+  dependsOn(
+    "dokkaHtml",
+    "publishToSonatype",
+    "closeAndReleaseSonatypeStagingRepository"
+  )
+
+  doLast {
+    val dokkaDir = file("docs/dokka")
+
+    dokkaDir.list()!!
+      .filter { it != projectVersion.featureVersion }
+      .map { dokkaDir.resolve(it) }
+      .forEach { it.deleteRecursively() }
+  }
+}
+
 tasks.create("update-readme") {
+  group = "Custom"
+
   doLast {
     val tmp    = file("readme.adoc.tmp")
     val readme = file("readme.adoc")
@@ -127,7 +168,7 @@ tasks.create("update-readme") {
             when {
               !it.startsWith(':')                -> it
               it.startsWith(":version-actual:")  -> ":version-actual: $version"
-              it.startsWith(":version-feature:") -> ":version-feature: $featureVersion"
+              it.startsWith(":version-feature:") -> ":version-feature: ${projectVersion.featureVersion}"
               else                               -> it
             }
           }
