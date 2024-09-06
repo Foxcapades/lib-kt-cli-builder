@@ -196,6 +196,12 @@ open class NullableFlagOptions<T: Any>(type: KClass<out T>)
 
 // endregion Flag Options
 
+// region Constructors
+
+// region Constructors -> Non-null
+
+// region Constructors -> Non-null -> Reified
+
 /**
  * Creates a new [Flag] delegate instance for the target type ([T]).
  *
@@ -240,6 +246,248 @@ open class NullableFlagOptions<T: Any>(type: KClass<out T>)
 inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit = {}): Flag<Argument<T>, T> =
   flag(T::class, action)
 
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input: String by flag { longForm = "input" }
+ *
+ *   // registers `-o` string flag
+ *   var output by flag<String> { shortForm = 'o' }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor      |
+ * |--------------|------------------|
+ * | [BigDecimal] | [bigDecimalFlag] |
+ * | [BigInteger] | [bigIntegerFlag] |
+ * | [Boolean]    | [booleanFlag]    |
+ * | [Byte]       | [byteFlag]       |
+ * | [Char]       | [charFlag]       |
+ * | [Double]     | [doubleFlag]     |
+ * | [Float]      | [floatFlag]      |
+ * | [Int]        | [intFlag]        |
+ * | [Long]       | [longFlag]       |
+ * | [Short]      | [shortFlag]      |
+ * | [String]     | [stringFlag]     |
+ * | [UByte]      | [ubyteFlag]      |
+ * | [UInt]       | [uintFlag]       |
+ * | [ULong]      | [ulongFlag]      |
+ * | [UShort]     | [ushortFlag]     |
+ *
+ * @param longForm Long-form name of the flag.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+inline fun <reified T : Any> flag(longForm: String, noinline action: FlagOptions<T>.() -> Unit = {}) =
+  flag(longForm, T::class, action)
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input: String by flag { longForm = "input" }
+ *
+ *   // registers `-o` string flag
+ *   var output by flag<String> { shortForm = 'o' }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor      |
+ * |--------------|------------------|
+ * | [BigDecimal] | [bigDecimalFlag] |
+ * | [BigInteger] | [bigIntegerFlag] |
+ * | [Boolean]    | [booleanFlag]    |
+ * | [Byte]       | [byteFlag]       |
+ * | [Char]       | [charFlag]       |
+ * | [Double]     | [doubleFlag]     |
+ * | [Float]      | [floatFlag]      |
+ * | [Int]        | [intFlag]        |
+ * | [Long]       | [longFlag]       |
+ * | [Short]      | [shortFlag]      |
+ * | [String]     | [stringFlag]     |
+ * | [UByte]      | [ubyteFlag]      |
+ * | [UInt]       | [uintFlag]       |
+ * | [ULong]      | [ulongFlag]      |
+ * | [UShort]     | [ushortFlag]     |
+ *
+ * @param shortForm Short-form name of the flag.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+inline fun <reified T : Any> flag(shortForm: Char, noinline action: FlagOptions<T>.() -> Unit = {}) =
+  flag(shortForm, T::class, action)
+
+// endregion Constructors -> Non-null -> Reified
+
+// region Constructors -> Non-null -> Concrete
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input by flag(String::class) { longForm = "input" }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor      |
+ * |--------------|------------------|
+ * | [BigDecimal] | [bigDecimalFlag] |
+ * | [BigInteger] | [bigIntegerFlag] |
+ * | [Boolean]    | [booleanFlag]    |
+ * | [Byte]       | [byteFlag]       |
+ * | [Char]       | [charFlag]       |
+ * | [Double]     | [doubleFlag]     |
+ * | [Float]      | [floatFlag]      |
+ * | [Int]        | [intFlag]        |
+ * | [Long]       | [longFlag]       |
+ * | [Short]      | [shortFlag]      |
+ * | [String]     | [stringFlag]     |
+ * | [UByte]      | [ubyteFlag]      |
+ * | [UInt]       | [uintFlag]       |
+ * | [ULong]      | [ulongFlag]      |
+ * | [UShort]     | [ushortFlag]     |
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+fun <T : Any> flag(type: KClass<out T>, action: FlagOptions<T>.() -> Unit) =
+  type.tryTyped(action) ?: GeneralFlagImpl.of(FlagOptions(type).also(action))
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input by flag(String::class) { longForm = "input" }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor      |
+ * |--------------|------------------|
+ * | [BigDecimal] | [bigDecimalFlag] |
+ * | [BigInteger] | [bigIntegerFlag] |
+ * | [Boolean]    | [booleanFlag]    |
+ * | [Byte]       | [byteFlag]       |
+ * | [Char]       | [charFlag]       |
+ * | [Double]     | [doubleFlag]     |
+ * | [Float]      | [floatFlag]      |
+ * | [Int]        | [intFlag]        |
+ * | [Long]       | [longFlag]       |
+ * | [Short]      | [shortFlag]      |
+ * | [String]     | [stringFlag]     |
+ * | [UByte]      | [ubyteFlag]      |
+ * | [UInt]       | [uintFlag]       |
+ * | [ULong]      | [ulongFlag]      |
+ * | [UShort]     | [ushortFlag]     |
+ *
+ * @param longForm Long-form name of the flag.
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+fun <T : Any> flag(longForm: String, type: KClass<out T>, action: FlagOptions<T>.() -> Unit) =
+  flag(type) {
+    this.longForm = longForm
+    action()
+  }
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input by flag(String::class) { longForm = "input" }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor      |
+ * |--------------|------------------|
+ * | [BigDecimal] | [bigDecimalFlag] |
+ * | [BigInteger] | [bigIntegerFlag] |
+ * | [Boolean]    | [booleanFlag]    |
+ * | [Byte]       | [byteFlag]       |
+ * | [Char]       | [charFlag]       |
+ * | [Double]     | [doubleFlag]     |
+ * | [Float]      | [floatFlag]      |
+ * | [Int]        | [intFlag]        |
+ * | [Long]       | [longFlag]       |
+ * | [Short]      | [shortFlag]      |
+ * | [String]     | [stringFlag]     |
+ * | [UByte]      | [ubyteFlag]      |
+ * | [UInt]       | [uintFlag]       |
+ * | [ULong]      | [ulongFlag]      |
+ * | [UShort]     | [ushortFlag]     |
+ *
+ * @param shortForm Short-form name of the flag.
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+fun <T : Any> flag(shortForm: Char, type: KClass<out T>, action: FlagOptions<T>.() -> Unit) =
+  flag(type) {
+    this.shortForm = shortForm
+    action()
+  }
+
+// endregion Constructors -> Non-null -> Concrete
+
+// endregion Constructors -> Non-null
+
+// region Constructors -> Nullable
+
+// region Constructors -> Nullable -> Reified
 
 /**
  * Creates a new [Flag] delegate instance for a nullable value of the target
@@ -290,12 +538,16 @@ inline fun <reified T : Any> nullableFlag(
   nullableFlag(T::class, action)
 
 /**
- * Creates a new [Flag] delegate instance for the target type ([T]).
+ * Creates a new [Flag] delegate instance for a nullable value of the target
+ * type ([T]).
  *
  * ```kt
  * class SomeCommand {
  *   // registers `--input` string flag.
- *   var input by flag(String::class) { longForm = "input" }
+ *   var input: String? by nullableFlag { longForm = "input" }
+ *
+ *   // registers `-o` string flag
+ *   var output by nullableFlag<String?> { shortForm = 'o' }
  * }
  * ```
  *
@@ -304,33 +556,92 @@ inline fun <reified T : Any> nullableFlag(
  * If `T` represents a Kotlin/Java built-in type, the flag creation will be
  * delegated to the appropriate type-specific flag constructor.
  *
- * | Type         | Constructor      |
- * |--------------|------------------|
- * | [BigDecimal] | [bigDecimalFlag] |
- * | [BigInteger] | [bigIntegerFlag] |
- * | [Boolean]    | [booleanFlag]    |
- * | [Byte]       | [byteFlag]       |
- * | [Char]       | [charFlag]       |
- * | [Double]     | [doubleFlag]     |
- * | [Float]      | [floatFlag]      |
- * | [Int]        | [intFlag]        |
- * | [Long]       | [longFlag]       |
- * | [Short]      | [shortFlag]      |
- * | [String]     | [stringFlag]     |
- * | [UByte]      | [ubyteFlag]      |
- * | [UInt]       | [uintFlag]       |
- * | [ULong]      | [ulongFlag]      |
- * | [UShort]     | [ushortFlag]     |
+ * | Type         | Constructor              |
+ * |--------------|--------------------------|
+ * | [BigDecimal] | [nullableBigDecimalFlag] |
+ * | [BigInteger] | [nullableBigIntegerFlag] |
+ * | [Boolean]    | [nullableBooleanFlag]    |
+ * | [Byte]       | [nullableByteFlag]       |
+ * | [Char]       | [nullableCharFlag]       |
+ * | [Double]     | [nullableDoubleFlag]     |
+ * | [Float]      | [nullableFloatFlag]      |
+ * | [Int]        | [nullableIntFlag]        |
+ * | [Long]       | [nullableLongFlag]       |
+ * | [Short]      | [nullableShortFlag]      |
+ * | [String]     | [nullableStringFlag]     |
+ * | [UByte]      | [nullableUByteFlag]      |
+ * | [UInt]       | [nullableUIntFlag]       |
+ * | [ULong]      | [nullableULongFlag]      |
+ * | [UShort]     | [nullableUShortFlag]     |
  *
- * @param type Class for the type of value that the new `Flag` will hold.
+ * @param longForm Long-form name of the flag.
  *
- * @param action Configuration that will be called on a new [FlagOptions]
- * instance which will then be used to configure the newly created `Flag`.
+ * @param action Configuration that will be called on a new
+ * [NullableFlagOptions] instance which will then be used to configure the newly
+ * created `Flag`.
  *
  * @return New `Flag` instance configured by the given [action].
  */
-fun <T : Any> flag(type: KClass<out T>, action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T> =
-  type.tryTyped(action) ?: GeneralFlagImpl.of(FlagOptions(type).also(action))
+inline fun <reified T : Any> nullableFlag(
+  longForm: String,
+  noinline action: NullableFlagOptions<T>.() -> Unit = {}
+): Flag<Argument<T?>, T?> =
+  nullableFlag(longForm, T::class, action)
+
+/**
+ * Creates a new [Flag] delegate instance for a nullable value of the target
+ * type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input: String? by nullableFlag { longForm = "input" }
+ *
+ *   // registers `-o` string flag
+ *   var output by nullableFlag<String?> { shortForm = 'o' }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor              |
+ * |--------------|--------------------------|
+ * | [BigDecimal] | [nullableBigDecimalFlag] |
+ * | [BigInteger] | [nullableBigIntegerFlag] |
+ * | [Boolean]    | [nullableBooleanFlag]    |
+ * | [Byte]       | [nullableByteFlag]       |
+ * | [Char]       | [nullableCharFlag]       |
+ * | [Double]     | [nullableDoubleFlag]     |
+ * | [Float]      | [nullableFloatFlag]      |
+ * | [Int]        | [nullableIntFlag]        |
+ * | [Long]       | [nullableLongFlag]       |
+ * | [Short]      | [nullableShortFlag]      |
+ * | [String]     | [nullableStringFlag]     |
+ * | [UByte]      | [nullableUByteFlag]      |
+ * | [UInt]       | [nullableUIntFlag]       |
+ * | [ULong]      | [nullableULongFlag]      |
+ * | [UShort]     | [nullableUShortFlag]     |
+ *
+ * @param shortForm Short-form name of the flag.
+ *
+ * @param action Configuration that will be called on a new
+ * [NullableFlagOptions] instance which will then be used to configure the newly
+ * created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+inline fun <reified T : Any> nullableFlag(
+  shortForm: Char,
+  noinline action: NullableFlagOptions<T>.() -> Unit = {}
+): Flag<Argument<T?>, T?> =
+  nullableFlag(shortForm, T::class, action)
+
+// endregion Constructors -> Nullable -> Reified
+
+// region Constructors -> Nullable -> Concrete
 
 /**
  * Creates a new [Flag] delegate instance for a nullable value of the target
@@ -376,6 +687,112 @@ fun <T : Any> flag(type: KClass<out T>, action: FlagOptions<T>.() -> Unit): Flag
  */
 fun <T : Any> nullableFlag(type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> =
   type.tryNullableTyped(action) ?: GeneralFlagImpl.of(NullableFlagOptions(type).also(action))
+
+/**
+ * Creates a new [Flag] delegate instance for a nullable value of the target
+ * type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input by nullableFlag(String::class) { longForm = "input" }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor              |
+ * |--------------|--------------------------|
+ * | [BigDecimal] | [nullableBigDecimalFlag] |
+ * | [BigInteger] | [nullableBigIntegerFlag] |
+ * | [Boolean]    | [nullableBooleanFlag]    |
+ * | [Byte]       | [nullableByteFlag]       |
+ * | [Char]       | [nullableCharFlag]       |
+ * | [Double]     | [nullableDoubleFlag]     |
+ * | [Float]      | [nullableFloatFlag]      |
+ * | [Int]        | [nullableIntFlag]        |
+ * | [Long]       | [nullableLongFlag]       |
+ * | [Short]      | [nullableShortFlag]      |
+ * | [String]     | [nullableStringFlag]     |
+ * | [UByte]      | [nullableUByteFlag]      |
+ * | [UInt]       | [nullableUIntFlag]       |
+ * | [ULong]      | [nullableULongFlag]      |
+ * | [UShort]     | [nullableUShortFlag]     |
+ *
+ * @param longForm Long-form name of the flag.
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new
+ * [NullableFlagOptions] instance which will then be used to configure the newly
+ * created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+fun <T : Any> nullableFlag(longForm: String, type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> =
+  nullableFlag(type) {
+    this.longForm = longForm
+    action()
+  }
+
+/**
+ * Creates a new [Flag] delegate instance for a nullable value of the target
+ * type ([T]).
+ *
+ * ```kt
+ * class SomeCommand {
+ *   // registers `--input` string flag.
+ *   var input by nullableFlag(String::class) { longForm = "input" }
+ * }
+ * ```
+ *
+ * @param T Flag value type.
+ *
+ * If `T` represents a Kotlin/Java built-in type, the flag creation will be
+ * delegated to the appropriate type-specific flag constructor.
+ *
+ * | Type         | Constructor              |
+ * |--------------|--------------------------|
+ * | [BigDecimal] | [nullableBigDecimalFlag] |
+ * | [BigInteger] | [nullableBigIntegerFlag] |
+ * | [Boolean]    | [nullableBooleanFlag]    |
+ * | [Byte]       | [nullableByteFlag]       |
+ * | [Char]       | [nullableCharFlag]       |
+ * | [Double]     | [nullableDoubleFlag]     |
+ * | [Float]      | [nullableFloatFlag]      |
+ * | [Int]        | [nullableIntFlag]        |
+ * | [Long]       | [nullableLongFlag]       |
+ * | [Short]      | [nullableShortFlag]      |
+ * | [String]     | [nullableStringFlag]     |
+ * | [UByte]      | [nullableUByteFlag]      |
+ * | [UInt]       | [nullableUIntFlag]       |
+ * | [ULong]      | [nullableULongFlag]      |
+ * | [UShort]     | [nullableUShortFlag]     |
+ *
+ * @param shortForm Short-form name of the flag.
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new
+ * [NullableFlagOptions] instance which will then be used to configure the newly
+ * created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+fun <T : Any> nullableFlag(shortForm: Char, type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> =
+  nullableFlag(type) {
+    this.shortForm = shortForm
+    action()
+  }
+
+// endregion Constructors -> Nullable -> Concrete
+
+// endregion Constructors -> Nullable
+
+// endregion Constructors
 
 internal fun Flag<*, *>.safeName(config: CliSerializationConfig) =
   if (hasLongForm)
