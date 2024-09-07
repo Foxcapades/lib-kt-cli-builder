@@ -3,10 +3,10 @@ package io.foxcapades.lib.cli.wrapper.serial
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 
 object NullableGeneralStringifier : ArgumentFormatter<Any?> {
-  override fun formatValue(value: Any?, builder: CliArgumentAppender) {
+  override fun formatValue(value: Any?, builder: CliArgumentWriter<*, Any?>) {
     if (value == null)
-      builder.config.nullSerializer(builder)
+      builder.config.nullSerializer.formatValue(builder)
     else
-      builder.appendString(value.toString())
+      builder.writeString(value.toString())
   }
 }

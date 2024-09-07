@@ -1,10 +1,11 @@
 package io.foxcapades.lib.cli.wrapper.serial.values
 
 import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.ResolvedComponent
+import io.foxcapades.lib.cli.wrapper.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.reflect.KCallable
 
 /**
  * # Argument Inclusion Predicate
@@ -48,9 +49,9 @@ fun interface ArgumentPredicate<A : Argument<V>, V> {
    * output, otherwise `false`.
    */
   fun shouldInclude(
-    argument: A,
-    reference: ResolvedComponent<*, V>,
-    config: CliSerializationConfig
+    argument:  A,
+    reference: ValueAccessorReference<*, V, out KCallable<V>>,
+    config:    CliSerializationConfig
   ): Boolean
 
   companion object {
@@ -93,7 +94,7 @@ internal inline fun ArgumentPredicate<*, *>.forceAny() =
 internal object ArgSetFilter : ArgumentPredicate<Argument<Any?>, Any?> {
   override fun shouldInclude(
     argument: Argument<Any?>,
-    reference: ResolvedComponent<*, Any?>,
+    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
     config: CliSerializationConfig
   ) = argument.isSet
 }
@@ -101,7 +102,7 @@ internal object ArgSetFilter : ArgumentPredicate<Argument<Any?>, Any?> {
 internal object ArgNullFilter : ArgumentPredicate<Argument<Any?>, Any?> {
   override fun shouldInclude(
     argument: Argument<Any?>,
-    reference: ResolvedComponent<*, Any?>,
+    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
     config: CliSerializationConfig,
   ) = argument.isSet && argument.get() != null
 }
@@ -116,7 +117,7 @@ internal object ArgNullFilter : ArgumentPredicate<Argument<Any?>, Any?> {
 internal object ArgGeneralDefaultFilter : ArgumentPredicate<Argument<Any?>, Any?> {
   override fun shouldInclude(
     argument: Argument<Any?>,
-    reference: ResolvedComponent<*, Any?>,
+    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
     config: CliSerializationConfig,
   ) =
     when {
@@ -160,7 +161,7 @@ internal object ArgGeneralDefaultFilter : ArgumentPredicate<Argument<Any?>, Any?
 internal object ArgZeroFilter : ArgumentPredicate<Argument<Any?>, Any?> {
   override fun shouldInclude(
     argument: Argument<Any?>,
-    reference: ResolvedComponent<*, Any?>,
+    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
     config: CliSerializationConfig
   ) = when {
     !argument.isSet     -> false
@@ -202,7 +203,7 @@ internal object ArgNegOneFilter : ArgumentPredicate<Argument<Any?>, Any?> {
 
   override fun shouldInclude(
     argument: Argument<Any?>,
-    reference: ResolvedComponent<*, Any?>,
+    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
     config: CliSerializationConfig
   ) = when {
     !argument.isSet     -> false

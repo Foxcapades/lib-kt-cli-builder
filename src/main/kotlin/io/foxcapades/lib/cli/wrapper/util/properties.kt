@@ -1,8 +1,6 @@
+@file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.wrapper.util
 
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 import kotlin.experimental.and
 import kotlin.experimental.inv
 import kotlin.experimental.or
@@ -93,7 +91,7 @@ fun <T> Property(value: T): Property<T> = ValueProperty(value)
 fun <T> Property<T>.toImmutable(): Property<T> =
   if (isSet) Property(get()) else Property()
 
-@Suppress("NOTHING_TO_INLINE", "UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 internal inline fun <T> Property<*>.unsafeCast() =
   this as Property<T>
 
@@ -409,7 +407,6 @@ internal value class BooleanProperty private constructor(private val value: Bool
   }
 }
 
-@Suppress("NOTHING_TO_INLINE")
 inline fun <T> T.asProperty(): Property<T> = Property(this)
 
 // TODO: rename this
@@ -447,46 +444,26 @@ private class SimpleProperty<T> : MutableProperty<T> {
       ?: SimpleProperty()
 }
 
-@Suppress("NOTHING_TO_INLINE")
 inline fun <T> Property<T>.getOrNull() = if(isSet) get() else null
 
-@Suppress("NOTHING_TO_INLINE")
 inline fun <T> Property<T>.getOr(fallback: T) = if (isSet) get() else fallback
 
 inline fun <T> Property<T>.mapAbsent(crossinline other: () -> T) = if (isSet) this else Property(other())
 
-@OptIn(ExperimentalContracts::class)
 inline fun <T> Property<T>.getOrCompute(fn: () -> T): T {
-  contract { callsInPlace(fn, InvocationKind.AT_MOST_ONCE) }
-
   return if(isSet) get() else fn()
 }
 
-@Suppress("NOTHING_TO_INLINE")
 inline fun <T> Property<T>.getOrThrow(ex: Throwable): T =
-  if (!isSet)
-    throw ex
-  else
-    get()
+  if (!isSet) throw ex else get()
 
-@OptIn(ExperimentalContracts::class)
-inline fun <T> Property<T>.getOrThrow(fn: () -> Throwable): T {
-  contract { callsInPlace(fn, InvocationKind.AT_MOST_ONCE) }
+inline fun <T> Property<T>.getOrThrow(fn: () -> Throwable) =
+  if (!isSet) throw fn() else get()
 
-  if (!isSet)
-    throw fn()
-
-  return get()
-}
-
-@Suppress("NOTHING_TO_INLINE")
 inline fun <T> MutableProperty<T>.setIfAbsent(value: T) =
   also { if (!isSet) set(value) }
 
-@OptIn(ExperimentalContracts::class)
 inline fun <T> MutableProperty<T>.computeIfAbsent(fn: () -> T): MutableProperty<T> {
-  contract { callsInPlace(fn, InvocationKind.AT_MOST_ONCE) }
-
   if (!isSet)
     set(fn())
 

@@ -2,12 +2,14 @@ package io.foxcapades.lib.cli.wrapper.flag
 
 import io.foxcapades.lib.cli.wrapper.*
 import io.foxcapades.lib.cli.wrapper.arg.GeneralArgumentImpl
+import io.foxcapades.lib.cli.wrapper.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.wrapper.serial.*
 import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.getOr
 import io.foxcapades.lib.cli.wrapper.util.getOrNull
 import io.foxcapades.lib.cli.wrapper.util.property
+import kotlin.reflect.KCallable
 
 internal class GeneralFlagImpl<A : Argument<V>, V>(
   longForm:    Property<String>,
@@ -36,13 +38,16 @@ internal class GeneralFlagImpl<A : Argument<V>, V>(
 
   override val isRequired = isRequired.getOr(false)
 
-  override fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedFlag<*, V>) =
-    fi?.shouldInclude(this, reference, config) ?: super.shouldSerialize(config, reference)
-
-  override fun writeToString(builder: CliAppender<*, V>) {
+  override fun writeToString(builder: CliFlagWriter<*, V>) {
     // TODO: this should be able to handle optional argument values?
-    builder.putPreferredFlagForm(this, true).putArgument(argument)
+    builder.writePreferredForm().writeArgument(argument)
   }
+
+  override fun shouldSerialize(
+    config:    CliSerializationConfig,
+    reference: ValueAccessorReference<*, V, out KCallable<V>>,
+  ) =
+    fi?.shouldInclude(this, reference, config) ?: super.shouldSerialize(config, reference)
 
   companion object {
     fun <T : Any> of(config: FlagOptions<T>): Flag<Argument<T>, T> =

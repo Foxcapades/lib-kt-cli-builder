@@ -1,10 +1,15 @@
 package io.foxcapades.lib.cli.wrapper.reflect
 
+import io.foxcapades.lib.cli.wrapper.util.safeName
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-interface PropertyReference<T : Any, V> : TypeReference<T> {
-  val property: KProperty1<T, V>
+class PropertyReference<T : Any, V>(
+  override val type: KClass<out T>,
+  override val accessor: KProperty1<T, V>,
+) : ValueAccessorReference<T, V, KProperty1<T, V>> {
+  override fun getValue(instance: T) = accessor.get(instance)
 
-  val propertyIsNullable
-    get() = property.returnType.isMarkedNullable
+  override fun toString() = "Property:${type.safeName}::${accessor.name}"
 }
+

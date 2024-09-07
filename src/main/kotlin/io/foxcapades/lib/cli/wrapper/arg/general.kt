@@ -3,18 +3,16 @@ package io.foxcapades.lib.cli.wrapper.arg
 import io.foxcapades.lib.cli.wrapper.ArgOptions
 import io.foxcapades.lib.cli.wrapper.Argument
 import io.foxcapades.lib.cli.wrapper.NullableArgOptions
-import io.foxcapades.lib.cli.wrapper.ResolvedComponent
+import io.foxcapades.lib.cli.wrapper.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.wrapper.reflect.shouldQuote
-import io.foxcapades.lib.cli.wrapper.serial.CliArgumentAppender
-import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.wrapper.serial.NonNullGeneralStringifier
-import io.foxcapades.lib.cli.wrapper.serial.NullableGeneralStringifier
+import io.foxcapades.lib.cli.wrapper.serial.*
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgSetFilter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
 import io.foxcapades.lib.cli.wrapper.serial.values.unsafeCast
 import io.foxcapades.lib.cli.wrapper.util.*
 import java.math.BigDecimal
+import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
 internal class GeneralArgumentImpl<V>(
@@ -51,10 +49,12 @@ internal class GeneralArgumentImpl<V>(
     filter      = (filter.getOrNull() ?: ArgSetFilter).unsafeCast()
   )
 
-  override fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedComponent<*, V>) =
-    filter.shouldInclude(this, reference, config)
+  override fun shouldSerialize(
+    config:    CliSerializationConfig,
+    reference: ValueAccessorReference<*, V, out KCallable<V>>,
+  ) = filter.shouldInclude(this, reference, config)
 
-  override fun writeToString(builder: CliArgumentAppender) =
+  override fun writeToString(builder: CliArgumentWriter<*, V>) =
     formatter.formatValue(get(), builder)
 
   companion object {

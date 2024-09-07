@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
 import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.serial.CliArgumentAppender
+import io.foxcapades.lib.cli.wrapper.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgSetFilter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
@@ -23,6 +23,6 @@ internal abstract class AbstractScalarArgument<out A : ScalarArgument<V>, V>(
 {
   protected val formatter = formatter
 
-  override fun writeToString(builder: CliArgumentAppender) =
+  override fun writeToString(builder: CliArgumentWriter<*, V>) =
     formatter.formatValue(get(), builder)
 }

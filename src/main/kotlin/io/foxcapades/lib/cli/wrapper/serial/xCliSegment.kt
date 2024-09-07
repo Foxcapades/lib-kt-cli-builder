@@ -8,17 +8,8 @@ internal inline val CliSegment.Type.isLongFlag
 internal inline val CliSegment.Type.hasValue
   get() = this == LongFlagWithValue || this == ShortFlagWithValue
 
-internal inline val CliSegment.isFlag
-  get() = this.type.ordinal < 4
-
-internal inline val CliSegment.isValue
-  get() = this.type.ordinal > 3
-
 internal inline val CliSegment.isLongFlag
   get() = this.type.isLongFlag
-
-internal inline val CliSegment.isShortFlag
-  get() = this.type == ShortFlagWithValue || this.type == ShortFlagNoValue
 
 internal inline val CliSegment.hasValue
   get() = this.type.hasValue

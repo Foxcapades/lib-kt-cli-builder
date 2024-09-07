@@ -4,8 +4,6 @@ import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.util.NoSuchDefaultValueException
 import io.foxcapades.lib.cli.wrapper.util.isPrintable
 import io.foxcapades.lib.cli.wrapper.util.safeName
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
 
 class InvalidFlagFormException(
   message: String,
@@ -20,7 +18,7 @@ class InvalidFlagFormException(
       val msg = StringBuilder()
         .append(flag.type.safeName)
         .append("::")
-        .append(flag.property.name)
+        .append(flag.accessor.name)
         .append(" was configured with both invalid short-form and invalid long-form names: (short=")
 
       if (flag.shortForm.isPrintable) {
@@ -77,7 +75,7 @@ class InvalidFlagFormException(
       StringBuilder()
         .append(flag.type.safeName)
         .append("::")
-        .append(flag.property.name)
+        .append(flag.accessor.name)
         .append(" was configured with an invalid ")
         .append(if (long) "long" else "short")
         .append("form flag name: ")
@@ -98,24 +96,6 @@ open class UnsetArgumentDefaultException(msg: String) : NoSuchDefaultValueExcept
   constructor() : this("attempted to fetch the default value for an argument that had none")
 }
 
-class UnsetCliComponentException(
-  flag: ResolvedFlag<*, *>,
-  config: CliSerializationConfig
-) : RuntimeException(flag.makeErrorMessage(config)), ResolvedComponent<Any, Any?> {
-  private val ref: ResolvedComponent<Any, Any?>
-
-  override val property: KProperty1<Any, Any?>
-    get() = ref.property
-
-  override val type: KClass<out Any>
-    get() = ref.type
-
-  init {
-    @Suppress("UNCHECKED_CAST")
-    ref = flag as ResolvedFlag<Any, Any?>
-  }
-}
-
 private fun ResolvedFlag<*, *>.makeErrorMessage(config: CliSerializationConfig) =
-  "Flag " + safeName(config) + " (" + type.safeName + "::" + property.name +
+  "Flag " + safeName(config) + " (" + type.safeName + "::" + name +
     ") is marked as required, but no value was set."

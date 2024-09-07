@@ -2,14 +2,15 @@ package io.foxcapades.lib.cli.wrapper.serial.values
 
 import io.foxcapades.lib.cli.wrapper.Argument
 import io.foxcapades.lib.cli.wrapper.Flag
-import io.foxcapades.lib.cli.wrapper.ResolvedFlag
+import io.foxcapades.lib.cli.wrapper.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.util.BUG
+import kotlin.reflect.KCallable
 
 fun interface FlagPredicate<F : Flag<A, V>, A : Argument<V>, V> {
   fun shouldInclude(
     flag: F,
-    reference: ResolvedFlag<*, V>,
+    reference: ValueAccessorReference<*, V, out KCallable<V>>,
     config: CliSerializationConfig
   ): Boolean
 }
@@ -22,7 +23,7 @@ internal inline fun <F : Flag<A, V>, A : Argument<V>, V> FlagPredicate<*, *, *>.
 internal object FlagSetFilter : FlagPredicate<Flag<Argument<Any?>, Any?>, Argument<Any?>, Any?> {
   override fun shouldInclude(
     flag: Flag<Argument<Any?>, Any?>,
-    reference: ResolvedFlag<*, Any?>,
+    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
     config: CliSerializationConfig,
   ) = flag.argument.isSet
 }
@@ -30,7 +31,7 @@ internal object FlagSetFilter : FlagPredicate<Flag<Argument<Any?>, Any?>, Argume
 internal object InvalidFlagFilter : FlagPredicate<Flag<Argument<Any?>, Any?>, Argument<Any?>, Any?> {
   override fun shouldInclude(
     flag: Flag<Argument<Any?>, Any?>,
-    reference: ResolvedFlag<*, Any?>,
+    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
     config: CliSerializationConfig,
   ) = BUG()
 }

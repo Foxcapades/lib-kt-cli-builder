@@ -2,10 +2,13 @@
 
 package io.foxcapades.lib.cli.wrapper.flag
 
-import io.foxcapades.lib.cli.wrapper.*
+import io.foxcapades.lib.cli.wrapper.Argument
+import io.foxcapades.lib.cli.wrapper.Flag
+import io.foxcapades.lib.cli.wrapper.FlagOptions
+import io.foxcapades.lib.cli.wrapper.NullableFlagOptions
 import io.foxcapades.lib.cli.wrapper.arg.BooleanArgument
 import io.foxcapades.lib.cli.wrapper.arg.BooleanArgumentImpl
-import io.foxcapades.lib.cli.wrapper.serial.CliAppender
+import io.foxcapades.lib.cli.wrapper.serial.CliFlagWriter
 import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
 import io.foxcapades.lib.cli.wrapper.util.MutableProperty
 import io.foxcapades.lib.cli.wrapper.util.Property
@@ -81,11 +84,10 @@ internal class BooleanFlagImpl(
     argument   = BooleanArgumentImpl(opts.argument)
   )
 
-  override fun writeToString(builder: CliAppender<*, Boolean>) {
+  override fun writeToString(builder: CliFlagWriter<*, Boolean>) {
     if (!isToggleFlag)
-      return super.writeToString(builder)
-
-    if (argument.isSet)
-      builder.putPreferredFlagForm(this, false)
+      super.writeToString(builder)
+    else if (argument.getOr(false))
+      builder.writePreferredForm()
   }
 }

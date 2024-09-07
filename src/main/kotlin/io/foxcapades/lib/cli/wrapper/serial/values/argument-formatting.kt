@@ -1,26 +1,30 @@
 package io.foxcapades.lib.cli.wrapper.serial.values
 
-import io.foxcapades.lib.cli.wrapper.serial.CliArgumentAppender
+import io.foxcapades.lib.cli.wrapper.serial.CliArgumentWriter
 import kotlin.reflect.KFunction1
 
 /**
  * @param V Argument value type.
  */
 fun interface ArgumentFormatter<V> {
-  fun formatValue(value: V, builder: CliArgumentAppender)
+  fun formatValue(value: V, builder: CliArgumentWriter<*, V>)
 
   companion object {
     @JvmStatic
-    fun <T: Any> ofToString() = ArgumentFormatter<T> { v, b -> b.appendString(v.toString()) }
+    fun <T: Any> ofToString() = ArgumentFormatter<T> { v, b -> b.writeString(v.toString()) }
 
     @JvmStatic
-    fun <T> simple(fn: (T) -> String) = ArgumentFormatter<T> { v, b -> b.appendString(fn(v)) }
+    fun <T> simple(fn: (T) -> String) = ArgumentFormatter<T> { v, b -> b.writeString(fn(v)) }
   }
 }
 
 @Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
 internal inline fun ArgumentFormatter<*>.forceAny() =
   this as ArgumentFormatter<Any?>
+
+@Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
+internal inline fun <T> ArgumentFormatter<*>.unsafeCast() =
+  this as ArgumentFormatter<T>
 
 /**
  * Helper used to type a given function reference as a [ArgumentFormatter]

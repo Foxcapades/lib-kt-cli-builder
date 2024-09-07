@@ -1,22 +1,24 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
 import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.ResolvedComponent
 import io.foxcapades.lib.cli.wrapper.meta.CliArgument
 import io.foxcapades.lib.cli.wrapper.meta.CliArgumentAnnotation
+import io.foxcapades.lib.cli.wrapper.meta.CliComponentAnnotation
 import io.foxcapades.lib.cli.wrapper.meta.CliFlagAnnotation
-import io.foxcapades.lib.cli.wrapper.reflect.AnnotatedPropertyReference
+import io.foxcapades.lib.cli.wrapper.reflect.AnnotatedValueAccessorReference
+import io.foxcapades.lib.cli.wrapper.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.wrapper.reflect.getOrCreate
 import io.foxcapades.lib.cli.wrapper.reflect.shouldQuote
-import io.foxcapades.lib.cli.wrapper.serial.CliArgumentAppender
+import io.foxcapades.lib.cli.wrapper.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.serial.values.forceAny
 import io.foxcapades.lib.cli.wrapper.util.BUG
 import io.foxcapades.lib.cli.wrapper.util.NoSuchDefaultValueException
+import kotlin.reflect.KCallable
 
 internal class FauxArgument<T : Any>(
   val instance: T,
-  val reference: AnnotatedPropertyReference<T, Any?, *>,
+  val reference: AnnotatedValueAccessorReference<T, Any?, KCallable<Any?>, out CliComponentAnnotation>,
 ) : Argument<Any?> {
   inline val annotation get() = when (val a = reference.annotation) {
     is CliFlagAnnotation     -> a.argument
@@ -24,7 +26,7 @@ internal class FauxArgument<T : Any>(
   }
 
   override val isSet
-    get() = reference.propertyIsNullable && get() != null
+    get() = reference.isNullable && get() != null
 
   override val hasDefault
     get() = BUG()
@@ -41,16 +43,19 @@ internal class FauxArgument<T : Any>(
 
   override fun getDefault() = throw NoSuchDefaultValueException()
 
-  override fun get() = reference.property.get(instance)
+  override fun get() = reference.getValue(instance)
 
   override fun set(value: Any?) = BUG()
 
   override fun unset() = BUG()
 
-  override fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedComponent<*, Any?>) =
+  override fun shouldSerialize(
+    config:    CliSerializationConfig,
+    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
+  ) =
     annotation.inclusionTest.getOrCreate().forceAny().shouldInclude(this, reference, config)
 
-  override fun writeToString(builder: CliArgumentAppender) {
+  override fun writeToString(builder: CliArgumentWriter<*, Any?>) {
     val formatter = annotation.formatter.getOrCreate().forceAny()
 
     try {

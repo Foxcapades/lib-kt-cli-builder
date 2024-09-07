@@ -8,3 +8,4 @@ internal inline val Char.isBackSlash get() = this == '\\'
 internal inline val Char.isApostrophe get() = this == '\''
 
 internal const val CHAR_NULL = '\u0000'
+internal const val CHAR_APOS = '\''

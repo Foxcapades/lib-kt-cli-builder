@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
 import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.serial.CliArgumentAppender
+import io.foxcapades.lib.cli.wrapper.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.wrapper.serial.NullableGeneralStringifier
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgSetFilter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
@@ -29,9 +29,7 @@ internal open class ComplexArgumentImpl<out A : ComplexArgument<V>, V>(
   )
   , ComplexArgument<V>
 {
-  @Suppress("UNCHECKED_CAST")
-  private val formatter = formatter.getOrCompute { NullableGeneralStringifier as ArgumentFormatter<V> }
+  private val formatter = formatter.getOrCompute { NullableGeneralStringifier.unsafeCast() }
 
-  override fun writeToString(builder: CliArgumentAppender) =
-    formatter.formatValue(get(), builder)
+  override fun writeToString(builder: CliArgumentWriter<*, V>) = formatter.formatValue(get(), builder)
 }

@@ -14,9 +14,9 @@ interface Shell {
 
   fun endString(appender: CharacterAppender)
 
-  fun isArgumentSafe(char: Char): Boolean
+  fun isArgumentSafe(char: Char, inQuotes: Boolean): Boolean
 
-  fun escapeArgumentChar(char: Char, appender: CharacterAppender)
+  fun escapeArgumentChar(char: Char, inQuotes: Boolean, appender: CharacterAppender)
 
   fun postProcessArgumentValue(value: String, appender: CharacterAppender) {}
 }

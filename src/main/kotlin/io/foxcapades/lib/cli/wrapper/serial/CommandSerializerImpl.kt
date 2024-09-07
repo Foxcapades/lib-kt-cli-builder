@@ -9,7 +9,10 @@ import io.foxcapades.lib.cli.wrapper.meta.CliFlag
 import io.foxcapades.lib.cli.wrapper.meta.wrap
 import io.foxcapades.lib.cli.wrapper.reflect.ClassInfo
 import io.foxcapades.lib.cli.wrapper.reflect.asDelegateType
-import io.foxcapades.lib.cli.wrapper.util.*
+import io.foxcapades.lib.cli.wrapper.util.filter
+import io.foxcapades.lib.cli.wrapper.util.findInstance
+import io.foxcapades.lib.cli.wrapper.util.onEach
+import io.foxcapades.lib.cli.wrapper.util.safeName
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
@@ -44,72 +47,16 @@ internal class CommandSerializerImpl<T : Any>(
 
   // region Iterator
 
-  private val emptyValue by lazy { StringBuilder(8).also {
-    config.targetShell.startString(it::append)
-    config.targetShell.endString(it::append)
-  }.toString() }
-
   override fun serializeToIterator() = iterator {
     for (leader in commandLeader)
       yield(leader)
 
     val serializer = LazyCliAppenderImpl(filterUsableProperties(), config)
     val buffer = StringBuilder(1024)
-    var last: CliSegment? = null
-
     while (serializer.hasNext()) {
       val segment = serializer.next()
 
-      if (segment.isFlag) {
-        appendFlag(last, segment, buffer)
-      } else {
-        appendValue(last, segment.value, buffer)
-      }
-
-      last = segment
-    }
-
-    if (last?.hasValue == true) {
-      maybeAppendEmpty(last, buffer)
-    }
-  }
-
-  private suspend fun SequenceScope<String>.appendFlag(last: CliSegment?, flag: CliSegment, buffer: StringBuilder) {
-    maybeAppendEmpty(last, buffer)
-
-    if (flag.isLongFlag)
-      buffer.append(config.longFlagPrefix).append(flag.value)
-    else
-      buffer.append(config.shortFlagPrefix).append(flag.value)
-
-    if (!flag.hasValue)
-      yield(buffer.dump())
-  }
-
-  private suspend fun SequenceScope<String>.appendValue(last: CliSegment?, value: String, buffer: StringBuilder) {
-    if (last?.hasValue == true)
-      appendValueFor(last, value, buffer)
-    else
-      yield(value)
-  }
-
-  private suspend fun SequenceScope<String>.maybeAppendEmpty(last: CliSegment?, buffer: StringBuilder) {
-    if (last?.hasValue == true)
-      appendValueFor(last, emptyValue, buffer)
-  }
-
-  private suspend fun SequenceScope<String>.appendValueFor(flag: CliSegment, value: String, buffer: StringBuilder) {
-    val divider = if (flag.isLongFlag)
-      config.longFlagValueSeparator
-    else
-      config.shortFlagValueSeparator
-
-    if (divider.isSplitableValueDivider) {
-      yield(buffer.dump())
-      yield(value)
-    } else {
-      buffer.append(divider).append(value)
-      yield(buffer.dump())
+      yield(segment)
     }
   }
 
@@ -166,11 +113,11 @@ internal class CommandSerializerImpl<T : Any>(
     return if (del != null) {
       if (ann != null) {
         if (del is Flag<*, *>)
-          AnnotatedFlag(type, prop, ann.wrap(), del.unsafeAnyType())
+          AnnotatedFlag(type, instance, prop, ann.wrap(), del.unsafeAnyType())
         else
           TODO("annotation + argument")
       } else if (del is Flag<*, *>) {
-        PinnedFlag(type, prop, del)
+        PinnedFlag(type, instance, prop, del)
       } else {
         TODO("pinned annotation")
       }

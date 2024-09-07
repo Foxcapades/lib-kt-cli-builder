@@ -1,192 +1,20 @@
 package io.foxcapades.lib.cli.wrapper
 
 import io.foxcapades.lib.cli.wrapper.flag.*
-import io.foxcapades.lib.cli.wrapper.serial.CliAppender
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
-import io.foxcapades.lib.cli.wrapper.serial.values.FlagPredicate
-import io.foxcapades.lib.cli.wrapper.util.MutableDefaultableProperty
-import io.foxcapades.lib.cli.wrapper.util.MutableProperty
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
 
 // region Flag Base
 
-/**
- * Represents a command line flag option.
- *
- * @since v1.0.0
- */
-interface Flag<out A : Argument<V>, V> : MutableDefaultableProperty<V>, CliCallComponent {
-  /**
-   * Indicates whether this flag has a long form.
-   */
-  val hasLongForm: Boolean
-
-  /**
-   * Long form of this flag.
-   */
-  val longForm: String
-
-  /**
-   * Indicates whether this flag has a short form.
-   */
-  val hasShortForm: Boolean
-
-  /**
-   * Short form of this flag.
-   */
-  val shortForm: Char
-
-  /**
-   * Argument for this flag.
-   */
-  val argument: A
-
-  /**
-   * Indicates whether this flag is required to be present in CLI calls.
-   */
-  val isRequired: Boolean
-
-  /**
-   * Method used to indicate whether a [Flag] instance should be included in
-   * serialization based on customizable logic.
-   *
-   * Different implementations may provide varying default serialization
-   * inclusion rules, however the default behavior provided by this interface is
-   * to always include flags whose arguments return `true` on calls to
-   * [Argument.shouldSerialize].
-   *
-   * `Flag` instances that are marked with [isRequired] = `true` will be always
-   * be included in serialization.  For such instances, this method will not be
-   * called.
-   *
-   * Implementers should indicate if/when they do not make use of a call to
-   * [Argument.shouldSerialize].
-   *
-   * @param config Current serialization configuration.
-   *
-   * @return `true` if this `Flag` instance should be included in serialization
-   * output, otherwise `false` if this `Flag` should be omitted.
-   */
-  fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedFlag<*, V>): Boolean =
-    argument.shouldSerialize(config, reference)
-
-  fun writeToString(builder: CliAppender<*, V>)
-
-  override val isSet: Boolean
-    get() = argument.isSet
-
-  override val hasDefault: Boolean
-    get() = argument.hasDefault
-
-  override fun get() = argument.get()
-
-  override fun set(value: V) = argument.set(value)
-
-  override fun unset() = argument.unset()
-
-  override fun getDefault() = argument.getDefault()
-}
-
 @Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
 inline fun Flag<*, *>.unsafeAnyType() =
   this as Flag<Argument<Any?>, Any?>
 
-fun <V> CliAppender<*, V>.putPreferredFlagForm(flag: Flag<*, V>, withValue: Boolean) = apply {
-  if (flag.hasLongForm) {
-    if (config.preferredFlagForm.isLong || !flag.hasShortForm)
-      putLongFlag(flag.longForm, withValue)
-    else
-      putShortFlag(flag.shortForm, withValue)
-  } else if (flag.hasShortForm) {
-    putShortFlag(flag.shortForm, withValue)
-  } else {
-    putLongFlag(config.propertyNameFormatter.format(reference.property.name, config), withValue)
-  }
-}
-
 // endregion Flag Base
 
-/**
- * @param T Flag container class type.
- *
- * @param V Flag argument value type.
- */
-interface ResolvedFlag<T : Any, V> : ResolvedComponent<T, V>, Flag<Argument<V>, V>
-
 // region Flag Options
-
-sealed class BaseFlagOptions<V : Any, O : V?, A : BaseArgOptions<V, O>>(
-  type: KClass<out V>,
-  arg: A,
-)
-  : BaseComponentOptions<V>(type)
-{
-  /**
-   * Sets the long-form name of the flag being configured.
-   */
-  var longForm by MutableProperty<String>()
-
-  /**
-   * Sets the short-form name of the flag being configured.
-   */
-  var shortForm by MutableProperty<Char>()
-
-  /**
-   * Sets whether this flag's presence is required in a CLI generated call.
-   */
-  var required by MutableProperty<Boolean>()
-
-  /**
-   * Defines a predicate which will is used to determine when a non-required
-   * flag should be included or omitted from a CLI call.
-   *
-   * Flags marked as being [required] will always be included without any call
-   * to this filter.
-   */
-  var flagFilter by MutableProperty<FlagPredicate<out Flag<Argument<O>, O>, out Argument<O>, O>>()
-
-  /**
-   * Argument configuration
-   */
-  val argument: A = arg
-
-  /**
-   * Argument configuration action.
-   *
-   * Calls the given action on the value of [argument].
-   */
-  inline fun argument(crossinline action: A.() -> Unit) = argument.action()
-
-  /**
-   * Convenience shortcut to set `argument.required`.
-   *
-   * @see [BaseArgOptions.required]
-   */
-  inline var argRequired: Boolean
-    get() = argument.required
-    set(value) { argument.required = value }
-
-  /**
-   * Convenience shortcut to set `argument.filter`
-   *
-   * @see [BaseArgOptions.filter]
-   */
-  inline var argFilter: ArgumentPredicate<out Argument<O>, O>
-    get() = argument.filter
-    set(value) { argument.filter = value }
-
-  /**
-   * Convenience shortcut to set `argument.default`
-   *
-   * @see [BaseArgOptions.default]
-   */
-  inline var default: O
-    get() = argument.default
-    set(value) { argument.default = value }
-}
 
 open class FlagOptions<T: Any>(type: KClass<out T>)
   : BaseFlagOptions<T, T, ArgOptions<T>>(type, ArgOptions(type))

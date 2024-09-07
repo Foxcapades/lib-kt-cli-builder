@@ -1,12 +1,13 @@
 package io.foxcapades.lib.cli.wrapper.arg
 
 import io.foxcapades.lib.cli.wrapper.Argument
-import io.foxcapades.lib.cli.wrapper.ResolvedComponent
+import io.foxcapades.lib.cli.wrapper.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
 import io.foxcapades.lib.cli.wrapper.util.BasicMutableDefaultableProperty
 import io.foxcapades.lib.cli.wrapper.util.Property
 import io.foxcapades.lib.cli.wrapper.util.getOrNull
+import kotlin.reflect.KCallable
 
 internal sealed class AbstractArgument<out A : Argument<V>, V>(
   default:     Property<V>,
@@ -27,6 +28,8 @@ internal sealed class AbstractArgument<out A : Argument<V>, V>(
 
   override val shouldQuote = shouldQuote
 
-  override fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedComponent<*, V>) =
-    filter.shouldInclude(self, reference, config)
+  override fun shouldSerialize(
+    config:    CliSerializationConfig,
+    reference: ValueAccessorReference<*, V, out KCallable<V>>,
+  ) = filter.shouldInclude(self, reference, config)
 }

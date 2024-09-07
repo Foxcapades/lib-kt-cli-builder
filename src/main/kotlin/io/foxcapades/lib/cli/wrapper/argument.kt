@@ -1,11 +1,13 @@
 package io.foxcapades.lib.cli.wrapper
 
-import io.foxcapades.lib.cli.wrapper.serial.CliArgumentAppender
+import io.foxcapades.lib.cli.wrapper.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.wrapper.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.wrapper.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentFormatter
 import io.foxcapades.lib.cli.wrapper.serial.values.ArgumentPredicate
 import io.foxcapades.lib.cli.wrapper.util.MutableDefaultableProperty
 import io.foxcapades.lib.cli.wrapper.util.MutableProperty
+import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
 // region Argument Def
@@ -18,16 +20,16 @@ interface Argument<V> : MutableDefaultableProperty<V>, CliCallComponent {
 
   val shouldQuote: Boolean
 
-  fun shouldSerialize(config: CliSerializationConfig, reference: ResolvedComponent<*, V>): Boolean
+  val isDefault: Boolean
+    get() = hasDefault && isSet && getDefault() == get()
 
-  fun writeToString(builder: CliArgumentAppender)
+  fun shouldSerialize(config: CliSerializationConfig, reference: ValueAccessorReference<*, V, out KCallable<V>>): Boolean
+
+  fun writeToString(builder: CliArgumentWriter<*, V>)
 
   @Throws(UnsetArgumentDefaultException::class)
   override fun getDefault(): V
 }
-
-inline val Argument<*>.isDefault
-  get() = hasDefault && isSet && getDefault() == get()
 
 // endregion Argument Def
 

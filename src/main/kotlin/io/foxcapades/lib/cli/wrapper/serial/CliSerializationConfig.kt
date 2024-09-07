@@ -37,8 +37,11 @@ data class CliSerializationConfig(
    * values.
    *
    * ```kt
-   * val sep = "="
+   * sep = "="
    * "--flag${sep}value" -> "--flag=value"
+   *
+   * sep = " "
+   * "--flag${sep}value" -> "--flag value"
    * ```
    */
   val longFlagValueSeparator: String,
@@ -55,8 +58,14 @@ data class CliSerializationConfig(
    * values.
    *
    * ```kt
+   * val sep = "="
+   * "-f${sep}value" -> "-f=value"
+   *
    * val sep = " "
    * "-f${sep}value" -> "-f value"
+   *
+   * val sep = ""
+   * "-f${sep}value" -> "-fvalue"
    * ```
    */
   val shortFlagValueSeparator: String,
@@ -82,10 +91,19 @@ data class CliSerializationConfig(
    */
   val nullSerializer: NullSerializer,
 
+  /**
+   * Formatter used to serialize a raw class property name when no short or long
+   * form for a flag is specified.
+   *
+   * Default formatters are available through the
+   * [PropertyNameFormatter.Companion] object.
+   */
   val propertyNameFormatter: PropertyNameFormatter,
 
-  val fallbackSerializer: ArgumentFormatter<in Any>,
-
+  /**
+   * Target shell, used when formatting values to ensure generated cli command
+   * strings are safe for use.
+   */
   val targetShell: Shell,
 ) {
   object Defaults {
@@ -130,7 +148,6 @@ data class CliSerializationConfig(
     includeDefaultedPositionalArgs = Defaults.IncludeDefaultedPositionalArgs,
     nullSerializer                 = Defaults.NullSerializer,
     propertyNameFormatter          = Defaults.PropertyNameFormatter,
-    fallbackSerializer             = Defaults.FallbackSerializer,
     targetShell                    = Defaults.TargetShell,
   )
 
@@ -144,7 +161,6 @@ data class CliSerializationConfig(
     includeDefaultedPositionalArgs = builder.includeDefaultedPositionalArgs,
     nullSerializer                 = builder.nullSerializer,
     propertyNameFormatter          = builder.propertyNameFormatter,
-    fallbackSerializer             = builder.fallbackSerializer,
     targetShell                    = builder.targetShell,
   )
 
@@ -160,7 +176,6 @@ data class CliSerializationConfig(
     var includeDefaultedPositionalArgs: IncludeDefault,
     var nullSerializer: NullSerializer,
     var propertyNameFormatter: PropertyNameFormatter,
-    var fallbackSerializer: ArgumentFormatter<in Any>,
     var targetShell: Shell,
   ) {
     constructor() : this(
@@ -173,7 +188,6 @@ data class CliSerializationConfig(
       includeDefaultedPositionalArgs = Defaults.IncludeDefaultedPositionalArgs,
       nullSerializer                 = Defaults.NullSerializer,
       propertyNameFormatter          = Defaults.PropertyNameFormatter,
-      fallbackSerializer             = Defaults.FallbackSerializer,
       targetShell                    = Defaults.TargetShell,
     )
 
@@ -198,8 +212,6 @@ data class CliSerializationConfig(
     fun nullSerializer(value: NullSerializer) = apply { nullSerializer = value }
 
     fun propertyNameFormatter(value: PropertyNameFormatter) = apply { propertyNameFormatter = value }
-
-    fun fallbackSerializer(value: ArgumentFormatter<in Any>) = apply { fallbackSerializer = value }
 
     fun targetShell(value: Shell) = apply { targetShell = value }
 
