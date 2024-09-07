@@ -7,6 +7,11 @@ import java.math.BigInteger
 fun bigIntegerArg(action: ArgOptions<BigInteger>.() -> Unit): BigIntegerArgument =
   BigIntegerArgumentImpl(ArgOptions(BigInteger::class).also(action))
 
+fun bigIntArg(action: ArgOptions<BigInteger>.() -> Unit): BigIntegerArgument =
+  BigIntegerArgumentImpl(ArgOptions(BigInteger::class).also(action))
+
 fun nullableBigIntegerArg(action: NullableArgOptions<BigInteger>.() -> Unit): Argument<BigInteger?> =
   UniversalArgumentImpl.of(NullableArgOptions(BigInteger::class).also(action))
 
+fun nullableBigIntArg(action: NullableArgOptions<BigInteger>.() -> Unit): Argument<BigInteger?> =
+  UniversalArgumentImpl.of(NullableArgOptions(BigInteger::class).also(action))

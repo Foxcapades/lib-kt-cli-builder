@@ -3,7 +3,7 @@ package io.foxcapades.lib.cli.builder.arg.format
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 
 fun interface NullSerializer : ArgumentFormatter<Any?> {
-  override fun formatValue(value: Any?, builder: CliArgumentWriter<*, Any?>) = formatValue(builder)
+  override fun formatValue(value: Any?, writer: CliArgumentWriter<*, Any?>) = formatValue(writer)
 
   fun formatValue(builder: CliArgumentWriter<*, Any?>)
 
