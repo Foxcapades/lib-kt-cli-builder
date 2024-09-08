@@ -14,7 +14,7 @@ import io.foxcapades.lib.cli.builder.reflect.shouldQuote
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
-import io.foxcapades.lib.cli.builder.util.NoSuchDefaultValueException
+import io.foxcapades.lib.cli.builder.util.properties.NoSuchDefaultValueException
 import kotlin.reflect.KCallable
 
 internal class FauxArgument<T : Any>(
@@ -57,13 +57,13 @@ internal class FauxArgument<T : Any>(
   ) =
     annotation.inclusionTest.getOrCreate().forceAny().shouldInclude(this, reference, config)
 
-  override fun writeToString(builder: CliArgumentWriter<*, Any?>) {
+  override fun writeToString(writer: CliArgumentWriter<*, Any?>) {
     val formatter = annotation.formatter.getOrCreate().forceAny()
 
     try {
-      formatter.formatValue(get(), builder)
+      formatter.formatValue(get(), writer)
     } catch (e: NullPointerException) {
-      builder.config.nullSerializer.formatValue(builder)
+      writer.config.nullSerializer.formatValue(writer)
     }
   }
 }

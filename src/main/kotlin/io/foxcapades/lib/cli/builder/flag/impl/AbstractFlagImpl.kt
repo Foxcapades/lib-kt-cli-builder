@@ -11,10 +11,10 @@ import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
 
 internal abstract class AbstractFlagImpl<Self : Flag<A, V>, A : Argument<V>, V>(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  filter: Property<FlagPredicate<Self, A, V>>,
+  filter:     Property<FlagPredicate<Self, A, V>>,
   argument:   A,
 ) : Flag<A, V> {
   private val lf = longForm

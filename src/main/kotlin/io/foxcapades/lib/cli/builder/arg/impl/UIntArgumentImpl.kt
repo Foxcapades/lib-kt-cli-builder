@@ -4,19 +4,19 @@ import io.foxcapades.lib.cli.builder.arg.ArgOptions
 import io.foxcapades.lib.cli.builder.arg.UIntArgument
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
+import io.foxcapades.lib.cli.builder.reflect.property
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
-import io.foxcapades.lib.cli.builder.reflect.property
 
 internal class UIntArgumentImpl(
-  default: Property<UInt>,
-  isRequired: Property<Boolean>,
+  default:     Property<UInt>,
+  isRequired:  Property<Boolean>,
   shouldQuote: Property<Boolean>,
-  filter: Property<ArgumentPredicate<UIntArgument, UInt>>,
-  formatter: Property<ArgumentFormatter<UInt>>,
+  filter:      Property<ArgumentPredicate<UIntArgument, UInt>>,
+  formatter:   Property<ArgumentFormatter<UInt>>,
 ) : AbstractScalarArgument<UIntArgument, UInt>(
   default     = default,
-  isRequired  = isRequired.getOr(!default.isSet),
+  isRequired  = isRequired,
   shouldQuote = shouldQuote.getOr(false),
   filter      = filter,
   formatter   = formatter.getOr(ArgumentFormatter(UInt::toString)),

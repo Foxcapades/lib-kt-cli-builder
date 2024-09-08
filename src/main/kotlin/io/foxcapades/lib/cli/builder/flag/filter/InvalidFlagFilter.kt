@@ -9,8 +9,8 @@ import kotlin.reflect.KCallable
 
 internal object InvalidFlagFilter : FlagPredicate<Flag<Argument<Any?>, Any?>, Argument<Any?>, Any?> {
   override fun shouldInclude(
-    flag: Flag<Argument<Any?>, Any?>,
+    flag:      Flag<Argument<Any?>, Any?>,
     reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
-    config: CliSerializationConfig,
+    config:    CliSerializationConfig,
   ) = BUG()
 }

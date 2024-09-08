@@ -1,8 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.util.properties
 
-import io.foxcapades.lib.cli.builder.util.NoSuchValueException
-
 fun <T> MutableProperty(): MutableProperty<T> = SimpleMutableProperty()
 
 fun <T> MutableProperty(value: T): MutableProperty<T> = SimpleMutableProperty(value)

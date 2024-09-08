@@ -4,17 +4,17 @@ import io.foxcapades.lib.cli.builder.arg.ArgOptions
 import io.foxcapades.lib.cli.builder.arg.PathArgument
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
+import io.foxcapades.lib.cli.builder.reflect.property
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.mapAbsent
-import io.foxcapades.lib.cli.builder.reflect.property
 import java.nio.file.Path
 
 internal class PathArgumentImpl(
-  default: Property<Path>,
-  isRequired: Property<Boolean>,
+  default:     Property<Path>,
+  isRequired:  Property<Boolean>,
   shouldQuote: Property<Boolean>,
-  filter: Property<ArgumentPredicate<PathArgument, Path>>,
-  formatter: Property<ArgumentFormatter<Path>>
+  filter:      Property<ArgumentPredicate<PathArgument, Path>>,
+  formatter:   Property<ArgumentFormatter<Path>>
 ) : ComplexArgumentImpl<PathArgument, Path>(
   default     = default,
   isRequired  = isRequired,

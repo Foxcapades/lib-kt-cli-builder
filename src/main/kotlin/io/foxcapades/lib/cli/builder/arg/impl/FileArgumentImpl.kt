@@ -4,17 +4,17 @@ import io.foxcapades.lib.cli.builder.arg.ArgOptions
 import io.foxcapades.lib.cli.builder.arg.FileArgument
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
+import io.foxcapades.lib.cli.builder.reflect.property
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.mapAbsent
-import io.foxcapades.lib.cli.builder.reflect.property
 import java.io.File
 
 internal class FileArgumentImpl(
-  default: Property<File>,
-  isRequired: Property<Boolean>,
+  default:     Property<File>,
+  isRequired:  Property<Boolean>,
   shouldQuote: Property<Boolean>,
-  filter: Property<ArgumentPredicate<FileArgument, File>>,
-  formatter: Property<ArgumentFormatter<File>>
+  filter:      Property<ArgumentPredicate<FileArgument, File>>,
+  formatter:   Property<ArgumentFormatter<File>>
 ) : ComplexArgumentImpl<FileArgument, File>(
   default     = default,
   isRequired  = isRequired,

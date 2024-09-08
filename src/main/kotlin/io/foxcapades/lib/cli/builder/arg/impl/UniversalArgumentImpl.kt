@@ -20,11 +20,11 @@ import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
 internal class UniversalArgumentImpl<V>(
-  default: Property<V>,
+  default:     Property<V>,
   shouldQuote: Boolean,
-  isRequired: Boolean,
-  private val formatter: ArgumentFormatter<V>,
-  private val filter: ArgumentPredicate<Argument<V>, V>
+  isRequired:  Boolean,
+  private val  formatter: ArgumentFormatter<V>,
+  private val  filter: ArgumentPredicate<Argument<V>, V>
 ) : BasicMutableDefaultableProperty<V>(
   if (default.isSet) 2 else 0,
   default.getOrNull(),
@@ -37,11 +37,11 @@ internal class UniversalArgumentImpl<V>(
   constructor(
     type:        KClass<*>,
     nullable:    Boolean,
-    default: Property<V>,
+    default:     Property<V>,
     shouldQuote: Property<Boolean>,
-    isRequired: Property<Boolean>,
-    formatter: Property<ArgumentFormatter<V>>,
-    filter: Property<ArgumentPredicate<Argument<V>, V>>
+    isRequired:  Property<Boolean>,
+    formatter:   Property<ArgumentFormatter<V>>,
+    filter:      Property<ArgumentPredicate<Argument<V>, V>>
   ) : this(
     default     = default,
     shouldQuote = shouldQuote.getOrCompute { type.shouldQuote() },
@@ -58,8 +58,8 @@ internal class UniversalArgumentImpl<V>(
     reference: ValueAccessorReference<*, V, out KCallable<V>>,
   ) = filter.shouldInclude(this, reference, config)
 
-  override fun writeToString(builder: CliArgumentWriter<*, V>) =
-    formatter.formatValue(get(), builder)
+  override fun writeToString(writer: CliArgumentWriter<*, V>) =
+    formatter.formatValue(get(), writer)
 
   companion object {
     @JvmStatic

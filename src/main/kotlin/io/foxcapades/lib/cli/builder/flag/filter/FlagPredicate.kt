@@ -8,8 +8,8 @@ import kotlin.reflect.KCallable
 
 fun interface FlagPredicate<F : Flag<A, V>, A : Argument<V>, V> {
   fun shouldInclude(
-    flag: F,
+    flag:      F,
     reference: ValueAccessorReference<*, V, out KCallable<V>>,
-    config: CliSerializationConfig
+    config:    CliSerializationConfig
   ): Boolean
 }

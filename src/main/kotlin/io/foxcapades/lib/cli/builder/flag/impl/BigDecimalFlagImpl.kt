@@ -6,15 +6,15 @@ import io.foxcapades.lib.cli.builder.arg.impl.BigDecimalArgumentImpl
 import io.foxcapades.lib.cli.builder.flag.BigDecimalFlag
 import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
-import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.reflect.property
+import io.foxcapades.lib.cli.builder.util.properties.Property
 import java.math.BigDecimal
 
 internal class BigDecimalFlagImpl(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  filter: Property<FlagPredicate<BigDecimalFlag, BigDecimalArgument, BigDecimal>>,
+  filter:     Property<FlagPredicate<BigDecimalFlag, BigDecimalArgument, BigDecimal>>,
   argument:   BigDecimalArgument,
 )
   : AbstractFlagImpl<BigDecimalFlag, BigDecimalArgument, BigDecimal>(

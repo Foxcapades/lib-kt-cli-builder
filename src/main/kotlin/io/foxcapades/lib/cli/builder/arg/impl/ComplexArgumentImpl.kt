@@ -12,11 +12,11 @@ import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
 
 internal open class ComplexArgumentImpl<out A : ComplexArgument<V>, V>(
-  default: Property<V>,
-  isRequired: Property<Boolean>,
+  default:     Property<V>,
+  isRequired:  Property<Boolean>,
   shouldQuote: Property<Boolean>,
-  formatter: Property<ArgumentFormatter<V>>,
-  filter: Property<ArgumentPredicate<A, V>>,
+  formatter:   Property<ArgumentFormatter<V>>,
+  filter:      Property<ArgumentPredicate<A, V>>,
 )
   : AbstractArgument<A, V>(
     default     = default,
@@ -28,6 +28,6 @@ internal open class ComplexArgumentImpl<out A : ComplexArgument<V>, V>(
 {
   private val formatter = formatter.getOr(NullableGeneralStringifier.unsafeCast())
 
-  override fun writeToString(builder: CliArgumentWriter<*, V>) =
-    formatter.formatValue(get(), builder)
+  override fun writeToString(writer: CliArgumentWriter<*, V>) =
+    formatter.formatValue(get(), writer)
 }

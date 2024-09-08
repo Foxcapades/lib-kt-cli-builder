@@ -1,19 +1,19 @@
 package io.foxcapades.lib.cli.builder.flag.impl
 
-import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.arg.BigIntegerArgument
 import io.foxcapades.lib.cli.builder.arg.impl.BigIntegerArgumentImpl
 import io.foxcapades.lib.cli.builder.flag.BigIntegerFlag
+import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
-import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.reflect.property
+import io.foxcapades.lib.cli.builder.util.properties.Property
 import java.math.BigInteger
 
 internal class BigIntegerFlagImpl(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  filter: Property<FlagPredicate<BigIntegerFlag, BigIntegerArgument, BigInteger>>,
+  filter:     Property<FlagPredicate<BigIntegerFlag, BigIntegerArgument, BigInteger>>,
   argument:   BigIntegerArgument
 )
   : AbstractFlagImpl<BigIntegerFlag, BigIntegerArgument, BigInteger>(

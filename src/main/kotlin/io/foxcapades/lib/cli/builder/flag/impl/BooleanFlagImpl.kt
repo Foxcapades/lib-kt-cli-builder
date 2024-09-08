@@ -1,21 +1,21 @@
 package io.foxcapades.lib.cli.builder.flag.impl
 
-import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.arg.BooleanArgument
 import io.foxcapades.lib.cli.builder.arg.impl.BooleanArgumentImpl
 import io.foxcapades.lib.cli.builder.flag.BooleanFlag
 import io.foxcapades.lib.cli.builder.flag.BooleanFlagOptions
-import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
+import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
+import io.foxcapades.lib.cli.builder.reflect.property
+import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
-import io.foxcapades.lib.cli.builder.reflect.property
 
 internal class BooleanFlagImpl(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  filter: Property<FlagPredicate<BooleanFlag, BooleanArgument, Boolean>>,
+  filter:     Property<FlagPredicate<BooleanFlag, BooleanArgument, Boolean>>,
   isToggle:   Boolean,
   argument:   BooleanArgument
 )

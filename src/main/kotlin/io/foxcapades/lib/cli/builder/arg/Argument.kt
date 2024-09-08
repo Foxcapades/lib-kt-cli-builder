@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.builder.arg
 
-import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.UnsetArgumentDefaultException
+import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
@@ -23,7 +23,7 @@ interface Argument<V> : MutableDefaultableProperty<V>, CliCallComponent {
 
   fun shouldSerialize(config: CliSerializationConfig, reference: ValueAccessorReference<*, V, out KCallable<V>>): Boolean
 
-  fun writeToString(builder: CliArgumentWriter<*, V>)
+  fun writeToString(writer: CliArgumentWriter<*, V>)
 
   @Throws(UnsetArgumentDefaultException::class)
   override fun getDefault(): V

@@ -18,10 +18,10 @@ import io.foxcapades.lib.cli.builder.util.properties.getOrNull
 import kotlin.reflect.KCallable
 
 internal class UniversalFlagImpl<A : Argument<V>, V>(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
-  isRequired: Property<Boolean>,
-  filter: Property<FlagPredicate<Flag<A, V>, A, V>>,
+  longForm:    Property<String>,
+  shortForm:   Property<Char>,
+  isRequired:  Property<Boolean>,
+  filter:      Property<FlagPredicate<Flag<A, V>, A, V>>,
   argument:    A,
 ) : Flag<A, V> {
   private val lf = longForm

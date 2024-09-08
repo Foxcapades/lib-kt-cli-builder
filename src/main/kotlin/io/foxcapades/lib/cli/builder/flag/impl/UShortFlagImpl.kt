@@ -1,18 +1,18 @@
 package io.foxcapades.lib.cli.builder.flag.impl
 
-import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.arg.UShortArgument
 import io.foxcapades.lib.cli.builder.arg.impl.UShortArgumentImpl
+import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.flag.UShortFlag
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
-import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.reflect.property
+import io.foxcapades.lib.cli.builder.util.properties.Property
 
 internal class UShortFlagImpl(
-  longForm: Property<String>,
-  shortForm: Property<Char>,
+  longForm:   Property<String>,
+  shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  filter: Property<FlagPredicate<UShortFlag, UShortArgument, UShort>>,
+  filter:     Property<FlagPredicate<UShortFlag, UShortArgument, UShort>>,
   argument:   UShortArgument
 )
   : AbstractFlagImpl<UShortFlag, UShortArgument, UShort>(longForm, shortForm, isRequired, filter, argument)
