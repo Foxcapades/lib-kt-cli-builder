@@ -3,30 +3,35 @@ package io.foxcapades.lib.cli.builder.arg.impl
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.CliArgument
 import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
-import io.foxcapades.lib.cli.builder.arg.filter.forceAny
-import io.foxcapades.lib.cli.builder.arg.format.forceAny
-import io.foxcapades.lib.cli.builder.component.CliComponentAnnotation
-import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
-import io.foxcapades.lib.cli.builder.reflect.AnnotatedValueAccessorReference
-import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
-import io.foxcapades.lib.cli.builder.reflect.getOrCreate
-import io.foxcapades.lib.cli.builder.reflect.shouldQuote
+import io.foxcapades.lib.cli.builder.arg.ResolvedArgumentOld
+import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
+import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
 import io.foxcapades.lib.cli.builder.util.properties.NoSuchDefaultValueException
+import io.foxcapades.lib.cli.builder.util.reflect.AnnotatedValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
+import io.foxcapades.lib.cli.builder.util.reflect.shouldQuote
 import kotlin.reflect.KCallable
 
-internal class FauxArgument<T : Any>(
-  val instance: T,
-  val reference: AnnotatedValueAccessorReference<T, Any?, KCallable<Any?>, out CliComponentAnnotation>,
-) : Argument<Any?> {
-  inline val annotation get() = when (val a = reference.annotation) {
-    is CliFlagAnnotation     -> a.argument
-    is CliArgumentAnnotation -> a.annotation
-    else                     -> BUG()
-  }
-
+/**
+ * Represents a property or getter that has been annotated as being an argument.
+ *
+ * @param T Containing class type.
+ *
+ * @param V Argument value type.
+ */
+internal class FauxArgument<T : Any, V>(
+  override val instance:   T,
+  override val annotation: CliArgumentAnnotation,
+  private  val reference:  ValueAccessorReference<T, V, KCallable<V>>
+)
+  : ResolvedArgumentOld<T, V>
+  , AnnotatedValueAccessorReference<T, V, KCallable<V>, CliArgumentAnnotation>
+  , ValueAccessorReference<T, V, KCallable<V>> by reference
+{
   override val isSet
     get() = reference.isNullable && get() != null
 
@@ -43,22 +48,26 @@ internal class FauxArgument<T : Any>(
       CliArgument.ShouldQuote.No   -> false
     }
 
+  override val qualifiedName: String
+    get() = "argument " + reference.qualifiedName
+
+
   override fun getDefault() = throw NoSuchDefaultValueException()
 
   override fun get() = reference.getValue(instance)
 
-  override fun set(value: Any?) = BUG()
+  override fun set(value: V) = BUG()
 
   override fun unset() = BUG()
 
   override fun shouldSerialize(
     config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
+    reference: ValueAccessorReference<*, V, KCallable<V>>?,
   ) =
-    annotation.inclusionTest.getOrCreate().forceAny().shouldInclude(this, reference, config)
+    annotation.filter.getOrCreate().unsafeCast<Argument<V>, V>().shouldInclude(this, config, reference)
 
-  override fun writeToString(writer: CliArgumentWriter<*, Any?>) {
-    val formatter = annotation.formatter.getOrCreate().forceAny()
+  override fun writeToString(writer: CliArgumentWriter<*, V>) {
+    val formatter = annotation.formatter.getOrCreate().unsafeCast<V>()
 
     try {
       formatter.formatValue(get(), writer)

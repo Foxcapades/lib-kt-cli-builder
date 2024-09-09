@@ -9,12 +9,12 @@ import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.flag.NullableFlagOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
-import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
-import io.foxcapades.lib.cli.builder.reflect.property
 import io.foxcapades.lib.cli.builder.serial.*
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
 import io.foxcapades.lib.cli.builder.util.properties.getOrNull
+import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.reflect.property
 import kotlin.reflect.KCallable
 
 internal class UniversalFlagImpl<A : Argument<V>, V>(
@@ -51,7 +51,7 @@ internal class UniversalFlagImpl<A : Argument<V>, V>(
 
   override fun shouldSerialize(
     config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, out KCallable<V>>,
+    reference: ValueAccessorReference<*, V, KCallable<V>>?,
   ) =
     fi?.shouldInclude(this, reference, config) ?: super.shouldSerialize(config, reference)
 

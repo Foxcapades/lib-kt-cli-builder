@@ -9,12 +9,12 @@ import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
 import io.foxcapades.lib.cli.builder.arg.format.NonNullGeneralStringifier
 import io.foxcapades.lib.cli.builder.arg.format.NullableGeneralStringifier
-import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
-import io.foxcapades.lib.cli.builder.reflect.property
-import io.foxcapades.lib.cli.builder.reflect.shouldQuote
 import io.foxcapades.lib.cli.builder.serial.*
 import io.foxcapades.lib.cli.builder.util.*
 import io.foxcapades.lib.cli.builder.util.properties.*
+import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.reflect.property
+import io.foxcapades.lib.cli.builder.util.reflect.shouldQuote
 import java.math.BigDecimal
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
@@ -55,8 +55,8 @@ internal class UniversalArgumentImpl<V>(
 
   override fun shouldSerialize(
     config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, out KCallable<V>>,
-  ) = filter.shouldInclude(this, reference, config)
+    reference: ValueAccessorReference<*, V, KCallable<V>>?,
+  ) = filter.shouldInclude(this, config, reference)
 
   override fun writeToString(writer: CliArgumentWriter<*, V>) =
     formatter.formatValue(get(), writer)

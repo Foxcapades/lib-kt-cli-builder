@@ -8,8 +8,8 @@ import io.foxcapades.lib.cli.builder.arg.filter.ArgZeroFilter.UByteZero
 import io.foxcapades.lib.cli.builder.arg.filter.ArgZeroFilter.UIntZero
 import io.foxcapades.lib.cli.builder.arg.filter.ArgZeroFilter.ULongZero
 import io.foxcapades.lib.cli.builder.arg.filter.ArgZeroFilter.UShortZero
-import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KCallable
@@ -24,8 +24,8 @@ import kotlin.reflect.KCallable
 internal object ArgGeneralDefaultFilter : ArgumentPredicate<Argument<Any?>, Any?> {
   override fun shouldInclude(
     argument: Argument<Any?>,
-    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
     config: CliSerializationConfig,
+    reference: ValueAccessorReference<*, Any?, KCallable<Any?>>?,
   ) =
     when {
       !argument.isSet     -> false

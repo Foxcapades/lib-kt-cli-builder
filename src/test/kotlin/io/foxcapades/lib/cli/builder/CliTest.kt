@@ -13,7 +13,7 @@ class CliTest {
 
   @Nested
   @DisplayName("using @CliCommand")
-  inner class WithCliCommand {
+  inner class WithCommand {
 
     @Nested
     @DisplayName("with annotated flags")

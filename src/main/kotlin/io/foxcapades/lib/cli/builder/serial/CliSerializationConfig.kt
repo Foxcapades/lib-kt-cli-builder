@@ -3,7 +3,7 @@ package io.foxcapades.lib.cli.builder.serial
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
 import io.foxcapades.lib.cli.builder.arg.format.NonNullGeneralStringifier
 import io.foxcapades.lib.cli.builder.arg.format.NullSerializer
-import io.foxcapades.lib.cli.builder.arg.properties.PropertyNameFormatter
+import io.foxcapades.lib.cli.builder.flag.properties.PropertyNameFormatter
 import io.foxcapades.lib.cli.builder.shell.SH
 import io.foxcapades.lib.cli.builder.shell.Shell
 
@@ -130,7 +130,7 @@ data class CliSerializationConfig(
     val NullSerializer get() = io.foxcapades.lib.cli.builder.arg.format.NullSerializer.useEmptyString()
 
     @JvmStatic
-    val PropertyNameFormatter get() = io.foxcapades.lib.cli.builder.arg.properties.PropertyNameFormatter.KebabCase
+    val PropertyNameFormatter get() = io.foxcapades.lib.cli.builder.flag.properties.PropertyNameFormatter.KebabCase
 
     @JvmStatic
     val FallbackSerializer get() = NonNullGeneralStringifier

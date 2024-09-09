@@ -1,9 +1,9 @@
 package io.foxcapades.lib.cli.builder.flag
 
 import io.foxcapades.lib.cli.builder.arg.CliArgument
-import io.foxcapades.lib.cli.builder.arg.properties.PropertyNameFormatter
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
-import io.foxcapades.lib.cli.builder.flag.filter.InvalidFlagFilter
+import io.foxcapades.lib.cli.builder.flag.filter.UnconfiguredFlagFilter
+import io.foxcapades.lib.cli.builder.flag.properties.PropertyNameFormatter
 import kotlin.reflect.KClass
 
 /**
@@ -63,7 +63,7 @@ annotation class CliFlag(
 
   val required: Boolean = false,
 
-  val inclusionTest: KClass<out FlagPredicate<*, *, *>> = InvalidFlagFilter::class,
+  val inclusionTest: KClass<out FlagPredicate<*, *, *>> = UnconfiguredFlagFilter::class,
 
   val argument: CliArgument = CliArgument()
 )

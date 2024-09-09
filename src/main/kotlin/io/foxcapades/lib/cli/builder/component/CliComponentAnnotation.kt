@@ -5,10 +5,4 @@ package io.foxcapades.lib.cli.builder.component
  *
  * @since 1.0.0
  */
-interface CliComponentAnnotation {
-
-  /**
-   * Indicates whether the annotation instance was marked as being required.
-   */
-  val required: Boolean
-}
+interface CliComponentAnnotation

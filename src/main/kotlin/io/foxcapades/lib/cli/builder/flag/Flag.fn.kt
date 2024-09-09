@@ -1,16 +1,30 @@
+@file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.flag
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.flag.impl.UniversalFlagImpl
+import io.foxcapades.lib.cli.builder.util.BUG
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
 
 // region Flag Base
 
-@Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
-inline fun Flag<*, *>.unsafeAnyType() =
-  this as Flag<Argument<Any?>, Any?>
+@Suppress("UNCHECKED_CAST")
+internal inline fun <V> Flag<*, *>.unsafeCast() = this as Flag<Argument<V>, V>
+
+
+internal inline fun Flag<*, *>.forceAny() = unsafeCast<Any?>()
+
+internal inline val Flag<*, *>.safeName
+  get() = if (hasLongForm) {
+    "long-form($longForm)"
+  } else if (hasShortForm) {
+    "short-form($shortForm)"
+  } else {
+    BUG()
+  }
+
 
 // endregion Flag Base
 
@@ -612,6 +626,8 @@ fun <T : Any> nullableFlag(shortForm: Char, type: KClass<out T>, action: Nullabl
 
 // endregion Constructors
 
+// region Constructor Support
+
 private fun <T : Any> KClass<*>.tryTyped(action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T>? {
   @Suppress("UNCHECKED_CAST")
   return when (java.`package`?.name) {
@@ -705,3 +721,5 @@ private fun <T : Any> KClass<out T>.tryNullableTyped(action: NullableFlagOptions
     else -> null
   } as Flag<Argument<T?>, T?>?
 }
+
+// endregion Constructor Support

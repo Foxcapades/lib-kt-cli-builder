@@ -1,11 +1,11 @@
 package io.foxcapades.lib.cli.builder.flag
 
-import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.properties.MutableDefaultableProperty
+import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
 import kotlin.reflect.KCallable
 
 /**
@@ -62,10 +62,14 @@ interface Flag<out A : Argument<V>, V> : MutableDefaultableProperty<V>, CliCallC
    *
    * @param config Current serialization configuration.
    *
+   * @param reference Reference to the class property or method from which the
+   * `Flag` instance was obtained.  If the `Flag` instance is not a property
+   * delegate, this parameter will be `null`.
+   *
    * @return `true` if this `Flag` instance should be included in serialization
    * output, otherwise `false` if this `Flag` should be omitted.
    */
-  fun shouldSerialize(config: CliSerializationConfig, reference: ValueAccessorReference<*, V, out KCallable<V>>): Boolean =
+  fun shouldSerialize(config: CliSerializationConfig, reference: ValueAccessorReference<*, V, KCallable<V>>?): Boolean =
     argument.shouldSerialize(config, reference)
 
   fun writeToString(builder: CliFlagWriter<*, V>)

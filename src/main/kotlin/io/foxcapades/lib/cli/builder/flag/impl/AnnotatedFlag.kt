@@ -4,29 +4,36 @@ import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.flag.BooleanFlag
 import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
 import io.foxcapades.lib.cli.builder.flag.Flag
-import io.foxcapades.lib.cli.builder.flag.ResolvedFlag
+import io.foxcapades.lib.cli.builder.flag.ResolvedFlagOld
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
-import io.foxcapades.lib.cli.builder.reflect.AnnotatedValueAccessorReference
-import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
-import io.foxcapades.lib.cli.builder.reflect.getOrCreate
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
+import io.foxcapades.lib.cli.builder.util.reflect.AnnotatedValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty1
 
-internal class AnnotatedFlag<T : Any>(
+/**
+ * Represents a flag delegate property that also has a `CliFlag` annotation
+ * attached.
+ *
+ * @param T Type of the flag delegate's containing class.
+ */
+internal class AnnotatedFlag<T : Any, V>(
   override val type:       KClass<out T>,
   override val instance:   T,
-  override val accessor:   KCallable<Any?>,
+  override val accessor:   KProperty1<T, V>,
   override val annotation: CliFlagAnnotation,
-  private val delegate:    Flag<Argument<Any?>, Any?>,
+  private val delegate:    Flag<Argument<V>, V>,
 )
-  : ResolvedFlag<T, Any?>
-  , AnnotatedValueAccessorReference<T, Any?, KCallable<Any?>, CliFlagAnnotation>
+  : ResolvedFlagOld<T, V>
+  , AnnotatedValueAccessorReference<T, V, KCallable<V>, CliFlagAnnotation>
 {
-  private inline val filter: FlagPredicate<Flag<Argument<Any?>, Any?>, Argument<Any?>, Any?>
+  private inline val filter: FlagPredicate<Flag<Argument<V>, V>, Argument<V>, V>
     get() = annotation.filter.getOrCreate().unsafeCast()
 
   override val hasLongForm
@@ -57,14 +64,14 @@ internal class AnnotatedFlag<T : Any>(
 
   override fun shouldSerialize(
     config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
+    reference: ValueAccessorReference<*, V, KCallable<V>>?,
   ) =
     if (annotation.hasFilter)
       filter.shouldInclude(delegate, this, config)
     else
       delegate.shouldSerialize(config, reference)
 
-  override fun writeToString(builder: CliFlagWriter<*, Any?>) {
+  override fun writeToString(builder: CliFlagWriter<*, V>) {
     if (delegate is BooleanFlag && delegate.isToggleFlag) {
 
       // Filter out flags that are not set, or are set to false.

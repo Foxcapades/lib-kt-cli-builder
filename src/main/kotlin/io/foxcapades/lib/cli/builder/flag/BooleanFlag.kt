@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.builder.flag
 
-import io.foxcapades.lib.cli.builder.arg.BooleanArgument
+import io.foxcapades.lib.cli.builder.arg.Argument
 
-interface BooleanFlag : ScalarFlag<BooleanArgument, Boolean> {
+interface BooleanFlag : Flag<Argument<Boolean>, Boolean> {
   val isToggleFlag: Boolean
 }

@@ -5,7 +5,7 @@ import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 fun interface NullSerializer : ArgumentFormatter<Any?> {
   override fun formatValue(value: Any?, writer: CliArgumentWriter<*, Any?>) = formatValue(writer)
 
-  fun formatValue(builder: CliArgumentWriter<*, Any?>)
+  fun formatValue(builder: CliArgumentWriter<*, *>)
 
   companion object {
     @JvmStatic

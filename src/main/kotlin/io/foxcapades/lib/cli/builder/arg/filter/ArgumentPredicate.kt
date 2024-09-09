@@ -1,8 +1,8 @@
 package io.foxcapades.lib.cli.builder.arg.filter
 
 import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
 import kotlin.reflect.KCallable
 
 /**
@@ -30,25 +30,26 @@ import kotlin.reflect.KCallable
  */
 fun interface ArgumentPredicate<A : Argument<V>, V> {
   /**
-   * Called to test whether the given argument should be included in the
+   * Called to test whether the given [Argument] should be included in the
    * serialized CLI call output.
    *
-   * This function will only be called on arguments that either have a default
-   * value or have been explicitly set.
+   * This function will only be called on `Argument` instances that either have
+   * a default value or have been explicitly set.
    *
-   * @param argument Argument instance containing the value under test.
-   *
-   * @param reference Reference to the class property or method from which the
-   * argument was obtained.
+   * @param argument `Argument` instance containing the value under test.
    *
    * @param config Current serialization config.
+   *
+   * @param reference Reference to the class property or method from which the
+   * `Argument` instance was obtained.  If the `Argument` instance is not a
+   * property delegate, this parameter will be `null`.
    *
    * @return `true` if the value should be included in the serialized CLI call
    * output, otherwise `false`.
    */
   fun shouldInclude(
     argument:  A,
-    reference: ValueAccessorReference<*, V, out KCallable<V>>,
-    config: CliSerializationConfig
+    config:    CliSerializationConfig,
+    reference: ValueAccessorReference<*, V, KCallable<V>>?
   ): Boolean
 }

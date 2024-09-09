@@ -25,5 +25,5 @@ internal inline fun <T, R> Iterator<T>.mapNonNull(crossinline fn: (T) -> R?) = i
     next().let(fn)?.then { yield(it) }
 }
 
-internal inline fun <T, reified R: Any> Iterable<T>.findInstance(): R? =
+internal inline fun <reified R : Any> Iterable<*>.findInstance(): R? =
   find { it is R }?.let { it as R }

@@ -1,8 +1,7 @@
 package io.foxcapades.lib.cli.builder
 
-import io.foxcapades.lib.cli.builder.flag.ResolvedFlag
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.util.isPrintable
-import io.foxcapades.lib.cli.builder.reflect.safeName
 
 class InvalidFlagFormException(message: String, val invalidForm: InvalidForm) : RuntimeException(message) {
   inline val isAboutShortFlag get() = invalidForm.isShort || invalidForm.isBoth
@@ -10,11 +9,9 @@ class InvalidFlagFormException(message: String, val invalidForm: InvalidForm) : 
   inline val isAboutLongFlag get() = invalidForm.isLong || invalidForm.isBoth
 
   companion object {
-    fun invalidBothForms(flag: ResolvedFlag<*, *>): InvalidFlagFormException {
+    fun invalidBothForms(flag: ResolvedFlag<*>): InvalidFlagFormException {
       val msg = StringBuilder()
-        .append(flag.type.safeName)
-        .append("::")
-        .append(flag.accessor.name)
+        .append(flag.qualifiedName)
         .append(" was configured with both invalid short-form and invalid long-form names: (short=")
 
       if (flag.shortForm.isPrintable) {
@@ -38,7 +35,7 @@ class InvalidFlagFormException(message: String, val invalidForm: InvalidForm) : 
     }
 
     @JvmStatic
-    fun invalidShortForm(flag: ResolvedFlag<*, *>): InvalidFlagFormException {
+    fun invalidShortForm(flag: ResolvedFlag<*>): InvalidFlagFormException {
       val msg = startSharedMessage(flag, false)
 
       if (flag.shortForm.isPrintable) {
@@ -51,7 +48,7 @@ class InvalidFlagFormException(message: String, val invalidForm: InvalidForm) : 
     }
 
     @JvmStatic
-    fun invalidLongForm(flag: ResolvedFlag<*, *>): InvalidFlagFormException {
+    fun invalidLongForm(flag: ResolvedFlag<*>): InvalidFlagFormException {
       val msg = startSharedMessage(flag, true).append('\'')
 
       for (c in flag.longForm) {
@@ -67,11 +64,9 @@ class InvalidFlagFormException(message: String, val invalidForm: InvalidForm) : 
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun startSharedMessage(flag: ResolvedFlag<*, *>, long: Boolean) =
+    private inline fun startSharedMessage(flag: ResolvedFlag<*>, long: Boolean) =
       StringBuilder()
-        .append(flag.type.safeName)
-        .append("::")
-        .append(flag.accessor.name)
+        .append(flag.qualifiedName)
         .append(" was configured with an invalid ")
         .append(if (long) "long" else "short")
         .append("form flag name: ")

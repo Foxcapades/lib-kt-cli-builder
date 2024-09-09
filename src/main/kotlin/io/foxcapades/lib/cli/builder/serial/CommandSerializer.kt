@@ -7,108 +7,182 @@ import kotlin.math.max
  *
  * @since 1.0.0
  */
-interface CommandSerializer<T : Any> {
+interface CommandSerializer {
   val config: CliSerializationConfig
 
   /**
-   * Serializes the CLI call into an iterator of CLI call parts.
+   * Serializes a CLI call into an iterator of CLI call parts.
    *
    * The returned iterator will always contain at least one value, the name of
    * or path to the executable command.
    *
+   * **IMPORTANT**: When serializing to `Iterator`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
+   *
    * @return Iterator of CLI call parts.
    */
-  fun serializeToIterator(): Iterator<String>
+  fun serializeToIterator(command: Any): Iterator<String>
 
   /**
-   * Serializes the CLI call into a sequence of CLI call parts.
+   * Serializes a CLI call into a sequence of CLI call parts.
    *
    * The returned sequence will always contain at least one value, the name of
    * or path to the executable command.
    *
+   * **IMPORTANT**: When serializing to `Sequence`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
+   *
    * @return Sequence of CLI call parts.
    */
-  fun serializeToSequence(): Sequence<String> =
-    Sequence(::serializeToIterator)
+  fun serializeToSequence(command: Any): Sequence<String> =
+    Sequence { serializeToIterator(command) }
 
   /**
-   * Serializes the CLI call into an iterable of CLI call parts.
+   * Serializes a CLI call into an iterable of CLI call parts.
    *
    * The returned iterable will always contain at least one value, the name of
    * or path to the executable command.
    *
+   * **IMPORTANT**: When serializing to `Iterable`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
+   *
    * @return Iterable of CLI call parts.
    */
-  fun serializeToIterable(): Iterable<String> =
-    Iterable(::serializeToIterator)
+  fun serializeToIterable(command: Any): Iterable<String> =
+    Iterable { serializeToIterator(command) }
 
   /**
-   * Serializes the CLI call into a `List` of CLI call parts.
+   * Serializes a CLI call into a `List` of CLI call parts.
    *
    * The returned `List` will always contain at least one value, the name of
    * or path to the executable command.
+   *
+   * **IMPORTANT**: When serializing to `List`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
    *
    * @return List of CLI call parts.
    *
    * @see serializeToMutableList
    */
-  fun serializeToList(): List<String> =
-    serializeToList(16)
+  fun serializeToList(command: Any): List<String> =
+    serializeToList(command, 16)
 
   /**
-   * Serializes the CLI call into a pre-sized `List` of CLI call parts.
+   * Serializes a CLI call into a pre-sized `List` of CLI call parts.
    *
    * The returned `List` will always contain at least one value, the name of
    * or path to the executable command.
    *
-   * @param preSize Starting size to use when constructing the returned list,
-   * may be used to reduce reallocations in situations where the size of the
-   * generated command is likely to contain many elements.
+   * **IMPORTANT**: When serializing to `List`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
+   *
+   * @param preSize Starting size to use when constructing the returned list.
+   * This value may be used to reduce reallocations in situations where the size
+   * of the generated command is likely to contain many elements.
+   *
+   * The output list size will be dependent on the number of elements actually
+   * serialized as part of the call.
    *
    * @return List of CLI call parts.
    *
    * @see serializeToMutableList
    */
-  fun serializeToList(preSize: Int): List<String> =
-    serializeToArray(preSize).asList()
+  fun serializeToList(command: Any, preSize: Int): List<String> =
+    serializeToArray(command, preSize).asList()
 
   /**
-   * Serializes the CLI call into a `MutableList` of CLI call parts.
+   * Serializes a CLI call into a `MutableList` of CLI call parts.
    *
    * The returned `List` will always contain at least one value, the name of
    * or path to the executable command.
+   *
+   * **IMPORTANT**: When serializing to `List`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
    *
    * @return Mutable list of CLI call parts.
    *
    * @see serializeToList
    */
-  fun serializeToMutableList(): MutableList<String> =
-    serializeToMutableList(32)
+  fun serializeToMutableList(command: Any): MutableList<String> =
+    serializeToMutableList(command, 16)
 
   /**
-   * Serializes the CLI call into a pre-sized `MutableList` of CLI call parts.
+   * Serializes a CLI call into a pre-sized `MutableList` of CLI call parts.
    *
    * The returned `List` will always contain at least one value, the name of
    * or path to the executable command.
    *
-   * @param preSize Starting size to use when constructing the returned list,
-   * may be used to reduce reallocations in situations where the size of the
-   * generated command is likely to contain many elements.
+   * **IMPORTANT**: When serializing to `List`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
+   *
+   * @param preSize Starting size to use when constructing the returned list.
+   * This value may be used to reduce reallocations in situations where the size
+   * of the generated command is likely to contain many elements.
+   *
+   * The output list size will be dependent on the number of elements actually
+   * serialized as part of the call.
    *
    * @return Mutable list of CLI call parts.
    *
    * @see serializeToList
    */
-  fun serializeToMutableList(preSize: Int): MutableList<String> =
-    ArrayList<String>(preSize).apply { serializeToIterator().forEach { add(it) } }
+  fun serializeToMutableList(command: Any, preSize: Int): MutableList<String> =
+    ArrayList<String>(max(8, preSize)).apply { serializeToIterator(command).forEach { add(it) } }
 
-  fun serializeToArray(): Array<String> =
-    serializeToArray(32)
+  /**
+   * Serializes a CLI call into an array of CLI call parts.
+   *
+   * The returned array will always contain at least one value, the name of
+   * or path to the executable command.
+   *
+   * **IMPORTANT**: When serializing to `Array`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
+   *
+   * @return Array of CLI call parts.
+   */
+  fun serializeToArray(command: Any): Array<String> =
+    serializeToArray(command, 16)
 
-  fun serializeToArray(preSize: Int): Array<String> {
+  /**
+   * Serializes a CLI call into an array of CLI call parts.
+   *
+   * The returned array will always contain at least one value, the name of
+   * or path to the executable command.
+   *
+   * **IMPORTANT**: When serializing to `Array`, string quoting and escaping
+   * rules are not applied!
+   *
+   * @param command Object to serialize.
+   *
+   * @param preSize Starting size to use when constructing the returned array.
+   * This value may be used to reduce reallocations in situations where the size
+   * of the generated command is likely to contain many elements.
+   *
+   * The output array size will be dependent on the number of elements actually
+   * serialized as part of the call.
+   *
+   * @return Array of CLI call parts.
+   */
+  fun serializeToArray(command: Any, preSize: Int): Array<String> {
     var pos = 0
     var tmp = arrayOfNulls<String>(max(8, preSize))
-    val seq = serializeToIterator()
+    val seq = serializeToIterator(command)
 
     while (seq.hasNext()) {
       if (pos == tmp.size)
@@ -121,8 +195,27 @@ interface CommandSerializer<T : Any> {
     return (if (pos == tmp.size) tmp else tmp.copyOf(pos)) as Array<String>
   }
 
-  fun serializeToString(): String =
-    serializeToString(2048)
+  /**
+   * Serializes a CLI call into a full call string.
+   *
+   * @param command Object to serialize.
+   *
+   * @return Serialized CLI call string.
+   */
+  fun serializeToString(command: Any): String =
+    serializeToString(command, 2048)
 
-  fun serializeToString(preSize: Int): String
+  /**
+   * Serializes a CLI call into a full call string.
+   *
+   * @param command Object to serialize.
+   *
+   * @param preSize Starting size to use when initializing a buffer with which
+   * the CLI call string will be built.  This value may be used to reduce
+   * allocations in situations where the size of the generated command string is
+   * likely to be larger than the default [preSize] value of `2048` characters.
+   *
+   * @return Serialized CLI call string.
+   */
+  fun serializeToString(command: Any, preSize: Int): String
 }

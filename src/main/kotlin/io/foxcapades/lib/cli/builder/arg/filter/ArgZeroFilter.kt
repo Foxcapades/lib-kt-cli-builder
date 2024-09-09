@@ -1,9 +1,9 @@
 package io.foxcapades.lib.cli.builder.arg.filter
 
 import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.Bytes
+import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KCallable
@@ -25,8 +25,8 @@ internal object ArgZeroFilter : ArgumentPredicate<Argument<Any?>, Any?> {
 
   override fun shouldInclude(
     argument: Argument<Any?>,
-    reference: ValueAccessorReference<*, Any?, out KCallable<Any?>>,
-    config: CliSerializationConfig
+    config: CliSerializationConfig,
+    reference: ValueAccessorReference<*, Any?, KCallable<Any?>>?
   ) = when {
     !argument.isSet     -> false
     argument.hasDefault -> argument.getDefault() == argument.get()
