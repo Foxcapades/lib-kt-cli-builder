@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.arg.format
 
+import java.text.DecimalFormat
 import java.text.NumberFormat
 
 /**
@@ -7,6 +8,7 @@ import java.text.NumberFormat
  *
  * @since 1.0.0
  */
+@Suppress("NOTHING_TO_INLINE")
 object DoubleFormat {
   /**
    * Creates a new [ArgumentFormatter] instance fromm the given [NumberFormat].
@@ -16,9 +18,11 @@ object DoubleFormat {
    * @return An `ArgumentFormatter` using the given `NumberFormat`.
    */
   @JvmStatic
-  @Suppress("NOTHING_TO_INLINE")
   inline fun of(format: NumberFormat) =
-    ArgumentFormatter<Double> { it, c -> c.writeString(format.format(it)) }
+    ArgumentFormatter<Double> { it, c, _ -> c.writeString(format.format(it)) }
+
+  @JvmStatic
+  inline fun ofFormat(format: String) = of(DecimalFormat(format))
 
   /**
    * Formats double values in the default region-based currency format.

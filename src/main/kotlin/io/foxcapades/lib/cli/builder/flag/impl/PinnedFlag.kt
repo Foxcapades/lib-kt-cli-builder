@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 internal class PinnedFlag<T : Any, V>(
-  override val type:     KClass<out T>,
+  override val containingType:     KClass<out T>,
   override val instance: T,
   override val accessor: KProperty1<T, V>,
   internal val delegate: Flag<Argument<V>, V>

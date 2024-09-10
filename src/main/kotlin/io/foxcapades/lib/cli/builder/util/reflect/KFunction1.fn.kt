@@ -17,3 +17,10 @@ internal inline val KFunction1<*, *>.isGetter
 
 internal inline fun KFunction1<*, *>.qualifiedName(parent: KClass<*>) =
   parent.qualifiedName + "::" + name + "(...)"
+
+
+internal inline fun <reified A : Annotation> KFunction1<*, *>.makeDuplicateAnnotationsError(parent: KClass<out Any>) =
+  makeDuplicateAnnotationsError(parent, A::class)
+
+internal inline fun KFunction1<*, *>.makeDuplicateAnnotationsError(parent: KClass<out Any>, type: KClass<out Annotation>) =
+  IllegalStateException("${qualifiedName(parent)} has more than one ${type::class.simpleName} annotation")

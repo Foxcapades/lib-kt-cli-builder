@@ -18,7 +18,7 @@ object ByteFormat {
   @JvmStatic
   @Suppress("NOTHING_TO_INLINE")
   inline fun of(format: NumberFormat) =
-    ArgumentFormatter<Byte> { it, c -> c.writeString(format.format(it.toLong())) }
+    ArgumentFormatter<Byte> { it, c, _ -> c.writeString(format.format(it.toLong())) }
 
   /**
    * Formats a byte value in the fewest hex digits possible.
@@ -30,7 +30,7 @@ object ByteFormat {
    */
   @JvmStatic
   inline val MinimalHex get() =
-    ArgumentFormatter<Byte> { it, c -> c.writeString("%x".format(it)) }
+    ArgumentFormatter<Byte> { it, c, _ -> c.writeString("%x".format(it)) }
 
   /**
    * Formats a byte value as a 2-digit hex string.
@@ -42,12 +42,12 @@ object ByteFormat {
    */
   @JvmStatic
   inline val HexPadded get() =
-    ArgumentFormatter<Byte> { it, c -> c.writeString("%02x".format(it)) }
+    ArgumentFormatter<Byte> { it, c, _ -> c.writeString("%02x".format(it)) }
 
   /**
    * Formats a byte value as an ASCII character.
    */
   @JvmStatic
   inline val ASCII get() =
-    ArgumentFormatter<Byte> { it, c -> c.writeChar(it) }
+    ArgumentFormatter<Byte> { it, c, _ -> c.writeChar(it) }
 }

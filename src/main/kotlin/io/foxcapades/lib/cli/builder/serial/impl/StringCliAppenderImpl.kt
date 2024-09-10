@@ -1,8 +1,11 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
 import io.foxcapades.lib.cli.builder.arg.ResolvedArgumentOld
+import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
+import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.component.ResolvedComponentOld
 import io.foxcapades.lib.cli.builder.flag.ResolvedFlagOld
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
@@ -19,7 +22,11 @@ internal class StringCliAppenderImpl<T : Any>(
   private val components: Iterator<ResolvedComponentOld<T, Any?>>,
   override val config: CliSerializationConfig,
   initSize: Int = 2048,
-) : CliFlagWriter<T, Any?>, CliArgumentWriter<T, Any?> {
+)
+  : AbstractCliAppender<T>()
+  , CliFlagWriter<T, Any?>
+  , CliArgumentWriter<T, Any?>
+{
   private val buffer = StringBuilder(initSize)
     .apply {
       append(command[0])
@@ -31,41 +38,18 @@ internal class StringCliAppenderImpl<T : Any>(
 
   private enum class Type { Long, Short, InQuotes, Arg, Raw }
 
+  private lateinit var reference: ResolvedComponent
+
   private var last = Type.Raw
 
-  private inline val flag
-    get() = reference as ResolvedFlagOld<T, Any?>
+  @Suppress("UNCHECKED_CAST")
+  override val flag
+    get() = reference as ResolvedFlag<Any?>
 
-  private inline val argument
-    get() = when (val ref = reference) {
-      is ResolvedFlagOld -> ref.argument
-      is ResolvedArgumentOld -> ref
-      else                -> BUG()
-    }
+  @Suppress("UNCHECKED_CAST")
+  override val argument
+    get() = reference as ResolvedArgument<Any?>
 
-  override lateinit var reference: ResolvedComponentOld<T, Any?>
-    private set
-
-  override fun writePreferredForm(): CliArgumentWriter<T, Any?> =
-    if (flag.hasLongForm) {
-      if (config.preferredFlagForm.isLong || !flag.hasShortForm)
-        writeLongForm()
-      else
-        writeShortForm()
-    } else if (flag.hasShortForm) {
-      writeShortForm()
-    } else {
-      writeLongForm(config.propertyNameFormatter.format(reference.name, config))
-    }
-
-  override fun writePreferredForm(action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writePreferredForm().action()
-
-  override fun writeLongForm(): CliArgumentWriter<T, Any?> =
-    writeLongForm(flag.longForm)
-
-  override fun writeLongForm(action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writeLongForm().action()
 
   override fun writeLongForm(custom: String): CliArgumentWriter<T, Any?> {
     prepNext()
@@ -75,15 +59,6 @@ internal class StringCliAppenderImpl<T : Any>(
     return this
   }
 
-  override fun writeLongForm(custom: String, action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writeLongForm(custom).action()
-
-  override fun writeShortForm(): CliArgumentWriter<T, Any?> =
-    writeShortForm(flag.shortForm)
-
-  override fun writeShortForm(action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writeShortForm().action()
-
   override fun writeShortForm(custom: Char): CliArgumentWriter<T, Any?> {
     prepNext()
     buffer.append(config.shortFlagPrefix).append(custom)
@@ -91,12 +66,6 @@ internal class StringCliAppenderImpl<T : Any>(
 
     return this
   }
-
-  override fun writeShortForm(custom: Char, action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writeShortForm(custom).action()
-
-  override fun rawWriteChar(char: Byte) =
-    rawWriteChar(char.toInt().toChar())
 
   override fun rawWriteChar(char: Char) {
     prepNext()
@@ -108,10 +77,6 @@ internal class StringCliAppenderImpl<T : Any>(
     prepNext()
     string.forEach(::internalWriteChar)
     flush()
-  }
-
-  override fun writeChar(char: Byte) {
-    writeChar(char.toInt().toChar())
   }
 
   override fun writeChar(char: Char) {

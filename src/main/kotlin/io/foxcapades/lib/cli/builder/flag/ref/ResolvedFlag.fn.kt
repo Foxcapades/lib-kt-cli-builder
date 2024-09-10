@@ -29,3 +29,12 @@ internal fun ResolvedFlag<*>.validateFlagNames(config: CliSerializationConfig) {
 }
 
 // endregion Validation
+
+// region Unsafe Casting
+
+@Suppress("UNCHECKED_CAST")
+internal fun <T : ResolvedFlag<V>, V> T.forceAny() = this as ResolvedFlag<Any?>
+
+// endregion Unsafe Casting
+
+

@@ -18,7 +18,7 @@ object ShortFormat {
   @JvmStatic
   @Suppress("NOTHING_TO_INLINE")
   inline fun of(format: NumberFormat) =
-    ArgumentFormatter<Short> { it, c -> c.writeString(format.format(it.toLong())) }
+    ArgumentFormatter<Short> { it, c, _ -> c.writeString(format.format(it.toLong())) }
 
   /**
    * Formats values in the fewest hex digits possible.
@@ -32,7 +32,7 @@ object ShortFormat {
    */
   @JvmStatic
   inline val MinimalHex
-    get() = ArgumentFormatter<Short> { it, c -> c.writeString("%x".format(it)) }
+    get() = ArgumentFormatter<Short> { it, c, _ -> c.writeString("%x".format(it)) }
 
   /**
    * Formats value as 4-digit hex strings.
@@ -45,5 +45,5 @@ object ShortFormat {
    * ```
    */
   @JvmStatic
-  inline val HexPadded get() = ArgumentFormatter<Short> { it, c -> c.writeString("%04x".format(it)) }
+  inline val HexPadded get() = ArgumentFormatter<Short> { it, c, _ -> c.writeString("%04x".format(it)) }
 }

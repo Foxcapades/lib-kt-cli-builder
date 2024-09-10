@@ -1,29 +1,18 @@
 package io.foxcapades.lib.cli.builder.arg
 
-import io.foxcapades.lib.cli.builder.arg.filter.UnconfiguredArgFilter
-import io.foxcapades.lib.cli.builder.arg.format.UnconfiguredArgFormatter
+import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
+import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
 import io.foxcapades.lib.cli.builder.component.CliComponentAnnotation
+import kotlin.reflect.KClass
 
-@JvmInline
-internal value class CliArgumentAnnotation(val annotation: CliArgument) : CliComponentAnnotation {
+interface CliArgumentAnnotation : CliComponentAnnotation<CliArgument> {
   /**
    * Indicates whether the annotation instance was marked as being required.
    */
-  inline val required
-    get() = annotation.required
-
-  inline val hasFilter
-    get() = annotation.inclusionTest != UnconfiguredArgFilter::class
-
-  inline val filter
-    get() = annotation.inclusionTest
-
-  inline val shouldQuote
-    get() = annotation.shouldQuote
-
-  inline val hasFormatter
-    get() = annotation.formatter != UnconfiguredArgFormatter::class
-
-  inline val formatter
-    get() = annotation.formatter
+  val required: CliArgument.Toggle
+  val shouldQuote: CliArgument.Toggle
+  val hasFilter: Boolean
+  val filter: KClass<out ArgumentPredicate<*, *>>
+  val hasFormatter: Boolean
+  val formatter: KClass<out ArgumentFormatter<*>>
 }

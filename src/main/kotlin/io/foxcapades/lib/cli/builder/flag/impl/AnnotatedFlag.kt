@@ -2,7 +2,6 @@ package io.foxcapades.lib.cli.builder.flag.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.flag.BooleanFlag
-import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
 import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.ResolvedFlagOld
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
@@ -24,14 +23,14 @@ import kotlin.reflect.KProperty1
  * @param T Type of the flag delegate's containing class.
  */
 internal class AnnotatedFlag<T : Any, V>(
-  override val type:       KClass<out T>,
+  override val containingType:       KClass<out T>,
   override val instance:   T,
   override val accessor:   KProperty1<T, V>,
-  override val annotation: CliFlagAnnotation,
+  override val annotation: CliFlagAnnotationImpl,
   private val delegate:    Flag<Argument<V>, V>,
 )
   : ResolvedFlagOld<T, V>
-  , AnnotatedValueAccessorReference<T, V, KCallable<V>, CliFlagAnnotation>
+  , AnnotatedValueAccessorReference<T, V, KCallable<V>, CliFlagAnnotationImpl>
 {
   private inline val filter: FlagPredicate<Flag<Argument<V>, V>, Argument<V>, V>
     get() = annotation.filter.getOrCreate().unsafeCast()
@@ -71,7 +70,7 @@ internal class AnnotatedFlag<T : Any, V>(
     else
       delegate.shouldSerialize(config, reference)
 
-  override fun writeToString(builder: CliFlagWriter<*, V>) {
+  override fun writeToString(writer: CliFlagWriter<*, V>) {
     if (delegate is BooleanFlag && delegate.isToggleFlag) {
 
       // Filter out flags that are not set, or are set to false.
@@ -79,11 +78,11 @@ internal class AnnotatedFlag<T : Any, V>(
       if (!delegate.isSet || !delegate.argument.get())
         return
 
-      builder.writePreferredForm()
+      writer.writePreferredForm()
     } else {
-      val argWriter = builder.writePreferredForm()
+      val argWriter = writer.writePreferredForm()
 
-      if (delegate.argument.shouldSerialize(builder.config, builder.reference))
+      if (delegate.argument.shouldSerialize(writer.config, writer.reference))
         argument.writeToString(argWriter)
     }
   }

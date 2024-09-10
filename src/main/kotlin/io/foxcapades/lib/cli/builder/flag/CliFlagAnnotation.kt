@@ -1,34 +1,27 @@
 package io.foxcapades.lib.cli.builder.flag
 
+import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
 import io.foxcapades.lib.cli.builder.component.CliComponentAnnotation
-import io.foxcapades.lib.cli.builder.flag.filter.UnconfiguredFlagFilter
+import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
+import kotlin.reflect.KClass
 
-@JvmInline
-internal value class CliFlagAnnotation(val annotation: CliFlag) : CliComponentAnnotation {
+interface CliFlagAnnotation : CliComponentAnnotation<CliFlag> {
   /**
    * Indicates whether the annotation instance was marked as being required.
    */
-  inline val required
-    get() = annotation.required
+  val required: CliFlag.Toggle
 
-  inline val hasLongForm
-    get() = annotation.hasLongForm
+  val hasLongForm: Boolean
 
-  inline val longForm
-    get() = annotation.longForm
+  val longForm: String
 
-  inline val hasShortForm
-    get() = annotation.hasShortForm
+  val hasShortForm: Boolean
 
-  inline val shortForm
-    get() = annotation.shortForm
+  val shortForm: Char
 
-  inline val hasFilter
-    get() = annotation.inclusionTest != UnconfiguredFlagFilter::class
+  val hasFilter: Boolean
 
-  inline val filter
-    get() = annotation.inclusionTest
+  val filter: KClass<out FlagPredicate<*, *, *>>
 
-  inline val argument
-    get() = annotation.argument
+  val argument: CliArgumentAnnotation
 }

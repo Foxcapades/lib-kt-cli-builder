@@ -2,6 +2,7 @@ package io.foxcapades.lib.cli.builder.arg
 
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
+import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.reflect.AnnotatedValueAccessorReference
@@ -20,14 +21,14 @@ import kotlin.reflect.KProperty1
  * @param V Argument value type.
  */
 internal class AnnotatedArgument<T : Any, V>(
-  override val type:       KClass<out T>,
+  override val containingType:       KClass<out T>,
   override val instance:   T,
   override val accessor:   KProperty1<T, V>,
-  override val annotation: CliArgumentAnnotation,
+  override val annotation: CliArgumentAnnotationImpl,
   private  val delegate:   Argument<V>,
 )
   : ResolvedArgumentOld<T, V>
-  , AnnotatedValueAccessorReference<T, V, KCallable<V>, CliArgumentAnnotation>
+  , AnnotatedValueAccessorReference<T, V, KCallable<V>, CliArgumentAnnotationImpl>
 {
   override val hasDefault
     get() = delegate.hasDefault

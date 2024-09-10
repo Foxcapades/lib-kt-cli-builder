@@ -7,13 +7,13 @@ import io.foxcapades.lib.cli.builder.arg.format.UnconfiguredArgFormatter
 import kotlin.reflect.KClass
 
 annotation class CliArgument(
-  val required: Boolean = false,
+  val required: Toggle = Toggle.Unset,
 
   val inclusionTest: KClass<out ArgumentPredicate<*, *>> = UnconfiguredArgFilter::class,
 
-  val shouldQuote: ShouldQuote = ShouldQuote.Auto,
+  val shouldQuote: Toggle = Toggle.Unset,
 
   val formatter: KClass<out ArgumentFormatter<*>> = UnconfiguredArgFormatter::class
 ) {
-  enum class ShouldQuote { Yes, No, Auto }
+  enum class Toggle { Yes, No, Unset }
 }

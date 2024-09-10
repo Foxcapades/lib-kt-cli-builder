@@ -4,7 +4,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction1
 
 internal class GetterReference<T : Any, V>(
-  override val type:     KClass<out T>,
+  override val containingType:     KClass<out T>,
   override val accessor: KFunction1<T, V>,
 ) : ValueAccessorReference<T, V, KFunction1<T, V>> {
   override val qualifiedName: String
@@ -12,5 +12,5 @@ internal class GetterReference<T : Any, V>(
 
   override fun getValue(instance: T) = accessor.invoke(instance)
 
-  override fun toString() = "Method:${type.safeName}::${accessor.name}"
+  override fun toString() = "Method:${containingType.safeName}::${accessor.name}"
 }

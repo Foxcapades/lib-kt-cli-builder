@@ -7,3 +7,7 @@ import kotlin.reflect.KCallable
 interface ResolvedArgumentValueRef<T : Any, V>
   : ResolvedArgument<V>
   , ValueAccessorReference<T, Argument<V>, KCallable<Argument<V>>>
+{
+  override val qualifiedName: String
+    get() = "argument " + super.qualifiedName
+}

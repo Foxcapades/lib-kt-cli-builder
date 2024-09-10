@@ -34,10 +34,10 @@ internal class BooleanFlagImpl(
     argument   = BasicArgumentImpl(opts.argument)
   )
 
-  override fun writeToString(builder: CliFlagWriter<*, Boolean>) {
+  override fun writeToString(writer: CliFlagWriter<*, Boolean>) {
     if (!isToggleFlag)
-      super.writeToString(builder)
+      super.writeToString(writer)
     else if (argument.getOr(false))
-      builder.writePreferredForm()
+      writer.writePreferredForm()
   }
 }

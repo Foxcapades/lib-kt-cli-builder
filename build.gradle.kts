@@ -44,6 +44,8 @@ kotlin {
 }
 
 dependencies {
+  api("org.slf4j:slf4j-api:2.0.16")
+
   implementation(kotlin("reflect"))
 
   testImplementation("org.mockito:mockito-junit-jupiter:5.13.0")

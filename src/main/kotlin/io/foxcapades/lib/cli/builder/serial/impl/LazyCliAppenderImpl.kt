@@ -1,8 +1,8 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
-import io.foxcapades.lib.cli.builder.arg.ResolvedArgumentOld
-import io.foxcapades.lib.cli.builder.component.ResolvedComponentOld
-import io.foxcapades.lib.cli.builder.flag.ResolvedFlagOld
+import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
+import io.foxcapades.lib.cli.builder.component.ResolvedComponent
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
@@ -14,45 +14,34 @@ import io.foxcapades.lib.cli.builder.util.dump
  * serialized.
  */
 internal class LazyCliAppenderImpl<T : Any>(
-  private val components: Iterator<Any>,
-  override val config:    CliSerializationConfig,
-  initSize: Int = 2048
-) : CliFlagWriter<T, Any?>, CliArgumentWriter<T, Any?>, Iterator<String> {
+  components: Iterator<Any>,
+  config:     CliSerializationConfig,
+  initSize:   Int = 2048
+)
+  : AbstractCliAppender<T>(config)
+  , CliFlagWriter<T, Any?>
+  , CliArgumentWriter<T, Any?>
+  , Iterator<String>
+{
+  private val components = components
+
   private val queue = ArrayDeque<String>(4)
 
   private var dirty = false
 
   private val buffer by lazy { StringBuilder(initSize) }
 
-  private inline val flag
-    get() = reference as ResolvedFlagOld<T, Any?>
+  private lateinit var reference: ResolvedComponent
 
-  private inline val argument
-    get() = reference as ResolvedArgumentOld<T, Any?>
+  @Suppress("UNCHECKED_CAST")
+  override val flag
+    get() = reference as ResolvedFlag<Any?>
 
-  override lateinit var reference: ResolvedComponentOld<T, Any?>
-    private set
+  @Suppress("UNCHECKED_CAST")
+  override val argument
+    get() = reference as ResolvedArgument<Any?>
 
-  override fun writePreferredForm(): CliArgumentWriter<T, Any?> =
-    if (flag.hasLongForm) {
-      if (config.preferredFlagForm.isLong || !flag.hasShortForm)
-        writeLongForm()
-      else
-        writeShortForm()
-    } else if (flag.hasShortForm) {
-      writeShortForm()
-    } else {
-      writeLongForm(config.propertyNameFormatter.format(reference.name, config))
-    }
-
-  override fun writePreferredForm(action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writePreferredForm().action()
-
-  override fun writeLongForm(): CliArgumentWriter<T, Any?> =
-    writeLongForm(flag.longForm)
-
-  override fun writeLongForm(action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writeLongForm().action()
+  // region Flag Names
 
   override fun writeLongForm(custom: String): CliArgumentWriter<T, Any?> {
     dumpToQueue()
@@ -70,15 +59,6 @@ internal class LazyCliAppenderImpl<T : Any>(
     return this
   }
 
-  override fun writeLongForm(custom: String, action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writeLongForm(custom).action()
-
-  override fun writeShortForm(): CliArgumentWriter<T, Any?> =
-    writeShortForm(flag.shortForm)
-
-  override fun writeShortForm(action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writeShortForm().action()
-
   override fun writeShortForm(custom: Char): CliArgumentWriter<T, Any?> {
     dumpToQueue()
     buffer.append(config.shortFlagPrefix).append(custom)
@@ -95,15 +75,7 @@ internal class LazyCliAppenderImpl<T : Any>(
     return this
   }
 
-  override fun writeShortForm(custom: Char, action: CliArgumentWriter<T, Any?>.() -> Unit) =
-    writeShortForm(custom).action()
-
-  override fun rawWriteChar(char: Byte) {
-    dumpToQueue()
-    buffer.append(char.toInt().toChar())
-    dirty = true
-    dumpToQueue()
-  }
+  // endregion Flag Names
 
   override fun rawWriteChar(char: Char) {
     dumpToQueue()
@@ -117,11 +89,6 @@ internal class LazyCliAppenderImpl<T : Any>(
     buffer.append(string)
     dirty = true
     dumpToQueue()
-  }
-
-  override fun writeChar(char: Byte) {
-    buffer.append(char.toInt().toChar())
-    dirty = true
   }
 
   override fun writeChar(char: Char) {
@@ -158,8 +125,8 @@ internal class LazyCliAppenderImpl<T : Any>(
       reference = next
 
       when (next) {
-        is ResolvedFlagOld -> next.writeToString(this)
-        is ResolvedArgumentOld -> next.writeToString(this)
+        is ResolvedFlag<*> -> next.writeToString(this)
+        is ResolvedArgument<*> -> next.writeToString(this)
         else                -> BUG()
       }
 

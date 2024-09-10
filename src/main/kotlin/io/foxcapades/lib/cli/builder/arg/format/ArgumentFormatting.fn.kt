@@ -16,7 +16,7 @@ import kotlin.reflect.KFunction1
  */
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T> ArgumentFormatter(fn: KFunction1<T, String>) =
-  ArgumentFormatter { v, b -> b.writeString(fn(v)) }
+  ArgumentFormatter { v, b, _ -> b.writeString(fn(v)) }
 
 /**
  * Creates a new [ArgumentFormatter] instance from the given simple formatter
@@ -30,8 +30,7 @@ inline fun <T> ArgumentFormatter(fn: KFunction1<T, String>) =
  * @return A new `ArgumentFormatter` wrapping the given function.
  */
 inline fun <T> ArgumentFormatter(crossinline fn: (T) -> String) =
-  ArgumentFormatter { v, b -> b.writeString(fn(v)) }
-
+  ArgumentFormatter { v, b, _ -> b.writeString(fn(v)) }
 
 //
 

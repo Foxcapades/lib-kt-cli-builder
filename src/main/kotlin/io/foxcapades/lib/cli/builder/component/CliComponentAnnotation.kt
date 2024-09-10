@@ -5,4 +5,6 @@ package io.foxcapades.lib.cli.builder.component
  *
  * @since 1.0.0
  */
-interface CliComponentAnnotation
+interface CliComponentAnnotation<A : Annotation> {
+  val annotation: A
+}

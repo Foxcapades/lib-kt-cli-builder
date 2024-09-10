@@ -72,7 +72,7 @@ interface Flag<out A : Argument<V>, V> : MutableDefaultableProperty<V>, CliCallC
   fun shouldSerialize(config: CliSerializationConfig, reference: ValueAccessorReference<*, V, KCallable<V>>?): Boolean =
     argument.shouldSerialize(config, reference)
 
-  fun writeToString(builder: CliFlagWriter<*, V>)
+  fun writeToString(writer: CliFlagWriter<*, V>)
 
   override val isSet: Boolean
     get() = argument.isSet

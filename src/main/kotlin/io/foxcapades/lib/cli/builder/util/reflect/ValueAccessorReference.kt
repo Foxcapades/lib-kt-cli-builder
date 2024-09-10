@@ -3,7 +3,9 @@ package io.foxcapades.lib.cli.builder.util.reflect
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
-interface ValueAccessorReference<T : Any, V, out A : KCallable<V>> : TypeReference<T> {
+interface ValueAccessorReference<T : Any, V, out A : KCallable<V>> {
+  val containingType: KClass<out T>
+
   val accessor: A
 
   val name
@@ -15,8 +17,8 @@ interface ValueAccessorReference<T : Any, V, out A : KCallable<V>> : TypeReferen
   val valueClass: KClass<*>?
     get() = accessor.returnType.classifier as? KClass<*>
 
-  override val qualifiedName
-    get() = super.qualifiedName + "::" + accessor.name
+  val qualifiedName
+    get() = containingType.safeName + "::" + accessor.name
 
   fun getValue(instance: T): V = accessor.call(instance)
 }

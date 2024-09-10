@@ -61,9 +61,11 @@ annotation class CliFlag(
    */
   val shortForm: Char = '\u0000',
 
-  val required: Boolean = false,
+  val required: Toggle = Toggle.Unset,
 
   val inclusionTest: KClass<out FlagPredicate<*, *, *>> = UnconfiguredFlagFilter::class,
 
   val argument: CliArgument = CliArgument()
-)
+) {
+  enum class Toggle { Yes, No, Unset }
+}

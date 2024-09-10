@@ -18,16 +18,16 @@ internal inline fun <T> KProperty1<*, *>.property(instance: Any) =
     .getDelegate(instance) as MutableProperty<T>
 
 @Suppress("UNCHECKED_CAST")
-internal inline fun <T : Any, R : Any> KProperty1<T, *>.asDelegateType(instance: T, delegateType: KClass<R>): R? {
+internal inline fun <R : Any> KProperty1<*, *>.asDelegateType(instance: Any, delegateType: KClass<R>): R? {
   return if (returnType.classifier?.takeAs<KClassifier, KClass<*>>()?.let(delegateType::isSuperclassOf) == true)
-    get(instance) as R?
+    forceAny().get(instance) as R?
   else
-    getDelegate(instance)
+    forceAny().getDelegate(instance)
       ?.takeIf { delegateType.isInstance(it) }
       ?.let { delegateType.cast(it) }
 }
 
-internal inline fun <reified R : Any> KProperty1<Any, *>.asDelegateType(instance: Any) =
+internal inline fun <reified R : Any> KProperty1<*, *>.asDelegateType(instance: Any) =
   asDelegateType(instance, R::class)
 
 @Suppress("UNCHECKED_CAST")
@@ -35,3 +35,12 @@ internal inline fun <T : Any, V> KProperty1<*, *>.unsafeCast() = this as KProper
 
 @Suppress("UNCHECKED_CAST")
 internal inline fun KProperty1<*, *>.forceAny() = this as KProperty1<Any, Any?>
+
+internal inline fun KProperty1<*, *>.qualifiedName(parent: KClass<*>) =
+  parent.qualifiedName + "::" + name
+
+internal inline fun <reified A : Annotation> KProperty1<*, *>.makeDuplicateAnnotationsError(type: KClass<out Any>) =
+  makeDuplicateAnnotationsError(type, A::class)
+
+internal inline fun KProperty1<*, *>.makeDuplicateAnnotationsError(parent: KClass<out Any>, type: KClass<out Annotation>) =
+  IllegalStateException("${qualifiedName(parent)} has more than one ${type::class.simpleName} annotation")

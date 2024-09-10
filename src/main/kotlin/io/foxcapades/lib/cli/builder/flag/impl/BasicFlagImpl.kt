@@ -41,9 +41,9 @@ internal open class BasicFlagImpl<A : Argument<V>, V>(
 
   override val argument = argument
 
-  override fun writeToString(builder: CliFlagWriter<*, V>) {
+  override fun writeToString(writer: CliFlagWriter<*, V>) {
     // TODO: handle optional arguments
-    builder.writePreferredForm().writeArgument(argument)
+    writer.writePreferredForm().writeArgument(argument)
   }
 
   companion object {

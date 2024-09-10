@@ -4,7 +4,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
 internal class PropertyReference<T : Any, V>(
-  override val type:     KClass<out T>,
+  override val containingType:     KClass<out T>,
   override val accessor: KProperty1<T, V>,
 ) : ValueAccessorReference<T, V, KProperty1<T, V>> {
   override val qualifiedName: String
@@ -12,6 +12,6 @@ internal class PropertyReference<T : Any, V>(
 
   override fun getValue(instance: T) = accessor.get(instance)
 
-  override fun toString() = "Property:${type.safeName}::${accessor.name}"
+  override fun toString() = "Property:${containingType.safeName}::${accessor.name}"
 }
 

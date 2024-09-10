@@ -1,32 +1,39 @@
-package io.foxcapades.lib.cli.builder.arg.impl
+package io.foxcapades.lib.cli.builder.flag.ref.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.arg.ref.UnlinkedResolvedArgument
-import io.foxcapades.lib.cli.builder.component.ResolvedComponent
-import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
-import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
+import io.foxcapades.lib.cli.builder.arg.ref.impl.UnlinkedArgument
+import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
+import io.foxcapades.lib.cli.builder.flag.Flag
+import io.foxcapades.lib.cli.builder.flag.ref.UnlinkedResolvedFlag
+import io.foxcapades.lib.cli.builder.flag.safeName
+import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.reflect.safeName
 import kotlin.reflect.KCallable
 import kotlin.reflect.KProperty
 
-internal class UnlinkedArgument<V>(
-  parent:   ResolvedComponent,
-  instance: Argument<V>,
-) : UnlinkedResolvedArgument<V> {
+internal class UnlinkedFlag<V>(
+  parent: ResolvedCommand<*>,
+  instance: Flag<Argument<V>, V>
+) : UnlinkedResolvedFlag<V> {
   private val instance = instance
 
   override val parentComponent = parent
 
-  override val qualifiedName
-    get() = if (parentComponent is ResolvedFlag<*>) {
-      "argument of " + parentComponent.qualifiedName
-    } else {
-      parentComponent.qualifiedName + " argument"
-    }
+  override val qualifiedName by lazy { "flag " + parentComponent.type.safeName + "::??? " + instance.safeName }
 
-  override val shouldQuote
-    get() = instance.shouldQuote
+  override val hasLongForm
+    get() = instance.hasLongForm
+
+  override val longForm
+    get() = instance.longForm
+
+  override val hasShortForm
+    get() = instance.hasShortForm
+
+  override val shortForm
+    get() = instance.shortForm
 
   override val isRequired
     get() = instance.isRequired
@@ -37,8 +44,7 @@ internal class UnlinkedArgument<V>(
   override val hasDefault
     get() = instance.hasDefault
 
-  override val isDefault
-    get() = instance.isDefault
+  override val argument by lazy { UnlinkedArgument(this, instance.argument) }
 
   override fun get() =
     instance.get()
@@ -66,6 +72,6 @@ internal class UnlinkedArgument<V>(
     reference: ValueAccessorReference<*, V, KCallable<V>>?,
   ) = instance.shouldSerialize(config, reference)
 
-  override fun writeToString(writer: CliArgumentWriter<*, V>) =
+  override fun writeToString(writer: CliFlagWriter<*, V>) =
     instance.writeToString(writer)
 }

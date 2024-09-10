@@ -10,7 +10,7 @@ import kotlin.reflect.KClass
  * instance.
  */
 internal class PinnedArgument<T : Any, V>(
-  override val type:     KClass<out T>,
+  override val containingType:     KClass<out T>,
   override val instance: T,
   override val accessor: KCallable<V>,
   internal val delegate: Argument<V>,

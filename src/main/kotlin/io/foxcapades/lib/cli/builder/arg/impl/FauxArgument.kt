@@ -2,7 +2,6 @@ package io.foxcapades.lib.cli.builder.arg.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.CliArgument
-import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
 import io.foxcapades.lib.cli.builder.arg.ResolvedArgumentOld
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
@@ -25,11 +24,11 @@ import kotlin.reflect.KCallable
  */
 internal class FauxArgument<T : Any, V>(
   override val instance:   T,
-  override val annotation: CliArgumentAnnotation,
+  override val annotation: CliArgumentAnnotationImpl,
   private  val reference:  ValueAccessorReference<T, V, KCallable<V>>
 )
   : ResolvedArgumentOld<T, V>
-  , AnnotatedValueAccessorReference<T, V, KCallable<V>, CliArgumentAnnotation>
+  , AnnotatedValueAccessorReference<T, V, KCallable<V>, CliArgumentAnnotationImpl>
   , ValueAccessorReference<T, V, KCallable<V>> by reference
 {
   override val isSet
@@ -43,9 +42,9 @@ internal class FauxArgument<T : Any, V>(
 
   override val shouldQuote: Boolean
     get() = when (annotation.shouldQuote) {
-      CliArgument.ShouldQuote.Auto -> reference.type.shouldQuote()
-      CliArgument.ShouldQuote.Yes  -> true
-      CliArgument.ShouldQuote.No   -> false
+      CliArgument.Toggle.Yes  -> true
+      CliArgument.Toggle.No   -> false
+      CliArgument.Toggle.Unset -> reference.containingType.shouldQuote()
     }
 
   override val qualifiedName: String

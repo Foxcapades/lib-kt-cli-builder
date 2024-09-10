@@ -10,5 +10,5 @@ interface ResolvedFlagValueRef<T : Any, V>
   , ValueAccessorReference<T, Flag<Argument<V>, V>, KCallable<Flag<Argument<V>, V>>>
 {
   override val qualifiedName: String
-    get() = super.qualifiedName
+    get() = "flag " + super.qualifiedName
 }

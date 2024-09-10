@@ -2,22 +2,24 @@ package io.foxcapades.lib.cli.builder.serial.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.forceAny
-import io.foxcapades.lib.cli.builder.arg.impl.UnlinkedArgument
+import io.foxcapades.lib.cli.builder.arg.ref.impl.AnnotatedValueArgument
+import io.foxcapades.lib.cli.builder.arg.ref.impl.UnlinkedArgument
+import io.foxcapades.lib.cli.builder.arg.ref.impl.ValueArgument
 import io.foxcapades.lib.cli.builder.command.Command
-import io.foxcapades.lib.cli.builder.command.ResolvedCommand
+import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.forceAny
-import io.foxcapades.lib.cli.builder.flag.impl.UnlinkedFlag
+import io.foxcapades.lib.cli.builder.flag.ref.impl.AnnotatedValueFlag
+import io.foxcapades.lib.cli.builder.flag.ref.impl.UnlinkedFlag
+import io.foxcapades.lib.cli.builder.flag.ref.impl.ValueFlag
 import io.foxcapades.lib.cli.builder.flag.ref.validateFlagNames
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
-import io.foxcapades.lib.cli.builder.util.reflect.forceAny
-import io.foxcapades.lib.cli.builder.util.reflect.isGetter
-import io.foxcapades.lib.cli.builder.util.reflect.qualifiedName
-import io.foxcapades.lib.cli.builder.util.reflect.unsafeCast
+import io.foxcapades.lib.cli.builder.util.reflect.*
 import io.foxcapades.lib.cli.builder.util.takeAs
 import io.foxcapades.lib.cli.builder.util.then
+import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KFunction1
@@ -25,13 +27,15 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.jvm.isAccessible
 
-internal class ArbitraryComponentResolver(
+internal class ArbitraryComponentResolver<T : Any>(
   config:   CliSerializationConfig,
-  instance: ResolvedCommand<*>,
+  instance: ResolvedCommand<T>,
   iterable: Iterable<Any>
 )
   : Iterator<ResolvedComponent>
 {
+  private val logger = LoggerFactory.getLogger(javaClass)!!
+
   private val config = config
 
   private val instance = instance
@@ -147,28 +151,79 @@ internal class ArbitraryComponentResolver(
       ?.takeAs<KClassifier, KClass<*>>()
       ?.then {
         when {
-          Flag::class.isSuperclassOf(it)     -> return tryFlagGetterValue(getter.unsafeCast(), it.unsafeCast())
-          Argument::class.isSuperclassOf(it) -> return tryArgumentGetterValue(getter.unsafeCast(), it.unsafeCast())
+          Flag::class.isSuperclassOf(it)     -> return tryFlagGetterValue(getter.unsafeCast())
+          Argument::class.isSuperclassOf(it) -> return tryArgumentGetterValue(getter.unsafeCast())
           Command::class.isSuperclassOf(it)  -> return tryCommandGetterValue(getter.unsafeCast(), it.unsafeCast())
           // TODO: log if it's a cli component subtype
         }
       }
 
-    // check return type & annotations
+    // check return type for annotations
     // check annotations
     // else, plain value
   }
 
-  private fun tryFlagGetterValue(prop: KFunction1<Any, Flag<*, *>?>, type: KClass<out Flag<*, *>>) {
-    // check annotations
+  private fun tryFlagGetterValue(getter: KFunction1<T, Flag<*, *>?>) {
+    val annotations = try {
+      RelevantAnnotations.of(getter.relevantAnnotations)
+    } catch (e: RelevantAnnotations.DuplicateException) {
+      throw getter.makeDuplicateAnnotationsError(instance::class, e.annotation::class)
+    }
+
+    if (annotations.hasCommandAnnotation)
+      throw IllegalStateException("${getter.qualifiedName(instance::class)} is a Flag getter annotated with ${annotations.command!!::class}")
+
+    if (annotations.hasArgumentAnnotation)
+      throw IllegalStateException("${getter.qualifiedName(instance::class)} is a Flag getter annotated with ${annotations.argument!!::class}")
+
+    val flag = (getter(instance.instance) ?: return).forceAny()
+
+    if (annotations.hasFlagAnnotation)
+      queue.addLast(AnnotatedValueFlag(annotations.flag!!, instance, flag, getter.unsafeCast<T, Flag<Argument<Any?>, Any?>>()))
+    else
+      queue.addLast(ValueFlag(instance, flag, getter.unsafeCast<T, Flag<Argument<Any?>, Any?>>()))
   }
 
-  private fun tryArgumentGetterValue(prop: KFunction1<Any, Argument<*>?>, type: KClass<out Argument<*>>) {
-    // check annotations
+  private fun tryArgumentGetterValue(getter: KFunction1<Any, Argument<*>?>) {
+    val annotations = try {
+      RelevantAnnotations.of(getter.relevantAnnotations)
+    } catch (e: RelevantAnnotations.DuplicateException) {
+      throw getter.makeDuplicateAnnotationsError(instance::class, e.annotation::class)
+    }
+
+    if (annotations.hasCommandAnnotation)
+      throw IllegalStateException("${getter.qualifiedName(instance::class)} is an Argument getter annotated with ${annotations.command!!::class}")
+
+    if (annotations.hasFlagAnnotation)
+      throw IllegalStateException("${getter.qualifiedName(instance::class)} is an Argument getter annotated with ${annotations.flag!!::class}")
+
+    val arg = (getter(instance.instance) ?: return).forceAny()
+
+    if (annotations.hasArgumentAnnotation)
+      queue.addLast(AnnotatedValueArgument(annotations.argument!!, instance, arg, getter.unsafeCast<T, Argument<Any?>>()))
+    else
+      queue.addLast(ValueArgument(instance, arg, getter.unsafeCast<T, Argument<Any?>>()))
   }
 
-  private fun tryCommandGetterValue(prop: KFunction1<Any, Command?>, type: KClass<out Command>) {
-    // check annotations
+  private fun tryCommandGetterValue(getter: KFunction1<Any, Command?>, type: KClass<out Command>) {
+    val annotations = try {
+      RelevantAnnotations.of(getter.relevantAnnotations)
+    } catch (e: RelevantAnnotations.DuplicateException) {
+      throw getter.makeDuplicateAnnotationsError(instance::class, e.annotation::class)
+    }
+
+    if (annotations.hasArgumentAnnotation)
+      throw IllegalStateException("${getter.qualifiedName(instance::class)} is a Command getter annotated with ${annotations.argument!!::class}")
+
+    if (annotations.hasFlagAnnotation)
+      throw IllegalStateException("${getter.qualifiedName(instance::class)} is a Command getter annotated with ${annotations.flag!!::class}")
+
+    val com = (getter(instance.instance) ?: return)
+
+    if (annotations.hasCommandAnnotation)
+      queue.addLast(AnnotatedValueArgument(annotations.argument!!, instance, arg, getter.unsafeCast()))
+    else
+      queue.addLast(ValueArgument(instance, arg, getter.unsafeCast()))
   }
 
   // endregion Function Reference

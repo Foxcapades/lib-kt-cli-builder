@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.arg.format
 
+import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 
 /**
@@ -18,6 +19,8 @@ fun interface ArgumentFormatter<V> {
    * @param value Value to write.
    *
    * @param writer CLI writer into which [value] should be written.
+   *
+   * @param reference The argument instance being formatted.
    */
-  fun formatValue(value: V, writer: CliArgumentWriter<*, V>)
+  fun formatValue(value: V, writer: CliArgumentWriter<*, V>, reference: Argument<V>)
 }

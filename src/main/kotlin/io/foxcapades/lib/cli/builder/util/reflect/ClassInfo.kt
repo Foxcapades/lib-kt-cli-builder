@@ -1,6 +1,9 @@
 package io.foxcapades.lib.cli.builder.util.reflect
 
-import kotlin.reflect.*
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
+import kotlin.reflect.KFunction1
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMembers
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.isAccessible
@@ -70,33 +73,6 @@ internal class ClassInfo(val type: KClass<out Any>) {
       }
     }
 
-  // region Property Access
-
-  fun <R> mapFilterProperties(
-    mapper:   (KProperty1<Any, *>) -> R?,
-    conflict: (prev: Triple<KClass<*>, KProperty1<Any, *>, R>, next: Triple<KClass<*>, KProperty1<Any, *>, R>) -> Triple<KClass<*>, KProperty1<Any, *>, R>
-  ): Iterator<R> = mapFilterMembers(mapper, conflict, ClassInfo::properties)
-
-  fun findProperties(
-    filter:   (KProperty<*>) -> Boolean,
-    conflict: (prev: Pair<KClass<*>, KProperty1<Any, *>>, next: Pair<KClass<*>, KProperty1<Any, *>>) -> Pair<KClass<*>, KProperty1<Any, *>>,
-  ): Iterator<KProperty<*>> = findMembers(filter, conflict, ClassInfo::properties)
-
-  // endregion Property Access
-
-  // region Getter Access
-
-  fun <R> mapFilterGetters(
-    mapper:   (KFunction1<Any, *>) -> R?,
-    conflict: (prev: Triple<KClass<*>, KFunction1<Any, *>, R>, next: Triple<KClass<*>, KFunction1<Any, *>, R>) -> Triple<KClass<*>, KFunction1<Any, *>, R>
-  ): Iterator<R> = mapFilterMembers(mapper, conflict, ClassInfo::getters)
-
-  fun findGetters(
-    filter:   (KFunction1<Any, *>) -> Boolean,
-    conflict: (prev: Pair<KClass<*>, KFunction1<Any, *>>, next: Pair<KClass<*>, KFunction1<Any, *>>) -> Pair<KClass<*>, KFunction1<Any, *>>,
-  ): Iterator<KFunction1<Any, *>> = findMembers(filter, conflict, ClassInfo::getters)
-
-  // endregion Getter Access
 
   // region Reflection
 

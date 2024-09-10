@@ -44,9 +44,9 @@ internal class UniversalFlagImpl<A : Argument<V>, V>(
 
   override val isRequired = isRequired.getOr(false)
 
-  override fun writeToString(builder: CliFlagWriter<*, V>) {
+  override fun writeToString(writer: CliFlagWriter<*, V>) {
     // TODO: this should be able to handle optional argument values?
-    builder.writePreferredForm().writeArgument(argument)
+    writer.writePreferredForm().writeArgument(argument)
   }
 
   override fun shouldSerialize(
