@@ -182,15 +182,6 @@ tasks.create("release") {
     "publishToSonatype",
     "closeAndReleaseSonatypeStagingRepository"
   )
-
-  doLast {
-    val dokkaDir = file("docs/dokka")
-
-    dokkaDir.list()!!
-      .filter { it != projectVersion.featureVersion }
-      .map { dokkaDir.resolve(it) }
-      .forEach { it.deleteRecursively() }
-  }
 }
 
 tasks.create("update-readme") {
