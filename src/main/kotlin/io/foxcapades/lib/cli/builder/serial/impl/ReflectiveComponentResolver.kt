@@ -6,26 +6,30 @@ import io.foxcapades.lib.cli.builder.arg.forceAny
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.arg.ref.forceAny
 import io.foxcapades.lib.cli.builder.arg.ref.impl.*
+import io.foxcapades.lib.cli.builder.arg.unsafeCast
 import io.foxcapades.lib.cli.builder.command.CliCommand
 import io.foxcapades.lib.cli.builder.command.Command
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
-import io.foxcapades.lib.cli.builder.component.tryAsValueAccessor
 import io.foxcapades.lib.cli.builder.flag.CliFlag
 import io.foxcapades.lib.cli.builder.flag.Flag
-import io.foxcapades.lib.cli.builder.flag.forceAny
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.flag.ref.forceAny
 import io.foxcapades.lib.cli.builder.flag.ref.impl.*
 import io.foxcapades.lib.cli.builder.flag.ref.validateFlagNames
+import io.foxcapades.lib.cli.builder.flag.unsafeCast
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
-import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKP1
 import io.foxcapades.lib.cli.builder.util.filter
 import io.foxcapades.lib.cli.builder.util.reflect.*
 import io.foxcapades.lib.cli.builder.util.then
-import kotlin.reflect.*
+import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKF1
+import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKP1
+import io.foxcapades.lib.cli.builder.util.values.WrapperAccessorK1
+import kotlin.reflect.KCallable
+import kotlin.reflect.KFunction1
+import kotlin.reflect.KProperty1
 
 internal class ReflectiveComponentResolver<T : Any>(
   parent: ResolvedCommand<T>,
@@ -35,15 +39,17 @@ internal class ReflectiveComponentResolver<T : Any>(
 {
   private val typeInfo = ClassInfo(type)
 
-  override fun hasNext(): Boolean {
-    TODO("Not yet implemented")
-  }
+  private val stream = filterRelevantMembers().filter { it.isUsable }
 
-  override fun next(): ResolvedComponent {
-    TODO("Not yet implemented")
-  }
+  // region Public API
 
-  private fun filterUsableMembers() = filterRelevantMembers().filter { it.isUsable }
+  override fun hasNext() = stream.hasNext()
+
+  override fun next() = stream.next()
+
+  // endregion Public API
+
+  // region General Filtering
 
   private inline val ResolvedComponent.isUsable get() =
     when (this) {
@@ -58,7 +64,7 @@ internal class ReflectiveComponentResolver<T : Any>(
       // TODO: this needs to be its own error type!
       isSet || hasDefault || throw IllegalStateException("$qualifiedName is marked as required but is not set")
     } else {
-      forceAny().let { it.shouldSerialize(config, it.tryAsValueAccessor<T, Any?>()) }
+      forceAny().let { it.shouldSerialize(config, it.valueSource) }
     }
 
   private fun ResolvedArgument<*>.isUsable() =
@@ -66,12 +72,13 @@ internal class ReflectiveComponentResolver<T : Any>(
       // TODO: this needs to be its own error type!
       isSet || hasDefault || throw IllegalStateException("$qualifiedName is marked as required but is not set")
     } else {
-      forceAny().let { it.shouldSerialize(config, it.tryAsValueAccessor<T, Any?>()) }
+      forceAny().let { it.shouldSerialize(config, it.valueSource) }
     }
 
   private fun filterRelevantMembers() =
     typeInfo.mapFilterMembers(::siftMember) { p, _ -> p }
 
+  // sift class members down to only those that can be resolved to components
   private fun siftMember(member: KCallable<*>): ResolvedComponent? =
     when (member) {
       is KProperty1<*, *> -> siftProperty(member.unsafeCast())
@@ -79,12 +86,19 @@ internal class ReflectiveComponentResolver<T : Any>(
       else                -> null // TODO: LOG HERE
     }
 
+  // sift class properties down to only those that can be resolved to components
   private fun siftProperty(prop: KProperty1<T, Any?>): ResolvedComponent? {
+    // If the property is delegated, use the delegate for component resolution
     prop.asDelegateType<CliCallComponent>(parent)
       ?.then { return siftDelegateProperty(it, prop) }
 
+    // if the property is not delegated...
+
+    // get any relevant annotations for the property
     val annotations = prop.relevantAnnotations()
 
+    // If there are no annotations, and it is not a delegate, then it isn't
+    // something we care about.
     if (annotations.isEmpty)
       return null
 
@@ -96,24 +110,102 @@ internal class ReflectiveComponentResolver<T : Any>(
       annotations.hasArgumentAnnotation ->
         FauxArgument(annotations.argument!!, parent, ValueAccessorKP1(prop, parent.instance))
 
-      annotations.hasCommandAnnotation -> TODO("subcommands are not yet supported")
+      annotations.hasCommandAnnotation -> SUB_COMMAND()
 
       else -> BUG()
     }
   }
 
-  // region Delegates
+  private fun siftFunction(func: KFunction1<T, Any?>): ResolvedComponent? {
+    // Fetch any relevant annotations on the function.
+    // We do this before the getter check to provide a more useful error.
+    val annotations = func.relevantAnnotations()
+
+    // If the function is not a getter
+    if (!func.isGetter) {
+      // but it has an annotation, report an error
+      if (!annotations.isEmpty) {
+        // TODO: This should be a concrete error type
+        throw IllegalStateException("${func.qualifiedName(type)} is not a getter, but is annotated as a CLI component")
+      }
+
+      // else, it has no annotation, it's just some random function we don't
+      // care about.
+      return null
+    }
+
+    // if the function IS a getter...
+
+    // Check the return type
+    val returns = func.determineValueType()
+
+    // If the function is not annotated, but returns a ...
+    if (annotations.isEmpty) {
+      return when (returns) {
+        ValueType.Flag -> func.unsafeCast<T, Flag<Any?>?>()(parent.instance)
+          ?.let { ValueFlag(parent, it, WrapperAccessorK1(it::get, func, parent.instance)) }
+
+        ValueType.Argument -> func.unsafeCast<T, Argument<Any?>?>()(parent.instance)
+          ?.let { ValueArgument(parent, it, WrapperAccessorK1(it::get, func, parent.instance)) }
+
+        ValueType.Command -> SUB_COMMAND()
+        ValueType.AnnotatedCommand -> SUB_COMMAND()
+
+        // It's a random getter func that we don't care about
+        ValueType.Value -> null
+      }
+    }
+
+    // The function is both a getter and is annotated.
+    return when {
+
+      // if it is annotated as a flag
+      annotations.hasFlagAnnotation -> when (returns) {
+        // but just returns a plain value, use a faux flag
+        ValueType.Value -> FauxFlag(annotations.flag!!, parent, ValueAccessorKF1(func, parent.instance))
+
+        // and is also a flag instance, use a joined flag
+        ValueType.Flag  -> func.unsafeCast<T, Flag<Any?>?>()(parent.instance)
+          ?.let { AnnotatedValueFlag(annotations.flag!!, parent, it, WrapperAccessorK1(it::get, func, parent.instance)) }
+
+        // else it's annotated as a flag, but is actually an argument or command
+        else -> throw IllegalStateException("${func.qualifiedName(type)} is annotated as being a Flag, but returns a value of type ${returns.name}")
+      }
+
+      // if it is annotated as an argument
+      annotations.hasArgumentAnnotation -> when (returns) {
+        // but just returns a plain value, use a faux argument
+        ValueType.Value    -> FauxArgument(annotations.argument!!, parent, ValueAccessorKF1(func, parent.instance))
+
+        // and is also an argument instance, use a joined argument
+        ValueType.Argument -> func.unsafeCast<T, Argument<Any?>?>()(parent.instance)
+          ?.let { AnnotatedValueArgument(annotations.argument!!, parent, it, WrapperAccessorK1(it::get, func, parent.instance)) }
+
+        // else it's annotated as an argument but is actually a flag or command
+        else -> throw IllegalStateException("${func.qualifiedName(type)} is annotated as being an Argument, but returns a value of type ${returns.name}")
+      }
+
+      // if it is annotated as a command
+      annotations.hasCommandAnnotation -> SUB_COMMAND()
+
+      // impossible condition
+      else -> BUG()
+    }
+  }
+
+  // endregion General Filtering
+
+  // region Delegate Filtering
 
   private fun siftDelegateProperty(del: CliCallComponent, prop: KProperty1<T, *>): ResolvedComponent {
     return when (del) {
-      is Flag<*>     -> siftDelegateFlag(del, prop)
-      is Argument<*> -> siftDelegateArg(del, prop)
-      is Command     -> siftDelegateCom(del, prop)
+      is Flag<*>     -> siftDelegateFlag(del.unsafeCast(), prop)
+      is Argument<*> -> siftDelegateArg(del.unsafeCast(), prop)
       else           -> TODO("custom CliCallComponent types are currently unsupported")
     }
   }
 
-  private fun siftDelegateFlag(del: Flag<*>, prop: KProperty1<T, *>): ResolvedComponent {
+  private fun siftDelegateFlag(del: Flag<Any?>, prop: KProperty1<T, *>): ResolvedComponent {
     val annotations = prop.relevantAnnotations()
 
     when {
@@ -122,10 +214,10 @@ internal class ReflectiveComponentResolver<T : Any>(
     }
 
     return if (annotations.hasFlagAnnotation)
-      AnnotatedDelegateFlag(annotations.flag!!, parent, del.forceAny(), ValueAccessorKP1(prop, parent.instance))
+      AnnotatedDelegateFlag(annotations.flag!!, parent, del, ValueAccessorKP1(prop, parent.instance))
         .also { it.validateFlagNames(config) }
     else
-      DelegateFlag(parent, del.forceAny(), ValueAccessorKP1(prop, parent.instance))
+      DelegateFlag(parent, del, ValueAccessorKP1(prop, parent.instance))
   }
 
   private fun siftDelegateArg(del: Argument<Any?>, prop: KProperty1<T, Any?>): ResolvedComponent {
@@ -142,70 +234,9 @@ internal class ReflectiveComponentResolver<T : Any>(
       DirectArgument(parent, del.forceAny(), ValueAccessorKP1(prop, parent.instance))
   }
 
-  private fun siftDelegateCom(del: Command, prop: KProperty1<T, *>): ResolvedComponent {
+  private fun siftDelegateCom(del: Command, prop: KProperty1<T, Command?>): ResolvedComponent {
     return SUB_COMMAND()
   }
 
-  // endregion Delegates
-
-  private fun siftFunction(func: KFunction1<T, Any?>): ResolvedComponent? {
-    val annotations = func.relevantAnnotations()
-
-    if (!func.isGetter) {
-      if (!annotations.isEmpty) {
-        // TODO: This should be a concrete error type
-        throw IllegalStateException("${func.qualifiedName(type)} is not a getter, but is annotated as a CLI component")
-      }
-
-      return null
-    }
-
-    // If there is a relevant return type.
-    val returns = func.determineValueType()
-
-    if (annotations.isEmpty) {
-      // it's not annotated, but it might be a value getter
-      return when (returns) {
-        ValueType.Flag -> func.unsafeCast<T, Flag<Any?>?>()(parent.instance)
-          ?.let { ValueFlag(parent, it, func.unsafeCast<T, Flag<Any?>>()) }
-
-        ValueType.Argument -> func.unsafeCast<T, Argument<Any?>?>()(parent.instance)
-          ?.let { ValueArgument(type, parent, it, func.unsafeCast<T, Argument<Any?>>()) }
-
-        ValueType.Command -> TODO("subcommands are not currently supported")
-        ValueType.AnnotatedCommand -> TODO("subcommands are not currently supported")
-
-        ValueType.Value -> null
-      }
-    }
-
-    if (annotations.count > 1) {
-      throw IllegalStateException("${func.qualifiedName(type)} is annotated as being multiple different types of CLI component")
-    }
-
-    return when {
-      annotations.hasFlagAnnotation -> when (returns) {
-        ValueType.Value -> FauxFlag(annotations.flag!!, parent, func)
-        ValueType.Flag  -> func.unsafeCast<T, Flag<Any?>?>()(parent.instance)
-          ?.let { AnnotatedValueFlag(annotations.flag!!, parent, it, func.unsafeCast<T, Flag<Any?>>()) }
-
-        else -> throw IllegalStateException("${func.qualifiedName(type)} is annotated as being a Flag, but returns a value of type ${returns.name}")
-      }
-
-      annotations.hasArgumentAnnotation -> when (returns) {
-        ValueType.Value    -> FauxArgument(annotations.argument!!, parent.instance,
-          parent, func)
-        ValueType.Argument -> func.unsafeCast<T, Argument<Any?>?>()(parent.instance)
-          ?.let { AnnotatedValueArgument(annotations.argument!!, parent, it, func.unsafeCast<T, Argument<Any?>>()) }
-
-        else -> throw IllegalStateException("${func.qualifiedName(type)} is annotated as being an Argument, but returns a value of type ${returns.name}")
-      }
-
-      annotations.hasCommandAnnotation -> {
-        TODO("subcommands are not currently supported")
-      }
-
-      else -> null
-    }
-  }
+  // endregion Delegate Filtering
 }

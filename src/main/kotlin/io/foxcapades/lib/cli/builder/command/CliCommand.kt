@@ -11,5 +11,5 @@ annotation class CliCommand(
   /**
    * Additional cli command components.
    */
-  vararg val extras: String
+  vararg val positionalArgs: String
 )

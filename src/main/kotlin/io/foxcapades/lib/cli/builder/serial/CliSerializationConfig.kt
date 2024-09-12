@@ -133,7 +133,7 @@ data class CliSerializationConfig(
     val PropertyNameFormatter get() = io.foxcapades.lib.cli.builder.flag.properties.PropertyNameFormatter.KebabCase
 
     @JvmStatic
-    val FallbackSerializer get() = NonNullGeneralStringifier
+    val FallbackSerializer: ArgumentFormatter<Any> get() = NonNullGeneralStringifier
 
     // TODO: determine default based on OS
     @JvmStatic

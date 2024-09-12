@@ -72,7 +72,7 @@ internal class UniversalFlagImpl<V>(
         ),
       )
 
-    fun <T : Any> of(config: NullableFlagOptions<T>): Flag<Argument<T?>, T?> =
+    fun <T : Any> of(config: NullableFlagOptions<T>): Flag<T?> =
       UniversalFlagImpl(
         longForm   = NullableFlagOptions<T>::longForm.property(config),
         shortForm  = NullableFlagOptions<T>::shortForm.property(config),

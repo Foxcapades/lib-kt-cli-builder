@@ -16,7 +16,7 @@ internal class AnnotatedUnlinkedArgument<V>(
   annotation: CliArgumentAnnotation,
   parent:     ResolvedComponent,
   instance:   Argument<V>,
-  source: ValueSource,
+  source:     ValueSource,
 )
   : UnlinkedResolvedArgument<V>
   , UnlinkedArgument<V>(parent, instance, source)

@@ -57,7 +57,7 @@ internal open class BasicFlagImpl<V>(
       shortForm  = FlagOptions<V>::shortForm.property(opts),
       isRequired = FlagOptions<V>::required.property(opts),
       filter     = FlagOptions<V>::flagFilter.property(opts),
-      argument   = BasicArgumentImpl(opts.argument)
+      argument   = BasicArgumentImpl.of(opts.argument)
     )
   }
 }

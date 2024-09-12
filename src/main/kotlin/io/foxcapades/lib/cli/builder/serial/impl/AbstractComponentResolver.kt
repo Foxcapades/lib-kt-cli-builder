@@ -1,19 +1,18 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
+import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
 import io.foxcapades.lib.cli.builder.command.CliCommand
 import io.foxcapades.lib.cli.builder.command.CliCommandAnnotation
 import io.foxcapades.lib.cli.builder.command.Command
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
+import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
 import io.foxcapades.lib.cli.builder.flag.Flag
-import io.foxcapades.lib.cli.builder.flag.impl.CliFlagAnnotationImpl
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
 import io.foxcapades.lib.cli.builder.util.logger
-import io.foxcapades.lib.cli.builder.util.reflect.makeDuplicateAnnotationsError
 import io.foxcapades.lib.cli.builder.util.reflect.relevantAnnotations
 import io.foxcapades.lib.cli.builder.util.reflect.safeName
 import kotlin.reflect.*
@@ -84,8 +83,8 @@ internal abstract class AbstractComponentResolver<T : Any>(
   // region Annotation Search
 
   protected fun KCallable<*>.relevantAnnotations(): RelevantAnnotations {
-    var flag:     CliFlagAnnotationImpl?     = null
-    var argument: CliArgumentAnnotationImpl? = null
+    var flag:     CliFlagAnnotation?     = null
+    var argument: CliArgumentAnnotation? = null
     var command:  CliCommandAnnotation?      = null
 
     val fn = when (this) {
@@ -96,10 +95,10 @@ internal abstract class AbstractComponentResolver<T : Any>(
 
     for (ann in relevantAnnotations) {
       when (ann) {
-        is CliFlagAnnotationImpl     -> if (flag     == null) flag     = ann else throw fn(type, ann.annotation::class)
-        is CliArgumentAnnotationImpl -> if (argument == null) argument = ann else throw fn(type, ann.annotation::class)
-        is CliCommandAnnotation      -> if (command  == null) command  = ann else throw fn(type, ann.annotation::class)
-        else                         -> BUG()
+        is CliFlagAnnotation     -> if (flag     == null) flag     = ann else throw fn(type, ann.annotation::class)
+        is CliArgumentAnnotation -> if (argument == null) argument = ann else throw fn(type, ann.annotation::class)
+        is CliCommandAnnotation  -> if (command  == null) command  = ann else throw fn(type, ann.annotation::class)
+        else                     -> BUG()
       }
     }
 
@@ -116,8 +115,8 @@ internal abstract class AbstractComponentResolver<T : Any>(
   }
 
   protected data class RelevantAnnotations(
-    val flag:     CliFlagAnnotationImpl?     = null,
-    val argument: CliArgumentAnnotationImpl? = null,
+    val flag:     CliFlagAnnotation?     = null,
+    val argument: CliArgumentAnnotation? = null,
     val command:  CliCommandAnnotation?      = null,
   ) {
     inline val hasFlagAnnotation

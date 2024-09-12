@@ -2,12 +2,8 @@ package io.foxcapades.lib.cli.builder.command
 
 import io.foxcapades.lib.cli.builder.component.CliComponentAnnotation
 
-@JvmInline
-internal value class CliCommandAnnotation(val annotation: CliCommand) : CliComponentAnnotation<CliCommand> {
-  inline val command
-    get() = annotation.command
-
-  inline val extras
-    get() = annotation.extras
+interface CliCommandAnnotation : CliComponentAnnotation<CliCommand> {
+  val command: String
+  val positionalArgs: Array<String>
 }
 

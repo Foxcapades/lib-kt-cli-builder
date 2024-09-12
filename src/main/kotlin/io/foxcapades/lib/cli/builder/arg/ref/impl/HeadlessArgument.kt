@@ -9,6 +9,7 @@ import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.reflect.shouldQuote
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
+// An argument that is just a value with no context
 internal class HeadlessArgument<V>(
   parent: ResolvedComponent,
   value:  V,

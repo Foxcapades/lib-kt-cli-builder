@@ -3,16 +3,16 @@ package io.foxcapades.lib.cli.builder.flag.ref.impl
 import io.foxcapades.lib.cli.builder.arg.ref.impl.AnnotatedValueArgument
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.flag.CliFlag
+import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
 import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
-import io.foxcapades.lib.cli.builder.flag.impl.CliFlagAnnotationImpl
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
 
 internal class AnnotatedValueFlag<T : Any, V>(
-  annotation: CliFlagAnnotationImpl,
+  annotation: CliFlagAnnotation,
   parent:     ResolvedCommand<T>,
   instance:   Flag<V>,
   source: ValueSource,

@@ -2,6 +2,7 @@ package io.foxcapades.lib.cli.builder.serial.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.forceAny
+import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.arg.ref.impl.*
 import io.foxcapades.lib.cli.builder.arg.unsafeCast
 import io.foxcapades.lib.cli.builder.command.CliCommand
@@ -12,6 +13,7 @@ import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.forceAny
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.flag.ref.impl.*
 import io.foxcapades.lib.cli.builder.flag.ref.validateFlagNames
 import io.foxcapades.lib.cli.builder.flag.unsafeCast
@@ -22,7 +24,7 @@ import io.foxcapades.lib.cli.builder.util.then
 import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKP0
 import io.foxcapades.lib.cli.builder.util.values.AnonymousComponentValue
 import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKF0
-import io.foxcapades.lib.cli.builder.util.values.WrapperAccessorKP0
+import io.foxcapades.lib.cli.builder.util.values.WrapperAccessorK0
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KProperty0
 import kotlin.reflect.full.findAnnotation
@@ -151,10 +153,10 @@ internal class ArbitraryComponentResolver<T : Any>(
     val annotations = prop.relevantAnnotations()
 
     if (annotations.isEmpty)
-      return queue.addLast(UnlinkedFlag(parent, instance, WrapperAccessorKP0(instance::get, prop, type)))
+      return queue.addLast(UnlinkedFlag(parent, instance, WrapperAccessorK0(instance::get, prop, type)))
 
     if (annotations.hasFlagAnnotation)
-      return queue.addLast(AnnotatedUnlinkedFlag(annotations.flag!!, parent, instance, WrapperAccessorKP0(instance::get, prop, type)))
+      return queue.addLast(AnnotatedUnlinkedFlag(annotations.flag!!, parent, instance, WrapperAccessorK0(instance::get, prop, type)))
 
     if (annotations.hasArgumentAnnotation)
       throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
@@ -170,10 +172,10 @@ internal class ArbitraryComponentResolver<T : Any>(
     val annotations = prop.relevantAnnotations()
 
     if (annotations.isEmpty)
-      return queue.addLast(UnlinkedArgument(parent, instance, WrapperAccessorKP0(instance::get, prop, type)))
+      return queue.addLast(UnlinkedArgument(parent, instance, WrapperAccessorK0(instance::get, prop, type)))
 
     if (annotations.hasArgumentAnnotation)
-      return queue.addLast(AnnotatedUnlinkedArgument(annotations.argument!!, parent, instance, WrapperAccessorKP0(instance::get, prop, type)))
+      return queue.addLast(AnnotatedUnlinkedArgument(annotations.argument!!, parent, instance, WrapperAccessorK0(instance::get, prop, type)))
 
     if (annotations.hasFlagAnnotation)
       throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Flag")
@@ -282,10 +284,16 @@ internal class ArbitraryComponentResolver<T : Any>(
   // endregion Function Reference
 
   private fun tryFlag(flag: Flag<Any?>) =
-    queue.addLast(UnlinkedFlag(parent, flag, AnonymousComponentValue).apply { validateFlagNames(config) })
+    if (flag is ResolvedFlag)
+      queue.addLast(flag)
+    else
+      queue.addLast(UnlinkedFlag(parent, flag, AnonymousComponentValue).apply { validateFlagNames(config) })
 
   private fun tryArgument(argument: Argument<Any?>) =
-    queue.addLast(UnlinkedArgument(parent, argument, AnonymousComponentValue))
+    if (argument is ResolvedArgument)
+      queue.addLast(argument)
+    else
+      queue.addLast(UnlinkedArgument(parent, argument, AnonymousComponentValue))
 
   private fun tryCommand(command: Command) = SUB_COMMAND<Unit>()
 

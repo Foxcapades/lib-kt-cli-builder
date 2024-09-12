@@ -1,10 +1,10 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
-import io.foxcapades.lib.cli.builder.arg.ResolvedArgumentOld
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
+import io.foxcapades.lib.cli.builder.arg.ref.forceAny
+import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
-import io.foxcapades.lib.cli.builder.component.ResolvedComponentOld
-import io.foxcapades.lib.cli.builder.flag.ResolvedFlagOld
+import io.foxcapades.lib.cli.builder.flag.forceAny
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
@@ -18,21 +18,17 @@ import io.foxcapades.lib.cli.builder.util.impl.StringBuilderAppender
  * serialized.
  */
 internal class StringCliAppenderImpl<T : Any>(
-  command: Array<String>,
-  private val components: Iterator<ResolvedComponentOld<T, Any?>>,
-  override val config: CliSerializationConfig,
+  command:  ResolvedCommand<T>,
+  config:   CliSerializationConfig,
   initSize: Int = 2048,
 )
-  : AbstractCliAppender<T>()
+  : AbstractCliAppender<T>(config)
   , CliFlagWriter<T, Any?>
   , CliArgumentWriter<T, Any?>
 {
+  private val command = command
+
   private val buffer = StringBuilder(initSize)
-    .apply {
-      append(command[0])
-      for (i in 1 ..< command.size)
-        append(' ').append(command[i])
-    }
 
   private val appender = StringBuilderAppender(buffer)
 
@@ -42,6 +38,8 @@ internal class StringCliAppenderImpl<T : Any>(
 
   private var last = Type.Raw
 
+  private val components: Iterator<ResolvedComponent>
+
   @Suppress("UNCHECKED_CAST")
   override val flag
     get() = reference as ResolvedFlag<Any?>
@@ -49,6 +47,12 @@ internal class StringCliAppenderImpl<T : Any>(
   @Suppress("UNCHECKED_CAST")
   override val argument
     get() = reference as ResolvedArgument<Any?>
+
+  init {
+    val (name, it) = command.getCliCallComponents(config)
+    buffer.append(name)
+    components = it.iterator()
+  }
 
 
   override fun writeLongForm(custom: String): CliArgumentWriter<T, Any?> {
@@ -114,15 +118,13 @@ internal class StringCliAppenderImpl<T : Any>(
   }
 
   override fun toString(): String {
-    val foo: Iterable<String> = Array<String>(0) { "" }
-
     for (component in components) {
       reference = component
 
       when (component) {
-        is ResolvedFlagOld -> component.writeToString(this)
-        is ResolvedArgumentOld -> component.writeToString(this)
-        else                -> BUG()
+        is ResolvedFlag<*>     -> component.forceAny().writeToString(this)
+        is ResolvedArgument<*> -> component.forceAny().writeToString(this)
+        else                   -> BUG()
       }
     }
 

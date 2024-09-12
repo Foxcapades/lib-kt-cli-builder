@@ -2,7 +2,7 @@ package io.foxcapades.lib.cli.builder
 
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.serial.CommandSerializer
-import io.foxcapades.lib.cli.builder.serial.impl.CommandSerializerCore
+import io.foxcapades.lib.cli.builder.serial.impl.*
 
 /**
  * CLI Serialization Helpers
@@ -16,7 +16,7 @@ object Cli {
   /**
    * Attempts to serialize the given object into a CLI call string.
    *
-   * @param cliConfig CLI call config to serialize.
+   * @param cliCommand CLI call config to serialize.
    *
    * @param options Serialization options.
    *
@@ -24,8 +24,8 @@ object Cli {
    */
   @JvmStatic
   @JvmOverloads
-  fun <T : Any> toCliString(cliConfig: T, options: CliSerializationConfig = CliSerializationConfig()) =
-    CommandSerializerCore(cliConfig, options).serializeToString()
+  fun toCliString(cliCommand: Any, options: CliSerializationConfig = CliSerializationConfig()) =
+    newCommandSerializer(options).serializeToString(cliCommand)
 
   /**
    * Attempts to serialize the given object into an array of CLI call params
@@ -34,7 +34,7 @@ object Cli {
    * When serializing into a collection of CLI call params, string quoting rules
    * do not apply.
    *
-   * @param cliConfig CLI call config to serialize.
+   * @param cliCommand CLI call config to serialize.
    *
    * @param options Serialization options.
    *
@@ -42,8 +42,8 @@ object Cli {
    */
   @JvmStatic
   @JvmOverloads
-  fun <T : Any> toCliCallArray(cliConfig: T, options: CliSerializationConfig = CliSerializationConfig()) =
-    CommandSerializerCore(cliConfig, options).serializeToArray()
+  fun toCliCallArray(cliCommand: Any, options: CliSerializationConfig = CliSerializationConfig()) =
+    newCommandSerializer(options).serializeToArray(cliCommand)
 
   /**
    * Attempts to serialize the given object into a list of CLI call params
@@ -52,7 +52,7 @@ object Cli {
    * When serializing into a collection of CLI call params, string quoting rules
    * do not apply.
    *
-   * @param cliConfig CLI call config to serialize.
+   * @param cliCommand CLI call config to serialize.
    *
    * @param options Serialization options.
    *
@@ -60,14 +60,14 @@ object Cli {
    */
   @JvmStatic
   @JvmOverloads
-  fun <T : Any> toCliCallList(cliConfig: T, options: CliSerializationConfig = CliSerializationConfig()) =
-    CommandSerializerCore(cliConfig, options).serializeToList()
+  fun toCliCallList(cliCommand: Any, options: CliSerializationConfig = CliSerializationConfig()) =
+    newCommandSerializer(options).serializeToList(cliCommand)
 
   /**
    * Attempts to serialize the given object into CLI call params that are then
    * fed into a new [ProcessBuilder] instance.
    *
-   * @param cliConfig CLI call config to serialize.
+   * @param cliCommand CLI call config to serialize.
    *
    * @param options Serialization options.
    *
@@ -76,13 +76,13 @@ object Cli {
    */
   @JvmStatic
   @JvmOverloads
-  fun <T : Any> toProcessBuilder(cliConfig: T, options: CliSerializationConfig = CliSerializationConfig()) =
-    ProcessBuilder(CommandSerializerCore(cliConfig, options).serializeToList())
+  fun toProcessBuilder(cliCommand: Any, options: CliSerializationConfig = CliSerializationConfig()) =
+    ProcessBuilder(toCliCallList(cliCommand, options))
 
   @JvmStatic
   @JvmOverloads
-  fun <T : Any> newCommandSerializer(cliConfig: T, options: CliSerializationConfig = CliSerializationConfig()): CommandSerializer<T> =
-    ProcessB
+  fun newCommandSerializer(options: CliSerializationConfig = CliSerializationConfig()): CommandSerializer =
+    CommandSerializerImpl(options)
 }
 
 

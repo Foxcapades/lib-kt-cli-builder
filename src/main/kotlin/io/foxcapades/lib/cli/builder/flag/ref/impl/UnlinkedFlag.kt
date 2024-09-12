@@ -44,7 +44,7 @@ internal open class UnlinkedFlag<V>(
   override val hasDefault
     get() = instance.hasDefault
 
-  override val argument: ResolvedArgument<V> by lazy { UnlinkedArgument(this, instance.argument) }
+  override val argument: ResolvedArgument<V> by lazy { UnlinkedArgument(this, instance.argument, valueSource) }
 
   override fun get() =
     instance.get()

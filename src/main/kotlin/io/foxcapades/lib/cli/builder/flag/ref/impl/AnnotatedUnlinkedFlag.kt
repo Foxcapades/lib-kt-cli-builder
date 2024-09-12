@@ -15,14 +15,14 @@ internal class AnnotatedUnlinkedFlag<V>(
   annotation: CliFlagAnnotation,
   parent:     ResolvedCommand<*>,
   instance:   Flag<V>,
-  source: ValueSource,
+  source:     ValueSource,
 )
   : UnlinkedResolvedFlag<V>
   , UnlinkedFlag<V>(parent, instance, source)
 {
   private val annotation = annotation
 
-  override val argument = AnnotatedUnlinkedArgument(annotation.argument, parent, instance.argument)
+  override val argument = AnnotatedUnlinkedArgument(annotation.argument, parent, instance.argument, source)
 
   override val hasLongForm
     get() = annotation.hasLongForm || super.hasLongForm

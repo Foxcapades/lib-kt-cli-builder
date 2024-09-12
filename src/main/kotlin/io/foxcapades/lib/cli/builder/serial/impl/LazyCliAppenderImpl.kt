@@ -1,7 +1,10 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
+import io.foxcapades.lib.cli.builder.arg.ref.forceAny
+import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
+import io.foxcapades.lib.cli.builder.flag.forceAny
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
@@ -14,16 +17,18 @@ import io.foxcapades.lib.cli.builder.util.dump
  * serialized.
  */
 internal class LazyCliAppenderImpl<T : Any>(
-  components: Iterator<Any>,
-  config:     CliSerializationConfig,
-  initSize:   Int = 2048
+  command:  ResolvedCommand<T>,
+  config:   CliSerializationConfig,
+  initSize: Int = 2048
 )
   : AbstractCliAppender<T>(config)
   , CliFlagWriter<T, Any?>
   , CliArgumentWriter<T, Any?>
   , Iterator<String>
 {
-  private val components = components
+  private val command = command
+
+  private val components: Iterator<ResolvedComponent>
 
   private val queue = ArrayDeque<String>(4)
 
@@ -40,6 +45,12 @@ internal class LazyCliAppenderImpl<T : Any>(
   @Suppress("UNCHECKED_CAST")
   override val argument
     get() = reference as ResolvedArgument<Any?>
+
+  init {
+    val (name, it) = command.getCliCallComponents(config)
+    queue.addLast(name)
+    components = it.iterator()
+  }
 
   // region Flag Names
 
@@ -118,16 +129,13 @@ internal class LazyCliAppenderImpl<T : Any>(
         return false
 
       val next = components.next()
-
-      when ()
-
-
       reference = next
 
       when (next) {
-        is ResolvedFlag<*> -> next.writeToString(this)
-        is ResolvedArgument<*> -> next.writeToString(this)
-        else                -> BUG()
+        is ResolvedFlag<*>     -> next.forceAny().writeToString(this)
+        is ResolvedArgument<*> -> next.forceAny().writeToString(this)
+//        is ResolvedCommand<*>  -> next.forceAny().writeToString(this)
+        else                   -> BUG()
       }
 
       dumpToQueue()

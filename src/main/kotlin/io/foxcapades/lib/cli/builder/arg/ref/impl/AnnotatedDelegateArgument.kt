@@ -2,9 +2,9 @@ package io.foxcapades.lib.cli.builder.arg.ref.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.CliArgument
+import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
-import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedDelegatedArgumentRef
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
@@ -12,7 +12,7 @@ import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class AnnotatedDelegateArgument<T : Any, V>(
-  annotation: CliArgumentAnnotationImpl,
+  annotation: CliArgumentAnnotation,
   parent:     ResolvedCommand<T>,
   delegate:   Argument<V>,
   accessor:   ValueSource,
