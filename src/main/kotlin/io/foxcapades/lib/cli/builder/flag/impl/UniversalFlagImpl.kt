@@ -10,11 +10,11 @@ import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.flag.NullableFlagOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.serial.*
-import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
 import io.foxcapades.lib.cli.builder.util.properties.getOrNull
 import io.foxcapades.lib.cli.builder.util.reflect.property
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class UniversalFlagImpl<V>(
   longForm:    Property<String>,

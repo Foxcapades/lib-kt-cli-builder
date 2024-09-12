@@ -1,8 +1,8 @@
 package io.foxcapades.lib.cli.builder.flag.ref
 
 import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.command.Command
+import io.foxcapades.lib.cli.builder.flag.Flag
 
 /**
  * Represents a [Flag] instance for which the parent/container class is not

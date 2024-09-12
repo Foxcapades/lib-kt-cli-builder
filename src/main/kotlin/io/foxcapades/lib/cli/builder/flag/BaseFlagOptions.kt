@@ -1,8 +1,8 @@
 package io.foxcapades.lib.cli.builder.flag
 
-import io.foxcapades.lib.cli.builder.component.BaseComponentOptions
 import io.foxcapades.lib.cli.builder.arg.BaseArgOptions
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
+import io.foxcapades.lib.cli.builder.component.BaseComponentOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.util.properties.MutableProperty
 import kotlin.reflect.KClass

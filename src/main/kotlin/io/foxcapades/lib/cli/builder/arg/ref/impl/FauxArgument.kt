@@ -8,10 +8,10 @@ import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
-import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.NoSuchDefaultValueException
 import io.foxcapades.lib.cli.builder.util.reflect.shouldQuote
+import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class FauxArgument<V>(
   annotation: CliArgumentAnnotation,

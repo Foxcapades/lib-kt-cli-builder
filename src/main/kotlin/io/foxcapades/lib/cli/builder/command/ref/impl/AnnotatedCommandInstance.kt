@@ -1,10 +1,10 @@
 package io.foxcapades.lib.cli.builder.command.ref.impl
 
 import io.foxcapades.lib.cli.builder.arg.ref.impl.HeadlessArgument
+import io.foxcapades.lib.cli.builder.command.CliCommand
 import io.foxcapades.lib.cli.builder.command.CliCommandAnnotation
 import io.foxcapades.lib.cli.builder.command.CliCommandComponents
 import io.foxcapades.lib.cli.builder.command.Command
-import io.foxcapades.lib.cli.builder.command.CliCommand
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig

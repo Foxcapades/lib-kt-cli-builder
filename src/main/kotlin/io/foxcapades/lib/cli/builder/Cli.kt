@@ -2,7 +2,7 @@ package io.foxcapades.lib.cli.builder
 
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.serial.CommandSerializer
-import io.foxcapades.lib.cli.builder.serial.impl.*
+import io.foxcapades.lib.cli.builder.serial.impl.CommandSerializerImpl
 
 /**
  * CLI Serialization Helpers

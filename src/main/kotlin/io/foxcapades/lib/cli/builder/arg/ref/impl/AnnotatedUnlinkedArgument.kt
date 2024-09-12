@@ -9,8 +9,8 @@ import io.foxcapades.lib.cli.builder.arg.ref.UnlinkedResolvedArgument
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class AnnotatedUnlinkedArgument<V>(
   annotation: CliArgumentAnnotation,

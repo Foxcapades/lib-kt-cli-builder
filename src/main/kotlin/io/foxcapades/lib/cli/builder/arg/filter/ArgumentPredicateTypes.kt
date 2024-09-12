@@ -1,6 +1,5 @@
 package io.foxcapades.lib.cli.builder.arg.filter
 
-import io.foxcapades.lib.cli.builder.arg.Argument
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass

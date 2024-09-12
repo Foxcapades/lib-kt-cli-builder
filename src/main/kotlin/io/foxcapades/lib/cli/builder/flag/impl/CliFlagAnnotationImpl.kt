@@ -1,9 +1,12 @@
 package io.foxcapades.lib.cli.builder.flag.impl
 
 import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
-import io.foxcapades.lib.cli.builder.flag.*
+import io.foxcapades.lib.cli.builder.flag.CliFlag
+import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.flag.filter.UnconfiguredFlagFilter
+import io.foxcapades.lib.cli.builder.flag.hasLongForm
+import io.foxcapades.lib.cli.builder.flag.hasShortForm
 import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
 
 @JvmInline

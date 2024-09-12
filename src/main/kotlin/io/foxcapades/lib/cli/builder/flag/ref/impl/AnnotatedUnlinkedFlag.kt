@@ -8,8 +8,8 @@ import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.flag.ref.UnlinkedResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class AnnotatedUnlinkedFlag<V>(
   annotation: CliFlagAnnotation,

@@ -10,10 +10,10 @@ import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.serial.writeArgument
-import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
 import io.foxcapades.lib.cli.builder.util.reflect.property
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal open class BasicFlagImpl<V>(
   longForm:   Property<String>,

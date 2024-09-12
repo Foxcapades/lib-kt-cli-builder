@@ -1,7 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.arg.filter
 
-import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
 import kotlin.reflect.KClass
 

@@ -4,8 +4,8 @@ import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.MutableDefaultableProperty
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 /**
  * Represents a command line flag option.

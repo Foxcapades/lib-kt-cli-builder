@@ -1,7 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.flag
 
-import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
 import io.foxcapades.lib.cli.builder.arg.format.NonNullGeneralStringifier
 import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
