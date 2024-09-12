@@ -108,7 +108,7 @@ internal class StringCliAppenderImpl<T : Any>(
       else                   -> false
     }
 
-`    if (shouldQuote) {
+    if (shouldQuote) {
       config.targetShell.startString(appender)
       last = Type.InQuotes
     } else {
