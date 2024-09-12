@@ -6,25 +6,40 @@ import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 // region Validation
 
 internal fun ResolvedFlag<*>.validateFlagNames(config: CliSerializationConfig) {
-  val sv = !hasShortForm || config.targetShell.isFlagSafe(shortForm)
-  var lv = true
+  if (hasShortForm) {
+    val sv = config.targetShell.isFlagSafe(shortForm)
 
-  if (hasLongForm) {
+    if (hasLongForm) {
+      var lv = true
+
+      for (c in longForm) {
+        if (!config.targetShell.isFlagSafe(c)) {
+          lv = false
+          break
+        }
+      }
+
+      if (!sv) {
+        throw if (!lv)
+          InvalidFlagFormException.invalidBothForms(this)
+        else
+          InvalidFlagFormException.invalidShortForm(this)
+      }
+    }
+  } else if (hasLongForm) {
+    var lv = true
+
     for (c in longForm) {
       if (!config.targetShell.isFlagSafe(c)) {
         lv = false
         break
       }
     }
-  }
 
-  if (!sv) {
-    throw if (!lv)
-      InvalidFlagFormException.invalidBothForms(this)
-    else
-      InvalidFlagFormException.invalidShortForm(this)
-  } else if (!lv) {
-    throw InvalidFlagFormException.invalidLongForm(this)
+    if (!lv)
+      throw InvalidFlagFormException.invalidLongForm(this)
+  } else if (!valueSource.hasName) {
+    throw IllegalStateException("Flag instance has no short or long form defined; sourced from ${parentComponent.qualifiedName}")
   }
 }
 

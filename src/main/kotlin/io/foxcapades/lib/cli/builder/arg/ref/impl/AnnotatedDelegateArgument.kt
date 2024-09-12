@@ -5,7 +5,7 @@ import io.foxcapades.lib.cli.builder.arg.CliArgument
 import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
-import io.foxcapades.lib.cli.builder.arg.ref.ResolvedDelegatedArgumentRef
+import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
@@ -17,7 +17,7 @@ internal class AnnotatedDelegateArgument<T : Any, V>(
   delegate:   Argument<V>,
   accessor:   ValueSource,
 )
-  : ResolvedDelegatedArgumentRef<T, V>
+  : ResolvedArgument<V>
   , AbstractArgument<V>(parent, delegate, accessor)
 {
   private val annotation = annotation

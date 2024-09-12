@@ -87,6 +87,11 @@ internal class ArbitraryComponentResolver<T : Any>(
     return false
   }
 
+  private fun enqueueFlag(flag: ResolvedFlag<*>) {
+    flag.validateFlagNames(config)
+    queue.addLast(flag)
+  }
+
   // region Property Reference
 
   private fun tryProperty(prop: KProperty0<Any?>) {
@@ -122,10 +127,10 @@ internal class ArbitraryComponentResolver<T : Any>(
     val annotations = prop.relevantAnnotations()
 
     if (annotations.isEmpty)
-      return queue.addLast(DelegateFlag(parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
+      return enqueueFlag(DelegateFlag(parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
 
     if (annotations.hasFlagAnnotation)
-      return queue.addLast(AnnotatedDelegateFlag(annotations.flag!!, parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
+      return enqueueFlag(AnnotatedDelegateFlag(annotations.flag!!, parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
 
     if (annotations.hasArgumentAnnotation)
       throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
@@ -159,10 +164,10 @@ internal class ArbitraryComponentResolver<T : Any>(
     val annotations = prop.relevantAnnotations()
 
     if (annotations.isEmpty)
-      return queue.addLast(UnlinkedFlag(parent, instance, WrapperAccessorK0(instance::get, prop, type)))
+      return enqueueFlag(UnlinkedFlag(parent, instance, WrapperAccessorK0(instance::get, prop, type)))
 
     if (annotations.hasFlagAnnotation)
-      return queue.addLast(AnnotatedUnlinkedFlag(annotations.flag!!, parent, instance, WrapperAccessorK0(instance::get, prop, type)))
+      return enqueueFlag(AnnotatedUnlinkedFlag(annotations.flag!!, parent, instance, WrapperAccessorK0(instance::get, prop, type)))
 
     if (annotations.hasArgumentAnnotation)
       throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
@@ -203,7 +208,7 @@ internal class ArbitraryComponentResolver<T : Any>(
       return
 
     if (annotations.hasFlagAnnotation)
-      return queue.addLast(FauxFlag(annotations.flag!!, parent, ValueAccessorKP0(prop, null)))
+      return enqueueFlag(FauxFlag(annotations.flag!!, parent, ValueAccessorKP0(prop, null)))
 
     if (annotations.hasArgumentAnnotation)
       return queue.addLast(FauxArgument(annotations.argument!!, parent, ValueAccessorKP0(prop, null)))
@@ -243,9 +248,9 @@ internal class ArbitraryComponentResolver<T : Any>(
     val flag = (getter() ?: return).forceAny()
 
     if (annotations.hasFlagAnnotation)
-      queue.addLast(AnnotatedValueFlag(annotations.flag!!, parent, flag, ValueAccessorKF0(getter.unsafeCast<Flag<Any?>>(), type)))
+      enqueueFlag(AnnotatedValueFlag(annotations.flag!!, parent, flag, ValueAccessorKF0(getter.unsafeCast<Flag<Any?>>(), type)))
     else
-      queue.addLast(ValueFlag(parent, flag, ValueAccessorKF0(getter.unsafeCast<Flag<Any?>>(), type)))
+      enqueueFlag(ValueFlag(parent, flag, ValueAccessorKF0(getter.unsafeCast<Flag<Any?>>(), type)))
   }
 
   private fun tryArgumentGetterValue(getter: KFunction0<Argument<*>?>) {
@@ -276,7 +281,7 @@ internal class ArbitraryComponentResolver<T : Any>(
       return
 
     if (annotations.hasFlagAnnotation)
-      return queue.addLast(FauxFlag(annotations.flag!!, parent, ValueAccessorKF0(getter, null)))
+      return enqueueFlag(FauxFlag(annotations.flag!!, parent, ValueAccessorKF0(getter, null)))
 
     if (annotations.hasArgumentAnnotation)
       return queue.addLast(FauxArgument(annotations.argument!!, parent, ValueAccessorKF0(getter, null)))
@@ -291,9 +296,9 @@ internal class ArbitraryComponentResolver<T : Any>(
 
   private fun tryFlag(flag: Flag<Any?>) =
     if (flag is ResolvedFlag)
-      queue.addLast(flag)
+      enqueueFlag(flag)
     else
-      queue.addLast(UnlinkedFlag(parent, flag, AnonymousComponentValue).apply { validateFlagNames(config) })
+      enqueueFlag(UnlinkedFlag(parent, flag, AnonymousComponentValue).apply { validateFlagNames(config) })
 
   private fun tryArgument(argument: Argument<Any?>) =
     if (argument is ResolvedArgument)

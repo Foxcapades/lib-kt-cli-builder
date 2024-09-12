@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.versioning.VersioningPlugin
+import org.jetbrains.dokka.versioning.VersioningConfiguration
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
@@ -6,6 +8,12 @@ plugins {
   `maven-publish`
   signing
   id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+}
+
+buildscript {
+  dependencies {
+    classpath("org.jetbrains.dokka:versioning-plugin:1.9.20")
+  }
 }
 
 data class SemVer(
@@ -22,7 +30,7 @@ data class SemVer(
   override fun toString() = "$major.$minor.$patch"
 }
 
-val projectVersion = SemVer(major = 0, minor = 5, patch = 0)
+val projectVersion = SemVer(major = 0, minor = 6, patch = 0)
 
 group = "io.foxcapades.kt"
 version = projectVersion.toString()
@@ -47,6 +55,8 @@ dependencies {
   api("org.slf4j:slf4j-api:2.0.16")
 
   implementation(kotlin("reflect"))
+
+  dokkaHtmlPlugin("org.jetbrains.dokka:versioning-plugin:1.9.20")
 
   testImplementation("org.mockito:mockito-junit-jupiter:5.13.0")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
@@ -73,6 +83,11 @@ tasks.dokkaHtml {
 
   doFirst {
     targetDir.deleteRecursively()
+  }
+
+  pluginConfiguration<VersioningPlugin, VersioningConfiguration> {
+    version = projectVersion.gitTag
+    olderVersionsDir = file("docs/dokka")
   }
 }
 
@@ -130,19 +145,13 @@ signing {
   sign(publishing.publications["gpr"])
 }
 
-tasks.create("release") {
+tasks.create("bump-feature") {
   group = "Custom"
 
-  doFirst {
-    with(ProcessBuilder("git", "diff-index", "--quiet", "HEAD")) {
-      if (start().waitFor() != 0) {
-        throw GradleException("git workspace is not clean!")
-      }
-    }
-
+  doLast {
     val newVersion = projectVersion.copy(minor = projectVersion.minor + 1, patch = 0)
 
-    with(ProcessBuilder("sed", "s/${projectVersion.sedExp}/${projectVersion.sedExp}/", "build.gradle.kts")) {
+    with(ProcessBuilder("sed", "s/${projectVersion.sedExp}/${newVersion.sedExp}/", "build.gradle.kts")) {
       val tmp = file("build.gradle.kts.tmp")
       redirectOutput(tmp)
 
@@ -153,6 +162,18 @@ tasks.create("release") {
       val cur = file("build.gradle.kts")
       cur.delete()
       tmp.renameTo(cur)
+    }
+  }
+}
+
+tasks.create("release") {
+  group = "Custom"
+
+  doFirst {
+    with(ProcessBuilder("git", "diff-index", "--quiet", "HEAD")) {
+      if (start().waitFor() != 0) {
+        throw GradleException("git workspace is not clean!")
+      }
     }
   }
 

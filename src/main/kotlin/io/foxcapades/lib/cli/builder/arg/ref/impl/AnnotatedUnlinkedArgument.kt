@@ -5,7 +5,7 @@ import io.foxcapades.lib.cli.builder.arg.CliArgument
 import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
-import io.foxcapades.lib.cli.builder.arg.ref.UnlinkedResolvedArgument
+import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
@@ -18,7 +18,7 @@ internal class AnnotatedUnlinkedArgument<V>(
   instance:   Argument<V>,
   source:     ValueSource,
 )
-  : UnlinkedResolvedArgument<V>
+  : ResolvedArgument<V>
   , UnlinkedArgument<V>(parent, instance, source)
 {
   private val annotation = annotation

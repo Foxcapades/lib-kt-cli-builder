@@ -4,7 +4,7 @@ import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.arg.ref.impl.UnlinkedArgument
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.flag.Flag
-import io.foxcapades.lib.cli.builder.flag.ref.UnlinkedResolvedFlag
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
@@ -15,7 +15,7 @@ internal open class UnlinkedFlag<V>(
   instance: Flag<V>,
   source:   ValueSource,
 )
-  : UnlinkedResolvedFlag<V>
+  : ResolvedFlag<V>
 {
   private val instance = instance
 

@@ -6,7 +6,7 @@ import io.foxcapades.lib.cli.builder.flag.CliFlag
 import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
 import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
-import io.foxcapades.lib.cli.builder.flag.ref.UnlinkedResolvedFlag
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
@@ -17,7 +17,7 @@ internal class AnnotatedUnlinkedFlag<V>(
   instance:   Flag<V>,
   source:     ValueSource,
 )
-  : UnlinkedResolvedFlag<V>
+  : ResolvedFlag<V>
   , UnlinkedFlag<V>(parent, instance, source)
 {
   private val annotation = annotation

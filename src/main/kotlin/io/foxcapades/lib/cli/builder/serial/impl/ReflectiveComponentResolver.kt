@@ -58,9 +58,14 @@ internal class ReflectiveComponentResolver<T : Any>(
 
   private inline val ResolvedComponent.isUsable get() =
     when (this) {
-      is ResolvedFlag<*>     -> isUsable()
+      is ResolvedFlag<*> -> {
+        validateFlagNames(config)
+        isUsable()
+      }
+
       is ResolvedArgument<*> -> isUsable()
-      else                   -> false
+
+      else -> false
     }
 
   private fun ResolvedFlag<*>.isUsable() =
@@ -223,6 +228,7 @@ internal class ReflectiveComponentResolver<T : Any>(
         .also { it.validateFlagNames(config) }
     else
       DelegateFlag(parent, del, ValueAccessorKP1(prop, instance))
+        .also { it.validateFlagNames(config) }
   }
 
   private fun siftDelegateArg(del: Argument<Any?>, prop: KProperty1<T, Any?>): ResolvedComponent {
