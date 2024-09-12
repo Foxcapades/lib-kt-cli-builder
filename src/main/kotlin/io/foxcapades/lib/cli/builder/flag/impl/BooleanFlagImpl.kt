@@ -16,11 +16,11 @@ internal class BooleanFlagImpl(
   longForm:   Property<String>,
   shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  filter:     Property<FlagPredicate<BooleanFlag, Argument<Boolean>, Boolean>>,
+  filter:     Property<FlagPredicate<Boolean>>,
   isToggle:   Boolean,
   argument:   Argument<Boolean>
 )
-  : BasicFlagImpl<Argument<Boolean>, Boolean>(longForm, shortForm, isRequired, filter.unsafeCast(), argument)
+  : BasicFlagImpl<Boolean>(longForm, shortForm, isRequired, filter.unsafeCast(), argument)
   , BooleanFlag
 {
   override val isToggleFlag: Boolean = isToggle
@@ -31,7 +31,7 @@ internal class BooleanFlagImpl(
     isRequired = BooleanFlagOptions::required.property(opts),
     filter     = BooleanFlagOptions::flagFilter.property(opts),
     isToggle   = BooleanFlagOptions::isToggleFlag.property<Boolean>(opts).getOr(false),
-    argument   = BasicArgumentImpl(opts.argument)
+    argument   = BasicArgumentImpl.of(opts.argument)
   )
 
   override fun writeToString(writer: CliFlagWriter<*, Boolean>) {

@@ -39,7 +39,7 @@ import kotlin.reflect.KClass
  *
  * @see [CliFlag.required]
  */
-@Target(AnnotationTarget.PROPERTY)
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class CliFlag(
   /**
@@ -63,7 +63,7 @@ annotation class CliFlag(
 
   val required: Toggle = Toggle.Unset,
 
-  val inclusionTest: KClass<out FlagPredicate<*, *, *>> = UnconfiguredFlagFilter::class,
+  val inclusionTest: KClass<out FlagPredicate<*>> = UnconfiguredFlagFilter::class,
 
   val argument: CliArgument = CliArgument()
 ) {

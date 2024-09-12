@@ -36,5 +36,4 @@ internal inline fun <T : Any> KClass<out T>.getOrCreate() =
 
 
 @Suppress("UNCHECKED_CAST")
-internal inline fun <T : Any> KClass<*>.unsafeCast() =
-  this as KClass<out T>
+internal inline fun <T : Any> KClass<*>.unsafeCast() = this as KClass<out T>

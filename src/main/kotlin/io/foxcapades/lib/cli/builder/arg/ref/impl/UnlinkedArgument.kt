@@ -2,24 +2,9 @@ package io.foxcapades.lib.cli.builder.arg.ref.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.ref.UnlinkedResolvedArgument
-import io.foxcapades.lib.cli.builder.command.Command
-import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
+import io.foxcapades.lib.cli.builder.component.ResolvedComponent
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
-/**
- * Represents an [Argument] instance without a known property or getter source.
- *
- * These are only produced for raw `Argument` instances returned from
- * [Command.getCliCallComponents] calls.
- *
- * @param C Command class type.
- *
- * @param V Argument value type.
- */
-internal class UnlinkedArgument<C : Any, V>(parent: ResolvedCommand<C>, instance: Argument<V>)
+internal open class UnlinkedArgument<V>(parent: ResolvedComponent, instance: Argument<V>, source: ValueSource)
   : UnlinkedResolvedArgument<V>
-  , AbstractUnlinkedArgument<V>(parent, instance)
-{
-  @Suppress("UNCHECKED_CAST")
-  override val parentComponent
-    get() = super.parentComponent as ResolvedCommand<C>
-}
+  , AbstractArgument<V>(parent, instance, source)

@@ -1,27 +1,27 @@
 package io.foxcapades.lib.cli.builder.flag.ref.impl
 
-import io.foxcapades.lib.cli.builder.arg.Argument
+import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.arg.ref.impl.UnlinkedArgument
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.ref.UnlinkedResolvedFlag
-import io.foxcapades.lib.cli.builder.flag.safeName
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import io.foxcapades.lib.cli.builder.util.reflect.safeName
-import kotlin.reflect.KCallable
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import kotlin.reflect.KProperty
 
-internal class UnlinkedFlag<V>(
-  parent: ResolvedCommand<*>,
-  instance: Flag<Argument<V>, V>
-) : UnlinkedResolvedFlag<V> {
+internal open class UnlinkedFlag<V>(
+  parent:   ResolvedCommand<*>,
+  instance: Flag<V>,
+  source:   ValueSource,
+)
+  : UnlinkedResolvedFlag<V>
+{
   private val instance = instance
 
-  override val parentComponent = parent
+  override val valueSource = source
 
-  override val qualifiedName by lazy { "flag " + parentComponent.type.safeName + "::??? " + instance.safeName }
+  override val parentComponent = parent
 
   override val hasLongForm
     get() = instance.hasLongForm
@@ -44,7 +44,7 @@ internal class UnlinkedFlag<V>(
   override val hasDefault
     get() = instance.hasDefault
 
-  override val argument by lazy { UnlinkedArgument(this, instance.argument) }
+  override val argument: ResolvedArgument<V> by lazy { UnlinkedArgument(this, instance.argument) }
 
   override fun get() =
     instance.get()
@@ -67,10 +67,8 @@ internal class UnlinkedFlag<V>(
   override fun unset() =
     instance.unset()
 
-  override fun shouldSerialize(
-    config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?,
-  ) = instance.shouldSerialize(config, reference)
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    instance.shouldSerialize(config, source)
 
   override fun writeToString(writer: CliFlagWriter<*, V>) =
     instance.writeToString(writer)

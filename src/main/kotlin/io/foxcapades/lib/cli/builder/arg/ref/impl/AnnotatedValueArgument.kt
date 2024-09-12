@@ -1,25 +1,57 @@
 package io.foxcapades.lib.cli.builder.arg.ref.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
-import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgumentValueRef
-import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
-import kotlin.reflect.KCallable
+import io.foxcapades.lib.cli.builder.arg.CliArgument
+import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
+import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
+import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
+import io.foxcapades.lib.cli.builder.arg.ref.UnlinkedResolvedArgument
+import io.foxcapades.lib.cli.builder.component.ResolvedComponent
+import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
+import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
+import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
 
-internal class AnnotatedValueArgument<T : Any, V>(
-  annotation: CliArgumentAnnotationImpl,
-  parent:     ResolvedCommand<T>,
+internal open class AnnotatedValueArgument<V>(
+  annotation: CliArgumentAnnotation,
+  parent:     ResolvedComponent,
   instance:   Argument<V>,
-  accessor:   KCallable<Argument<V>>,
+  source:     ValueSource,
 )
-  : ResolvedArgumentValueRef<T, V>
-  , BaseAnnotatedValueArgument<ResolvedCommand<T>, V>(annotation, parent, instance)
+  : UnlinkedResolvedArgument<V>
+  , AbstractArgument<V>(parent, instance, source)
 {
-  override val accessor = accessor
+  private val annotation = annotation
 
-  override val containingType
-    get() = parentComponent.type
+  private val instance = instance
 
-  override val qualifiedName: String
-    get() = super<ResolvedArgumentValueRef>.qualifiedName
+  override val parentComponent = parent
+
+  override val valueSource = source
+
+  override val isRequired
+    get() = when (annotation.required) {
+      CliArgument.Toggle.Yes   -> true
+      CliArgument.Toggle.No    -> false
+      CliArgument.Toggle.Unset -> instance.isRequired
+    }
+
+  override val shouldQuote
+    get() = when (annotation.shouldQuote) {
+      CliArgument.Toggle.Yes   -> true
+      CliArgument.Toggle.No    -> false
+      CliArgument.Toggle.Unset -> instance.shouldQuote
+    }
+
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    if (annotation.hasFilter)
+      annotation.filter.getOrCreate().unsafeCast<V>().shouldInclude(this, config, source)
+    else
+      instance.shouldSerialize(config, source)
+
+  override fun writeToString(writer: CliArgumentWriter<*, V>) =
+    if (annotation.hasFormatter)
+      annotation.formatter.getOrCreate().unsafeCast<V>().formatValue(get(), writer, this)
+    else
+      super.writeToString(writer)
 }

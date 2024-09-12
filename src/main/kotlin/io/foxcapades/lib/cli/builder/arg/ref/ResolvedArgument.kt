@@ -5,5 +5,8 @@ import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 
 interface ResolvedArgument<V> : ResolvedComponent, Argument<V> {
   override val parentComponent: ResolvedComponent
+
+  override val qualifiedName: String
+    get() = "argument " + valueSource.reference
 }
 

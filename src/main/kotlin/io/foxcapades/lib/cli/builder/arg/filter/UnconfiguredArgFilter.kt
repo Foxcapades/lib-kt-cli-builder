@@ -2,13 +2,9 @@ package io.foxcapades.lib.cli.builder.arg.filter
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import kotlin.reflect.KCallable
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
-internal class UnconfiguredArgFilter : ArgumentPredicate<Argument<Any?>, Any?> {
-  override fun shouldInclude(
-    argument: Argument<Any?>,
-    config: CliSerializationConfig,
-    reference: ValueAccessorReference<*, Any?, KCallable<Any?>>?,
-  ) = ArgSetFilter.shouldInclude(argument, config, reference)
+internal class UnconfiguredArgFilter : ArgumentPredicate<Any?> {
+  override fun shouldInclude(argument: Argument<Any?>, config: CliSerializationConfig, source: ValueSource) =
+    ArgSetFilter.shouldInclude(argument, config, source)
 }

@@ -1,33 +1,29 @@
 package io.foxcapades.lib.cli.builder.arg.ref.impl
 
 import io.foxcapades.lib.cli.builder.arg.CliArgument
-import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
-import io.foxcapades.lib.cli.builder.arg.ref.ResolvedImaginaryArgument
+import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
+import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
+import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
+import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.NoSuchDefaultValueException
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import kotlin.reflect.KCallable
 
-internal class FauxArgument<T : Any, V>(
-  annotation: CliArgumentAnnotationImpl,
-  container:  T,
+internal class FauxArgument<V>(
+  annotation: CliArgumentAnnotation,
   parent:     ResolvedComponent,
-  accessor:   KCallable<V>,
+  accessor:   ValueAccessor<V>,
 )
-  : ResolvedImaginaryArgument<T, V>
+  : ResolvedArgument<V>
 {
-  private val container = container
-
-  override val annotation = annotation
-
-  override val containingType
-    get() = container::class
+  private val annotation = annotation
 
   override val parentComponent = parent
 
-  override val accessor = accessor
+  override val valueSource = accessor
 
   // TODO: this should be smarter
   override val isRequired
@@ -43,23 +39,21 @@ internal class FauxArgument<T : Any, V>(
   override val isSet: Boolean
     get() = true
 
-  override fun get() = accessor.call(container)
+  override fun get() =
+    valueSource()
 
-  override fun getDefault() = throw NoSuchDefaultValueException()
+  override fun getDefault() =
+    throw NoSuchDefaultValueException()
 
-  override fun set(value: V) {
+  override fun set(value: V) =
     throw UnsupportedOperationException()
-  }
 
-  override fun unset() {
+  override fun unset() =
     throw UnsupportedOperationException()
-  }
 
-  override fun shouldSerialize(
-    config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?,
-  ) = annotation.initFilter<V>().shouldInclude(this, config, reference)
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    annotation.initFilter().unsafeCast<V>().shouldInclude(this, config, source)
 
   override fun writeToString(writer: CliArgumentWriter<*, V>) =
-    annotation.initFormatter<V>().formatValue(get(), writer, this)
+    annotation.initFormatter().unsafeCast<V>().formatValue(get(), writer, this)
 }

@@ -11,4 +11,7 @@ sealed interface ResolvedCommand<C : Any> : ResolvedComponent, Command {
     get() = instance::class
 
   override val parentComponent: ResolvedCommand<*>?
+
+  override val qualifiedName: String
+    get() = "command " + valueSource.reference
 }

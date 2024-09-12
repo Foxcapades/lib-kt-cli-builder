@@ -2,15 +2,14 @@ package io.foxcapades.lib.cli.builder.arg.filter
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import kotlin.reflect.KCallable
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 /**
  * # Argument Inclusion Predicate
  *
- * Defines a predicate function used to determine whether an [Argument] or its
- * parent should be included in CLI call serialization output based on the value
- * of that `Argument`.
+ * Defines a predicate function used to determine whether an [Argument] should
+ * be included in CLI call serialization output based on the value of that
+ * `Argument`.
  *
  * This predicate is only called on `Argument` instances that either have a
  * default value or have been explicitly set.
@@ -24,11 +23,9 @@ import kotlin.reflect.KCallable
  *
  * @param V Type of value to be tested.
  *
- * @param A Argument type.
- *
  * @since 1.0.0
  */
-fun interface ArgumentPredicate<A : Argument<V>, V> {
+fun interface ArgumentPredicate<V> {
   /**
    * Called to test whether the given [Argument] should be included in the
    * serialized CLI call output.
@@ -40,16 +37,11 @@ fun interface ArgumentPredicate<A : Argument<V>, V> {
    *
    * @param config Current serialization config.
    *
-   * @param reference Reference to the class property or method from which the
-   * `Argument` instance was obtained.  If the `Argument` instance is not a
-   * property delegate, this parameter will be `null`.
+   * @param source Basic information about the source of the argument value.
+   * An `Argument` source would typically be a class property or getter method.
    *
    * @return `true` if the value should be included in the serialized CLI call
    * output, otherwise `false`.
    */
-  fun shouldInclude(
-    argument:  A,
-    config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?
-  ): Boolean
+  fun shouldInclude(argument: Argument<V>, config: CliSerializationConfig, source: ValueSource): Boolean
 }

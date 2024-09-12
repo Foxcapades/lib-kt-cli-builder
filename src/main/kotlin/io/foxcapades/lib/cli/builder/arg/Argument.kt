@@ -4,9 +4,8 @@ import io.foxcapades.lib.cli.builder.UnsetArgumentDefaultException
 import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.MutableDefaultableProperty
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import kotlin.reflect.KCallable
 
 /**
  * Represents a single positional or flag argument.
@@ -21,7 +20,7 @@ interface Argument<V> : MutableDefaultableProperty<V>, CliCallComponent {
   val isDefault: Boolean
     get() = hasDefault && isSet && getDefault() == get()
 
-  fun shouldSerialize(config: CliSerializationConfig, reference: ValueAccessorReference<*, V, KCallable<V>>?): Boolean
+  fun shouldSerialize(config: CliSerializationConfig, source: ValueSource): Boolean
 
   fun writeToString(writer: CliArgumentWriter<*, V>)
 

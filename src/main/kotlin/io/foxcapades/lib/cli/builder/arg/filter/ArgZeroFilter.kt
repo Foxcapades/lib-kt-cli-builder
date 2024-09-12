@@ -3,12 +3,11 @@ package io.foxcapades.lib.cli.builder.arg.filter
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.Bytes
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import java.math.BigDecimal
 import java.math.BigInteger
-import kotlin.reflect.KCallable
 
-internal object ArgZeroFilter : ArgumentPredicate<Argument<Any?>, Any?> {
+internal object ArgZeroFilter : ArgumentPredicate<Any?> {
   internal inline val ShortZero: Short get() = 0.toShort()
   internal inline val IntZero: Int get() = 0
   internal inline val LongZero: Long get() = 0L
@@ -23,15 +22,12 @@ internal object ArgZeroFilter : ArgumentPredicate<Argument<Any?>, Any?> {
 
   internal inline val CharZero: Char get() = '\u0000'
 
-  override fun shouldInclude(
-    argument: Argument<Any?>,
-    config: CliSerializationConfig,
-    reference: ValueAccessorReference<*, Any?, KCallable<Any?>>?
-  ) = when {
-    !argument.isSet     -> false
-    argument.hasDefault -> argument.getDefault() == argument.get()
-    else                -> !valueIsZero(argument.get())
-  }
+  override fun shouldInclude(argument: Argument<Any?>, config: CliSerializationConfig, source: ValueSource) =
+    when {
+      !argument.isSet     -> false
+      argument.hasDefault -> argument.getDefault() == argument.get()
+      else                -> !valueIsZero(argument.get())
+    }
 
   private fun valueIsZero(value: Any?) =
     when (value) {
@@ -51,6 +47,9 @@ internal object ArgZeroFilter : ArgumentPredicate<Argument<Any?>, Any?> {
       is UShort -> value == UShortZero
 
       is Char -> value == CharZero
+
+      is kotlin.time.Duration -> value == kotlin.time.Duration.ZERO
+      is java.time.Duration   -> value.isZero
 
       else -> false
     }

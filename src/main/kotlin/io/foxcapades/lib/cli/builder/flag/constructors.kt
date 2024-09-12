@@ -23,7 +23,7 @@ inline fun bigDecimalFlag(longForm: String, noinline action: FlagOptions<BigDeci
 inline fun bigDecimalFlag(shortForm: Char, noinline action: FlagOptions<BigDecimal>.() -> Unit = {}) =
   bigDecimalFlag { this.shortForm = shortForm; action() }
 
-fun bigDecimalFlag(action: FlagOptions<BigDecimal>.() -> Unit = {}): Flag<Argument<BigDecimal>, BigDecimal> =
+fun bigDecimalFlag(action: FlagOptions<BigDecimal>.() -> Unit = {}): Flag<BigDecimal> =
   BasicFlagImpl.of(FlagOptions(BigDecimal::class).also {
     it.formatter = ArgumentFormatter(BigDecimal::toPlainString)
     it.action()
@@ -31,7 +31,7 @@ fun bigDecimalFlag(action: FlagOptions<BigDecimal>.() -> Unit = {}): Flag<Argume
 
 fun nullableBigDecimalFlag(
   action: NullableFlagOptions<BigDecimal>.() -> Unit = {}
-): Flag<Argument<BigDecimal?>, BigDecimal?> =
+): Flag<BigDecimal?> =
   UniversalFlagImpl.of(NullableFlagOptions(BigDecimal::class).also(action))
 
 // endregion BigDecimal
@@ -44,7 +44,7 @@ inline fun bigIntegerFlag(longForm: String, noinline action: FlagOptions<BigInte
 inline fun bigIntegerFlag(shortForm: Char, noinline action: FlagOptions<BigInteger>.() -> Unit = {}) =
   bigIntegerFlag { this.shortForm = shortForm; action() }
 
-fun bigIntegerFlag(action: FlagOptions<BigInteger>.() -> Unit = {}): Flag<Argument<BigInteger>, BigInteger> =
+fun bigIntegerFlag(action: FlagOptions<BigInteger>.() -> Unit = {}): Flag<BigInteger> =
   BasicFlagImpl.of(FlagOptions(BigInteger::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
@@ -52,7 +52,7 @@ fun bigIntegerFlag(action: FlagOptions<BigInteger>.() -> Unit = {}): Flag<Argume
 
 fun nullableBigIntegerFlag(
   action: NullableFlagOptions<BigInteger>.() -> Unit = {}
-): Flag<Argument<BigInteger?>, BigInteger?> =
+): Flag<BigInteger?> =
   UniversalFlagImpl.of(NullableFlagOptions(BigInteger::class).also(action))
 
 // endregion BigInteger
@@ -98,7 +98,7 @@ fun booleanFlag(action: BooleanFlagOptions.() -> Unit = {}): BooleanFlag =
     it.action()
   })
 
-fun nullableBooleanFlag(action: NullableFlagOptions<Boolean>.() -> Unit = {}): Flag<Argument<Boolean?>, Boolean?> =
+fun nullableBooleanFlag(action: NullableFlagOptions<Boolean>.() -> Unit = {}): Flag<Boolean?> =
   UniversalFlagImpl.of(NullableFlagOptions(Boolean::class).also(action))
 
 // endregion Boolean
@@ -112,13 +112,13 @@ inline fun byteFlag(longForm: String, noinline action: FlagOptions<Byte>.() -> U
 inline fun byteFlag(shortForm: Char, noinline action: FlagOptions<Byte>.() -> Unit = {}) =
   byteFlag { this.shortForm = shortForm; action() }
 
-fun byteFlag(action: FlagOptions<Byte>.() -> Unit = {}): Flag<Argument<Byte>, Byte> =
+fun byteFlag(action: FlagOptions<Byte>.() -> Unit = {}): Flag<Byte> =
   BasicFlagImpl.of(FlagOptions(Byte::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableByteFlag(action: NullableFlagOptions<Byte>.() -> Unit = {}): Flag<Argument<Byte?>, Byte?> =
+fun nullableByteFlag(action: NullableFlagOptions<Byte>.() -> Unit = {}): Flag<Byte?> =
   UniversalFlagImpl.of(NullableFlagOptions(Byte::class).also(action))
 
 // endregion Byte
@@ -132,13 +132,13 @@ inline fun charFlag(longForm: String, noinline action: FlagOptions<Char>.() -> U
 inline fun charFlag(shortForm: Char, noinline action: FlagOptions<Char>.() -> Unit = {}) =
   charFlag { this.shortForm = shortForm; action() }
 
-fun charFlag(action: FlagOptions<Char>.() -> Unit = {}): Flag<Argument<Char>, Char> =
+fun charFlag(action: FlagOptions<Char>.() -> Unit = {}): Flag<Char> =
   BasicFlagImpl.of(FlagOptions(Char::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableCharFlag(action: NullableFlagOptions<Char>.() -> Unit = {}): Flag<Argument<Char?>, Char?> =
+fun nullableCharFlag(action: NullableFlagOptions<Char>.() -> Unit = {}): Flag<Char?> =
   UniversalFlagImpl.of(NullableFlagOptions(Char::class).also(action))
 
 // endregion Char
@@ -151,13 +151,13 @@ inline fun doubleFlag(longForm: String, noinline action: FlagOptions<Double>.() 
 inline fun doubleFlag(shortForm: Char, noinline action: FlagOptions<Double>.() -> Unit = {}) =
   doubleFlag { this.shortForm = shortForm; action() }
 
-fun doubleFlag(action: FlagOptions<Double>.() -> Unit = {}): Flag<Argument<Double>, Double> =
+fun doubleFlag(action: FlagOptions<Double>.() -> Unit = {}): Flag<Double> =
   BasicFlagImpl.of(FlagOptions(Double::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableDoubleFlag(action: NullableFlagOptions<Double>.() -> Unit = {}): Flag<Argument<Double?>, Double?> =
+fun nullableDoubleFlag(action: NullableFlagOptions<Double>.() -> Unit = {}): Flag<Double?> =
   UniversalFlagImpl.of(NullableFlagOptions(Double::class).also(action))
 
 // endregion Double
@@ -170,14 +170,14 @@ inline fun fileFlag(longForm: String, noinline action: FlagOptions<File>.() -> U
 inline fun fileFlag(shortForm: Char, noinline action: FlagOptions<File>.() -> Unit = {}) =
   fileFlag { this.shortForm = shortForm; action() }
 
-fun fileFlag(action: FlagOptions<File>.() -> Unit = {}): Flag<Argument<File>, File> =
+fun fileFlag(action: FlagOptions<File>.() -> Unit = {}): Flag<File> =
   BasicFlagImpl.of(FlagOptions(File::class).also {
     it.shouldQuote = true
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableFileFlag(action: NullableFlagOptions<File>.() -> Unit = {}): Flag<Argument<File?>, File?> =
+fun nullableFileFlag(action: NullableFlagOptions<File>.() -> Unit = {}): Flag<File?> =
   UniversalFlagImpl.of(NullableFlagOptions(File::class).also(action))
 
 // endregion Float
@@ -190,13 +190,13 @@ inline fun floatFlag(longForm: String, noinline action: FlagOptions<Float>.() ->
 inline fun floatFlag(shortForm: Char, noinline action: FlagOptions<Float>.() -> Unit = {}) =
   floatFlag { this.shortForm = shortForm; action() }
 
-fun floatFlag(action: FlagOptions<Float>.() -> Unit = {}): Flag<Argument<Float>, Float> =
+fun floatFlag(action: FlagOptions<Float>.() -> Unit = {}): Flag<Float> =
   BasicFlagImpl.of(FlagOptions(Float::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableFloatFlag(action: NullableFlagOptions<Float>.() -> Unit = {}): Flag<Argument<Float?>, Float?> =
+fun nullableFloatFlag(action: NullableFlagOptions<Float>.() -> Unit = {}): Flag<Float?> =
   UniversalFlagImpl.of(NullableFlagOptions(Float::class).also(action))
 
 // endregion File
@@ -209,13 +209,13 @@ inline fun intFlag(longForm: String, noinline action: FlagOptions<Int>.() -> Uni
 inline fun intFlag(shortForm: Char, noinline action: FlagOptions<Int>.() -> Unit = {}) =
   intFlag { this.shortForm = shortForm; action() }
 
-fun intFlag(action: FlagOptions<Int>.() -> Unit = {}): Flag<Argument<Int>, Int> =
+fun intFlag(action: FlagOptions<Int>.() -> Unit = {}): Flag<Int> =
   BasicFlagImpl.of(FlagOptions(Int::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableIntFlag(action: NullableFlagOptions<Int>.() -> Unit = {}): Flag<Argument<Int?>, Int?> =
+fun nullableIntFlag(action: NullableFlagOptions<Int>.() -> Unit = {}): Flag<Int?> =
   UniversalFlagImpl.of(NullableFlagOptions(Int::class).also(action))
 
 // endregion Int
@@ -228,13 +228,13 @@ inline fun longFlag(longForm: String, noinline action: FlagOptions<Long>.() -> U
 inline fun longFlag(shortForm: Char, noinline action: FlagOptions<Long>.() -> Unit = {}) =
   longFlag { this.shortForm = shortForm; action() }
 
-fun longFlag(action: FlagOptions<Long>.() -> Unit = {}): Flag<Argument<Long>, Long> =
+fun longFlag(action: FlagOptions<Long>.() -> Unit = {}): Flag<Long> =
   BasicFlagImpl.of(FlagOptions(Long::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableLongFlag(action: NullableFlagOptions<Long>.() -> Unit = {}): Flag<Argument<Long?>, Long?> =
+fun nullableLongFlag(action: NullableFlagOptions<Long>.() -> Unit = {}): Flag<Long?> =
   UniversalFlagImpl.of(NullableFlagOptions(Long::class).also(action))
 
 // endregion Long
@@ -247,14 +247,14 @@ inline fun pathFlag(longForm: String, noinline action: FlagOptions<Path>.() -> U
 inline fun pathFlag(shortForm: Char, noinline action: FlagOptions<Path>.() -> Unit = {}) =
   pathFlag { this.shortForm = shortForm; action() }
 
-fun pathFlag(action: FlagOptions<Path>.() -> Unit = {}): Flag<Argument<Path>, Path> =
+fun pathFlag(action: FlagOptions<Path>.() -> Unit = {}): Flag<Path> =
   BasicFlagImpl.of(FlagOptions(Path::class).also {
     it.shouldQuote = true
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullablePathFlag(action: NullableFlagOptions<Path>.() -> Unit = {}): Flag<Argument<Path?>, Path?> =
+fun nullablePathFlag(action: NullableFlagOptions<Path>.() -> Unit = {}): Flag<Path?> =
   UniversalFlagImpl.of(NullableFlagOptions(Path::class).also(action))
 
 // endregion Path
@@ -267,13 +267,13 @@ inline fun shortFlag(longForm: String, noinline action: FlagOptions<Short>.() ->
 inline fun shortFlag(shortForm: Char, noinline action: FlagOptions<Short>.() -> Unit = {}) =
   shortFlag { this.shortForm = shortForm; action() }
 
-fun shortFlag(action: FlagOptions<Short>.() -> Unit = {}): Flag<Argument<Short>, Short> =
+fun shortFlag(action: FlagOptions<Short>.() -> Unit = {}): Flag<Short> =
   BasicFlagImpl.of(FlagOptions(Short::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableShortFlag(action: NullableFlagOptions<Short>.() -> Unit = {}): Flag<Argument<Short?>, Short?> =
+fun nullableShortFlag(action: NullableFlagOptions<Short>.() -> Unit = {}): Flag<Short?> =
   UniversalFlagImpl.of(NullableFlagOptions(Short::class).also(action))
 
 // endregion Short
@@ -286,14 +286,14 @@ inline fun stringFlag(longForm: String, noinline action: FlagOptions<String>.() 
 inline fun stringFlag(shortForm: Char, noinline action: FlagOptions<String>.() -> Unit = {}) =
   stringFlag { this.shortForm = shortForm; action() }
 
-fun stringFlag(action: FlagOptions<String>.() -> Unit = {}): Flag<Argument<String>, String> =
+fun stringFlag(action: FlagOptions<String>.() -> Unit = {}): Flag<String> =
   BasicFlagImpl.of(FlagOptions(String::class).also {
     it.shouldQuote = true
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableStringFlag(action: NullableFlagOptions<String>.() -> Unit = {}): Flag<Argument<String?>, String?> =
+fun nullableStringFlag(action: NullableFlagOptions<String>.() -> Unit = {}): Flag<String?> =
   UniversalFlagImpl.of(NullableFlagOptions(String::class).also(action))
 
 // endregion String
@@ -306,13 +306,13 @@ inline fun ubyteFlag(longForm: String, noinline action: FlagOptions<UByte>.() ->
 inline fun ubyteFlag(shortForm: Char, noinline action: FlagOptions<UByte>.() -> Unit = {}) =
   ubyteFlag { this.shortForm = shortForm; action() }
 
-fun ubyteFlag(action: FlagOptions<UByte>.() -> Unit = {}): Flag<Argument<UByte>, UByte> =
+fun ubyteFlag(action: FlagOptions<UByte>.() -> Unit = {}): Flag<UByte> =
   BasicFlagImpl.of(FlagOptions(UByte::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableUByteFlag(action: NullableFlagOptions<UByte>.() -> Unit = {}): Flag<Argument<UByte?>, UByte?> =
+fun nullableUByteFlag(action: NullableFlagOptions<UByte>.() -> Unit = {}): Flag<UByte?> =
   UniversalFlagImpl.of(NullableFlagOptions(UByte::class).also(action))
 
 // endregion UByte
@@ -325,13 +325,13 @@ inline fun uintFlag(longForm: String, noinline action: FlagOptions<UInt>.() -> U
 inline fun uintFlag(shortForm: Char, noinline action: FlagOptions<UInt>.() -> Unit = {}) =
   uintFlag { this.shortForm = shortForm; action() }
 
-fun uintFlag(action: FlagOptions<UInt>.() -> Unit = {}): Flag<Argument<UInt>, UInt> =
+fun uintFlag(action: FlagOptions<UInt>.() -> Unit = {}): Flag<UInt> =
   BasicFlagImpl.of(FlagOptions(UInt::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableUIntFlag(action: NullableFlagOptions<UInt>.() -> Unit = {}): Flag<Argument<UInt?>, UInt?> =
+fun nullableUIntFlag(action: NullableFlagOptions<UInt>.() -> Unit = {}): Flag<UInt?> =
   UniversalFlagImpl.of(NullableFlagOptions(UInt::class).also(action))
 
 // endregion UInt
@@ -344,13 +344,13 @@ inline fun ulongFlag(longForm: String, noinline action: FlagOptions<ULong>.() ->
 inline fun ulongFlag(shortForm: Char, noinline action: FlagOptions<ULong>.() -> Unit = {}) =
   ulongFlag { this.shortForm = shortForm; action() }
 
-fun ulongFlag(action: FlagOptions<ULong>.() -> Unit = {}): Flag<Argument<ULong>, ULong> =
+fun ulongFlag(action: FlagOptions<ULong>.() -> Unit = {}): Flag<ULong> =
   BasicFlagImpl.of(FlagOptions(ULong::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableULongFlag(action: NullableFlagOptions<ULong>.() -> Unit = {}): Flag<Argument<ULong?>, ULong?> =
+fun nullableULongFlag(action: NullableFlagOptions<ULong>.() -> Unit = {}): Flag<ULong?> =
   UniversalFlagImpl.of(NullableFlagOptions(ULong::class).also(action))
 
 // endregion ULong
@@ -363,13 +363,13 @@ inline fun ushortFlag(longForm: String, noinline action: FlagOptions<UShort>.() 
 inline fun ushortFlag(shortForm: Char, noinline action: FlagOptions<UShort>.() -> Unit = {}) =
   ushortFlag { this.shortForm = shortForm; action() }
 
-fun ushortFlag(action: FlagOptions<UShort>.() -> Unit = {}): Flag<Argument<UShort>, UShort> =
+fun ushortFlag(action: FlagOptions<UShort>.() -> Unit = {}): Flag<UShort> =
   BasicFlagImpl.of(FlagOptions(UShort::class).also {
     it.formatter = NonNullGeneralStringifier.unsafeCast()
     it.action()
   })
 
-fun nullableUShortFlag(action: NullableFlagOptions<UShort>.() -> Unit = {}): Flag<Argument<UShort?>, UShort?> =
+fun nullableUShortFlag(action: NullableFlagOptions<UShort>.() -> Unit = {}): Flag<UShort?> =
   UniversalFlagImpl.of(NullableFlagOptions(UShort::class).also(action))
 
 // endregion UShort

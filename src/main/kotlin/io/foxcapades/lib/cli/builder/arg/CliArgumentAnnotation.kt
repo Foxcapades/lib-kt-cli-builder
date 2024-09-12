@@ -10,9 +10,18 @@ interface CliArgumentAnnotation : CliComponentAnnotation<CliArgument> {
    * Indicates whether the annotation instance was marked as being required.
    */
   val required: CliArgument.Toggle
+
   val shouldQuote: CliArgument.Toggle
+
   val hasFilter: Boolean
-  val filter: KClass<out ArgumentPredicate<*, *>>
+
+  val filter: KClass<out ArgumentPredicate<*>>
+
   val hasFormatter: Boolean
+
   val formatter: KClass<out ArgumentFormatter<*>>
+
+  fun initFilter(): ArgumentPredicate<*>
+
+  fun initFormatter(): ArgumentFormatter<*>
 }

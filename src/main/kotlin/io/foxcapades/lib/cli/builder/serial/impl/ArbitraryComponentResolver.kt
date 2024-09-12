@@ -2,29 +2,30 @@ package io.foxcapades.lib.cli.builder.serial.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.forceAny
-import io.foxcapades.lib.cli.builder.arg.ref.impl.AnnotatedValueArgument
-import io.foxcapades.lib.cli.builder.arg.ref.impl.UnlinkedArgument
-import io.foxcapades.lib.cli.builder.arg.ref.impl.ValueArgument
+import io.foxcapades.lib.cli.builder.arg.ref.impl.*
+import io.foxcapades.lib.cli.builder.arg.unsafeCast
+import io.foxcapades.lib.cli.builder.command.CliCommand
 import io.foxcapades.lib.cli.builder.command.Command
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
+import io.foxcapades.lib.cli.builder.command.ref.forceAny
+import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.forceAny
-import io.foxcapades.lib.cli.builder.flag.ref.impl.AnnotatedValueFlag
-import io.foxcapades.lib.cli.builder.flag.ref.impl.UnlinkedFlag
-import io.foxcapades.lib.cli.builder.flag.ref.impl.ValueFlag
+import io.foxcapades.lib.cli.builder.flag.ref.impl.*
 import io.foxcapades.lib.cli.builder.flag.ref.validateFlagNames
+import io.foxcapades.lib.cli.builder.flag.unsafeCast
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
 import io.foxcapades.lib.cli.builder.util.reflect.*
-import io.foxcapades.lib.cli.builder.util.takeAs
 import io.foxcapades.lib.cli.builder.util.then
-import org.slf4j.LoggerFactory
-import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KFunction1
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.isSuperclassOf
+import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKP0
+import io.foxcapades.lib.cli.builder.util.values.AnonymousComponentValue
+import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKF0
+import io.foxcapades.lib.cli.builder.util.values.WrapperAccessorKP0
+import kotlin.reflect.KFunction0
+import kotlin.reflect.KProperty0
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
 
 internal class ArbitraryComponentResolver<T : Any>(
@@ -32,14 +33,8 @@ internal class ArbitraryComponentResolver<T : Any>(
   instance: ResolvedCommand<T>,
   iterable: Iterable<Any>
 )
-  : Iterator<ResolvedComponent>
+  : AbstractComponentResolver<T>(instance, config)
 {
-  private val logger = LoggerFactory.getLogger(javaClass)!!
-
-  private val config = config
-
-  private val instance = instance
-
   private val stream = iterable.iterator()
 
   private val queue = ArrayDeque<Any>(4)
@@ -61,19 +56,17 @@ internal class ArbitraryComponentResolver<T : Any>(
   private fun prepQueue(): Boolean {
     while (queue.isEmpty() && stream.hasNext()) {
       when (val next = stream.next()) {
-        // It's a property reference, need to determine what the property type
-        // is.
-        is KProperty1<*, *> -> tryProperty(next.forceAny())
+        is KProperty0<*> -> tryProperty(next)
 
         // It's a function reference, need to confirm that it's a getter and
         // determine its type.
-        is KFunction1<*, *> -> tryGetter(next)
+        is KFunction0<*> -> tryGetter(next)
 
         // It's a flag instance with no parenting.
-        is Flag<*, *> -> tryFlag(next)
+        is Flag<*> -> tryFlag(next.unsafeCast())
 
         // It's an argument instance with no parenting.
-        is Argument<*> -> tryArgument(next)
+        is Argument<*> -> tryArgument(next.unsafeCast())
 
         // It's a command instance with no parenting.
         is Command -> tryCommand(next)
@@ -88,49 +81,129 @@ internal class ArbitraryComponentResolver<T : Any>(
 
   // region Property Reference
 
-  private fun tryProperty(prop: KProperty1<Any, Any?>) {
+  private fun tryProperty(prop: KProperty0<Any?>) {
     prop.isAccessible = true
 
     // if the property is delegated to a component type
-    prop.getDelegate(instance.instance)?.then {
-      when (it) {
-        is Flag<*, *>  -> return tryFlagDelegate(prop, it)
-        is Argument<*> -> return tryArgumentDelegate(prop, it)
-        // TODO: handle other possible delegate types?
-        //       log if it's a cli component subtype?
+    when (val it = prop.getDelegate()) {
+      null -> {} // null means it wasn't a delegate
+
+      is Flag<*> -> return tryFlagDelegate(prop, it.forceAny())
+
+      is Argument<*> -> return tryArgumentDelegate(prop, it.forceAny())
+
+      is CliCallComponent -> {
+        logger.warn("ignoring unrecognized delegated property type: {}", it::class.qualifiedName)
       }
-      // TODO: log that it's a delegate but not a known delegate type
+
+      else -> {
+        logger.debug("treating delegate property as value: {}<{}>", prop.name, it::class.qualifiedName)
+      }
     }
 
-    // else, if the property represents a component type
-    prop.returnType.classifier
-      ?.takeAs<KClassifier, KClass<*>>()
-      ?.then {
-        when {
-          Flag::class.isSuperclassOf(it)     -> return tryFlagPropertyValue(prop.unsafeCast(), it.unsafeCast())
-          Argument::class.isSuperclassOf(it) -> return tryArgumentPropertyValue(prop.unsafeCast(), it.unsafeCast())
-          Command::class.isSuperclassOf(it)  -> return tryCommandPropertyValue(prop.unsafeCast(), it.unsafeCast())
-          // TODO: log if it's a cli component subtype
-        }
-      }
-
-    // else, it's either annotated or a plain value
-    return tryUnknownPropertyValue(prop)
+    return when (prop.determineValueType()) {
+      ValueType.Flag             -> tryFlagPropertyValue(prop.unsafeCast())
+      ValueType.Argument         -> tryArgumentPropertyValue(prop.unsafeCast())
+      ValueType.Command          -> tryCommandPropertyValue(prop.unsafeCast())
+      ValueType.AnnotatedCommand -> tryFauxCommandPropertyValue(prop.unsafeCast())
+      ValueType.Value            -> tryUnknownPropertyValue(prop)
+    }
   }
 
-  private fun tryFlagDelegate(prop: KProperty1<Any, Any?>, delegate: Flag<*, *>) {}
+  private fun tryFlagDelegate(prop: KProperty0<Any?>, delegate: Flag<Any?>) {
+    val annotations = prop.relevantAnnotations()
 
-  private fun tryArgumentDelegate(prop: KProperty1<Any, Any?>, delegate: Argument<*>) {}
+    if (annotations.isEmpty)
+      return queue.addLast(DelegateFlag(parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
 
-  private fun tryFlagPropertyValue(prop: KProperty1<Any, Flag<*, *>?>, type: KClass<out Flag<*, *>>) {}
+    if (annotations.hasFlagAnnotation)
+      return queue.addLast(AnnotatedDelegateFlag(annotations.flag!!, parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
 
-  private fun tryArgumentPropertyValue(prop: KProperty1<Any, Argument<*>?>, type: KClass<out Argument<*>>) {}
+    if (annotations.hasArgumentAnnotation)
+      throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
 
-  private fun tryCommandPropertyValue(prop: KProperty1<Any, Command?>, type: KClass<out Command>) {}
+    if (annotations.hasCommandAnnotation)
+      throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
 
-  private fun tryUnknownPropertyValue(prop: KProperty1<Any, Any?>) {
-    // TODO: check annotations!
-    //       if it is not annotated, then it's a plain value
+    BUG()
+  }
+
+  private fun tryArgumentDelegate(prop: KProperty0<Any?>, delegate: Argument<Any?>) {
+    val annotations = prop.relevantAnnotations()
+
+    if (annotations.isEmpty)
+      return queue.addLast(DirectArgument(parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
+
+    if (annotations.hasArgumentAnnotation)
+      return queue.addLast(AnnotatedDelegateArgument(annotations.argument!!, parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
+
+    if (annotations.hasFlagAnnotation)
+      throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Flag")
+
+    if (annotations.hasCommandAnnotation)
+      throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
+
+    BUG()
+  }
+
+  private fun tryFlagPropertyValue(prop: KProperty0<Flag<Any?>?>) {
+    val instance    = (prop.get() ?: return).forceAny()
+    val annotations = prop.relevantAnnotations()
+
+    if (annotations.isEmpty)
+      return queue.addLast(UnlinkedFlag(parent, instance, WrapperAccessorKP0(instance::get, prop, type)))
+
+    if (annotations.hasFlagAnnotation)
+      return queue.addLast(AnnotatedUnlinkedFlag(annotations.flag!!, parent, instance, WrapperAccessorKP0(instance::get, prop, type)))
+
+    if (annotations.hasArgumentAnnotation)
+      throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
+
+    if (annotations.hasCommandAnnotation)
+      throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
+
+    BUG()
+  }
+
+  private fun tryArgumentPropertyValue(prop: KProperty0<Argument<Any?>?>) {
+    val instance    = (prop.get() ?: return).forceAny()
+    val annotations = prop.relevantAnnotations()
+
+    if (annotations.isEmpty)
+      return queue.addLast(UnlinkedArgument(parent, instance, WrapperAccessorKP0(instance::get, prop, type)))
+
+    if (annotations.hasArgumentAnnotation)
+      return queue.addLast(AnnotatedUnlinkedArgument(annotations.argument!!, parent, instance, WrapperAccessorKP0(instance::get, prop, type)))
+
+    if (annotations.hasFlagAnnotation)
+      throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Flag")
+
+    if (annotations.hasCommandAnnotation)
+      throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
+
+    BUG()
+  }
+
+  private fun tryCommandPropertyValue(prop: KProperty0<Command?>) = SUB_COMMAND<Unit>()
+
+  private fun tryFauxCommandPropertyValue(prop: KProperty0<Any?>) = SUB_COMMAND<Unit>()
+
+  private fun tryUnknownPropertyValue(prop: KProperty0<Any?>) {
+    val annotations = prop.relevantAnnotations()
+
+    if (annotations.isEmpty)
+      return
+
+    if (annotations.hasFlagAnnotation)
+      return queue.addLast(FauxFlag(annotations.flag!!, parent, ValueAccessorKP0(prop, null)))
+
+    if (annotations.hasArgumentAnnotation)
+      return queue.addLast(FauxArgument(annotations.argument!!, parent, ValueAccessorKP0(prop, null)))
+
+    if (annotations.hasCommandAnnotation)
+      return SUB_COMMAND()
+
+    TODO("treat this as a headless positional argument")
   }
 
   // endregion Property Reference
@@ -138,107 +211,89 @@ internal class ArbitraryComponentResolver<T : Any>(
 
   // region Function Reference
 
-  private fun tryGetter(getter: KFunction1<*, *>) {
+  private fun tryGetter(getter: KFunction0<Any?>) {
     getter.isAccessible = true
 
-    // ensure it's a getter!
-    if (!getter.isGetter) {
-      throw IllegalArgumentException("cannot use non-getter function ${getter.qualifiedName(instance.type)} as a cli component")
+    when (getter.determineValueType()) {
+      ValueType.Flag             -> tryFlagGetterValue(getter.unsafeCast())
+      ValueType.Argument         -> tryArgumentGetterValue(getter.unsafeCast())
+      ValueType.Command          -> tryCommandGetterValue(getter.unsafeCast())
+      ValueType.AnnotatedCommand -> tryFauxCommandGetterValue(getter.unsafeCast())
+      ValueType.Value            -> tryUnknownGetterValue(getter)
     }
-
-    // else, if the property represents a component type
-    getter.returnType.classifier
-      ?.takeAs<KClassifier, KClass<*>>()
-      ?.then {
-        when {
-          Flag::class.isSuperclassOf(it)     -> return tryFlagGetterValue(getter.unsafeCast())
-          Argument::class.isSuperclassOf(it) -> return tryArgumentGetterValue(getter.unsafeCast())
-          Command::class.isSuperclassOf(it)  -> return tryCommandGetterValue(getter.unsafeCast(), it.unsafeCast())
-          // TODO: log if it's a cli component subtype
-        }
-      }
-
-    // check return type for annotations
-    // check annotations
-    // else, plain value
   }
 
-  private fun tryFlagGetterValue(getter: KFunction1<T, Flag<*, *>?>) {
-    val annotations = try {
-      RelevantAnnotations.of(getter.relevantAnnotations)
-    } catch (e: RelevantAnnotations.DuplicateException) {
-      throw getter.makeDuplicateAnnotationsError(instance::class, e.annotation::class)
-    }
+  private fun tryFlagGetterValue(getter: KFunction0<Flag<*>?>) {
+    val annotations = getter.relevantAnnotations()
 
     if (annotations.hasCommandAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(instance::class)} is a Flag getter annotated with ${annotations.command!!::class}")
+      throw IllegalStateException("${getter.qualifiedName(parent::class)} is a Flag getter annotated with ${annotations.command!!::class}")
 
     if (annotations.hasArgumentAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(instance::class)} is a Flag getter annotated with ${annotations.argument!!::class}")
+      throw IllegalStateException("${getter.qualifiedName(parent::class)} is a Flag getter annotated with ${annotations.argument!!::class}")
 
-    val flag = (getter(instance.instance) ?: return).forceAny()
+    val flag = (getter() ?: return).forceAny()
 
     if (annotations.hasFlagAnnotation)
-      queue.addLast(AnnotatedValueFlag(annotations.flag!!, instance, flag, getter.unsafeCast<T, Flag<Argument<Any?>, Any?>>()))
+      queue.addLast(AnnotatedValueFlag(annotations.flag!!, parent, flag, ValueAccessorKF0(getter.unsafeCast<Flag<Any?>>(), type)))
     else
-      queue.addLast(ValueFlag(instance, flag, getter.unsafeCast<T, Flag<Argument<Any?>, Any?>>()))
+      queue.addLast(ValueFlag(parent, flag, ValueAccessorKF0(getter.unsafeCast<Flag<Any?>>(), type)))
   }
 
-  private fun tryArgumentGetterValue(getter: KFunction1<Any, Argument<*>?>) {
-    val annotations = try {
-      RelevantAnnotations.of(getter.relevantAnnotations)
-    } catch (e: RelevantAnnotations.DuplicateException) {
-      throw getter.makeDuplicateAnnotationsError(instance::class, e.annotation::class)
-    }
+  private fun tryArgumentGetterValue(getter: KFunction0<Argument<*>?>) {
+    val annotations = getter.relevantAnnotations()
 
     if (annotations.hasCommandAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(instance::class)} is an Argument getter annotated with ${annotations.command!!::class}")
+      throw IllegalStateException("${getter.qualifiedName(parent::class)} is an Argument getter annotated with ${annotations.command!!::class}")
 
     if (annotations.hasFlagAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(instance::class)} is an Argument getter annotated with ${annotations.flag!!::class}")
+      throw IllegalStateException("${getter.qualifiedName(parent::class)} is an Argument getter annotated with ${annotations.flag!!::class}")
 
-    val arg = (getter(instance.instance) ?: return).forceAny()
+    val arg = (getter() ?: return).forceAny()
 
     if (annotations.hasArgumentAnnotation)
-      queue.addLast(AnnotatedValueArgument(annotations.argument!!, instance, arg, getter.unsafeCast<T, Argument<Any?>>()))
+      queue.addLast(AnnotatedValueArgument(annotations.argument!!, parent, arg, ValueAccessorKF0(getter.unsafeCast<Argument<Any?>>(), type)))
     else
-      queue.addLast(ValueArgument(instance, arg, getter.unsafeCast<T, Argument<Any?>>()))
+      queue.addLast(DirectArgument(parent, arg, ValueAccessorKF0(getter.unsafeCast<Argument<Any?>>(), type)))
   }
 
-  private fun tryCommandGetterValue(getter: KFunction1<Any, Command?>, type: KClass<out Command>) {
-    val annotations = try {
-      RelevantAnnotations.of(getter.relevantAnnotations)
-    } catch (e: RelevantAnnotations.DuplicateException) {
-      throw getter.makeDuplicateAnnotationsError(instance::class, e.annotation::class)
-    }
+  private fun tryCommandGetterValue(getter: KFunction0<Command?>) = SUB_COMMAND<Unit>()
 
-    if (annotations.hasArgumentAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(instance::class)} is a Command getter annotated with ${annotations.argument!!::class}")
+  private fun tryFauxCommandGetterValue(getter: KFunction0<Any?>) = SUB_COMMAND<Unit>()
+
+  private fun tryUnknownGetterValue(getter: KFunction0<Any?>) {
+    val annotations = getter.relevantAnnotations()
+
+    if (annotations.isEmpty)
+      return
 
     if (annotations.hasFlagAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(instance::class)} is a Command getter annotated with ${annotations.flag!!::class}")
+      return queue.addLast(FauxFlag(annotations.flag!!, parent, ValueAccessorKF0(getter, null)))
 
-    val com = (getter(instance.instance) ?: return)
+    if (annotations.hasArgumentAnnotation)
+      return queue.addLast(FauxArgument(annotations.argument!!, parent, ValueAccessorKF0(getter, null)))
 
     if (annotations.hasCommandAnnotation)
-      queue.addLast(AnnotatedValueArgument(annotations.argument!!, instance, arg, getter.unsafeCast()))
-    else
-      queue.addLast(ValueArgument(instance, arg, getter.unsafeCast()))
+      return SUB_COMMAND()
+
+    queue.addLast(HeadlessArgument(parent, getter(), AnonymousComponentValue))
   }
 
   // endregion Function Reference
 
-  private fun tryFlag(flag: Flag<*, *>) =
-    queue.addLast(UnlinkedFlag(instance, flag.forceAny()).apply { validateFlagNames(config) })
+  private fun tryFlag(flag: Flag<Any?>) =
+    queue.addLast(UnlinkedFlag(parent, flag, AnonymousComponentValue).apply { validateFlagNames(config) })
 
-  private fun tryArgument(argument: Argument<*>) =
-    queue.addLast(UnlinkedArgument(instance, argument.forceAny()))
+  private fun tryArgument(argument: Argument<Any?>) =
+    queue.addLast(UnlinkedArgument(parent, argument, AnonymousComponentValue))
 
-  private fun tryCommand(command: Command) {
-    // unlinked subcommand, queue it and a sub component resolver instance
-  }
+  private fun tryCommand(command: Command) = SUB_COMMAND<Unit>()
 
   private fun tryValue(value: Any?) {
-    // some unknown value
+    if (value != null)
+      value::class.findAnnotation<CliCommand>()
+        ?.then { return@tryValue SUB_COMMAND() }
+
+    queue.addLast(HeadlessArgument(parent, value, AnonymousComponentValue))
   }
 }

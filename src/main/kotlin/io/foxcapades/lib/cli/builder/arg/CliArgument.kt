@@ -6,10 +6,13 @@ import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
 import io.foxcapades.lib.cli.builder.arg.format.UnconfiguredArgFormatter
 import kotlin.reflect.KClass
 
+
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
 annotation class CliArgument(
   val required: Toggle = Toggle.Unset,
 
-  val inclusionTest: KClass<out ArgumentPredicate<*, *>> = UnconfiguredArgFilter::class,
+  val inclusionTest: KClass<out ArgumentPredicate<*>> = UnconfiguredArgFilter::class,
 
   val shouldQuote: Toggle = Toggle.Unset,
 

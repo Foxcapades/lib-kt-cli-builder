@@ -1,7 +1,6 @@
 package io.foxcapades.lib.cli.builder.flag
 
 import io.foxcapades.lib.cli.builder.component.BaseComponentOptions
-import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.BaseArgOptions
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
@@ -36,7 +35,7 @@ open class BaseFlagOptions<V : Any, O : V?, A : BaseArgOptions<V, O>>(
    * Flags marked as being [required] will always be included without any call
    * to this filter.
    */
-  var flagFilter by MutableProperty<FlagPredicate<out Flag<Argument<O>, O>, out Argument<O>, O>>()
+  var flagFilter by MutableProperty<FlagPredicate<O>>()
 
   /**
    * Argument configuration
@@ -64,7 +63,7 @@ open class BaseFlagOptions<V : Any, O : V?, A : BaseArgOptions<V, O>>(
    *
    * @see [BaseArgOptions.filter]
    */
-  inline var argFilter: ArgumentPredicate<out Argument<O>, O>
+  inline var argFilter: ArgumentPredicate<O>
     get() = argument.filter
     set(value) { argument.filter = value }
 

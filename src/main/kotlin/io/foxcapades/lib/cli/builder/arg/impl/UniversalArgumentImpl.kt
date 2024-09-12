@@ -12,11 +12,10 @@ import io.foxcapades.lib.cli.builder.arg.format.NullableGeneralStringifier
 import io.foxcapades.lib.cli.builder.serial.*
 import io.foxcapades.lib.cli.builder.util.*
 import io.foxcapades.lib.cli.builder.util.properties.*
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.builder.util.reflect.property
 import io.foxcapades.lib.cli.builder.util.reflect.shouldQuote
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import java.math.BigDecimal
-import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
 internal class UniversalArgumentImpl<V>(
@@ -24,12 +23,15 @@ internal class UniversalArgumentImpl<V>(
   shouldQuote: Boolean,
   isRequired:  Boolean,
   private val  formatter: ArgumentFormatter<V>,
-  private val  filter: ArgumentPredicate<Argument<V>, V>
-) : BasicMutableDefaultableProperty<V>(
-  if (default.isSet) 2 else 0,
-  default.getOrNull(),
-  null
-), Argument<V> {
+  private val  filter: ArgumentPredicate<V>
+)
+  : Argument<V>
+  , BasicMutableDefaultableProperty<V>(
+    if (default.isSet) 2 else 0,
+    default.getOrNull(),
+    null
+  )
+{
   override val shouldQuote = shouldQuote
 
   override val isRequired = isRequired
@@ -41,7 +43,7 @@ internal class UniversalArgumentImpl<V>(
     shouldQuote: Property<Boolean>,
     isRequired:  Property<Boolean>,
     formatter:   Property<ArgumentFormatter<V>>,
-    filter:      Property<ArgumentPredicate<Argument<V>, V>>
+    filter:      Property<ArgumentPredicate<V>>
   ) : this(
     default     = default,
     shouldQuote = shouldQuote.getOrCompute { type.shouldQuote() },
@@ -53,13 +55,11 @@ internal class UniversalArgumentImpl<V>(
     filter      = filter.getOr(ArgSetFilter.unsafeCast())
   )
 
-  override fun shouldSerialize(
-    config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?,
-  ) = filter.shouldInclude(this, config, reference)
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    filter.shouldInclude(this, config, source)
 
   override fun writeToString(writer: CliArgumentWriter<*, V>) =
-    formatter.formatValue(get(), writer)
+    formatter.formatValue(get(), writer, this)
 
   companion object {
     @JvmStatic

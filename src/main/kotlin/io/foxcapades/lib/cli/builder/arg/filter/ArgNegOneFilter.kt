@@ -3,12 +3,11 @@ package io.foxcapades.lib.cli.builder.arg.filter
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.Bytes
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import java.math.BigDecimal
 import java.math.BigInteger
-import kotlin.reflect.KCallable
 
-internal object ArgNegOneFilter : ArgumentPredicate<Argument<Any?>, Any?> {
+internal object ArgNegOneFilter : ArgumentPredicate<Any?> {
   private inline val ShortNeg1: Short get() = (-1).toShort()
   private inline val IntNeg1: Int get() = -1
   private inline val LongNeg1: Long get() = -1L
@@ -18,8 +17,8 @@ internal object ArgNegOneFilter : ArgumentPredicate<Argument<Any?>, Any?> {
 
   override fun shouldInclude(
     argument: Argument<Any?>,
-    config: CliSerializationConfig,
-    reference: ValueAccessorReference<*, Any?, KCallable<Any?>>?
+    config:   CliSerializationConfig,
+    source: ValueSource,
   ) = when {
     !argument.isSet     -> false
     argument.hasDefault -> argument.getDefault() == argument.get()

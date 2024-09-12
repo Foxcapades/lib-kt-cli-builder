@@ -7,9 +7,8 @@ import kotlin.reflect.KClass
 
 object ArgumentPredicateTypes {
   @JvmStatic
-  @Suppress("UNCHECKED_CAST")
-  val Set: KClass<out ArgumentPredicate<*, Argument<*>>>
-    get() = ArgSetFilter::class as KClass<out ArgumentPredicate<*, Argument<*>>>
+  val Set: KClass<out ArgumentPredicate<*>>
+    get() = ArgSetFilter::class
 
   /**
    * Filters the target argument based on whether it is explicitly set to either
@@ -49,18 +48,16 @@ object ArgumentPredicateTypes {
    * | [Any]?         | `null`     | Fallthrough                               |
    */
   @JvmStatic
-  @Suppress("UNCHECKED_CAST")
-  val Default: KClass<out ArgumentPredicate<*, Argument<*>>>
-    get() = ArgGeneralDefaultFilter::class as KClass<out ArgumentPredicate<*, Argument<*>>>
+  val Default: KClass<out ArgumentPredicate<*>>
+    get() = ArgGeneralDefaultFilter::class
 
   /**
    * [ArgumentPredicate] implementation that excludes arguments that are unset,
    * or are set to `null` values.
    */
   @JvmStatic
-  @Suppress("UNCHECKED_CAST")
-  val Null: KClass<out ArgumentPredicate<*, Argument<*>>>
-    get() = ArgNullFilter::class as KClass<out ArgumentPredicate<*, Argument<*>>>
+  val Null: KClass<out ArgumentPredicate<*>>
+    get() = ArgNullFilter::class
 
   /**
    * [ArgumentPredicate] implementation that excludes arguments that are unset,
@@ -86,9 +83,8 @@ object ArgumentPredicateTypes {
    * * [Char]
    */
   @JvmStatic
-  @Suppress("UNCHECKED_CAST")
-  val Zero: KClass<out ArgumentPredicate<*, Argument<*>>>
-    get() = ArgZeroFilter::class as KClass<out ArgumentPredicate<*, Argument<*>>>
+  val Zero: KClass<out ArgumentPredicate<*>>
+    get() = ArgZeroFilter::class
 
   /**
    * [ArgumentPredicate] implementation that excludes arguments that are unset,
@@ -107,7 +103,6 @@ object ArgumentPredicateTypes {
    * * [BigInteger]
    */
   @JvmStatic
-  @Suppress("UNCHECKED_CAST")
-  val NegativeOne: KClass<out ArgumentPredicate<*, Argument<*>>>
-    get() = ArgNegOneFilter::class as KClass<out ArgumentPredicate<*, Argument<*>>>
+  val NegativeOne: KClass<out ArgumentPredicate<*>>
+    get() = ArgNegOneFilter::class
 }

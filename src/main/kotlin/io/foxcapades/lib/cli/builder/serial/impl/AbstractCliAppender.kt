@@ -5,11 +5,13 @@ import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
 
 internal abstract class AbstractCliAppender<T : Any>(
   config: CliSerializationConfig
-) : CliFlagWriter<T, Any?>, CliArgumentWriter<T, Any?> {
+)
+  : CliFlagWriter<T, Any?>
+  , CliArgumentWriter<T, Any?>
+{
 
   override val config = config
 
@@ -17,21 +19,29 @@ internal abstract class AbstractCliAppender<T : Any>(
 
   protected abstract val argument: ResolvedArgument<Any?>
 
-  override fun writePreferredForm(): CliArgumentWriter<T, Any?> =
+  override fun writePreferredForm(): CliArgumentWriter<T, Any?> {
     if (flag.hasLongForm) {
-      if (config.preferredFlagForm.isLong || !flag.hasShortForm)
+      return if (config.preferredFlagForm.isLong || !flag.hasShortForm)
         writeLongForm()
       else
         writeShortForm()
-    } else if (flag.hasShortForm) {
-      writeShortForm()
-    } else if (flag is ValueAccessorReference<*, *, *>) {
-      val f = flag as ValueAccessorReference<*, *, *>
-      writeLongForm(config.propertyNameFormatter.format(f.name.takeUnless { it.startsWith("get") } ?: f.name.substring(3), config))
-    } else {
-      // TODO: make this a concrete type
-      throw IllegalStateException("Flag instance has no known or derivable long or short CLI names")
     }
+
+    if (flag.hasShortForm)
+      return writeShortForm()
+
+    if (flag.valueSource.hasName) {
+      val flagName = flag.valueSource.name.run { takeIf { it.startsWith("get") }?.substring(3) ?: this }
+
+      if (flagName.isNotBlank() && flagName.all { config.targetShell.isFlagSafe(it) })
+        return writeLongForm(config.propertyNameFormatter.format(flagName, config))
+      else
+        throw IllegalStateException("Flag instance has no known or derivable long or short CLI names, Flag source was \"${flag.valueSource.reference}\"")
+    }
+
+    // TODO: make this a concrete type
+    throw IllegalStateException("Flag instance has no known or derivable long or short CLI names")
+  }
 
   override fun writePreferredForm(action: CliArgumentWriter<T, Any?>.() -> Unit) =
     writePreferredForm().action()

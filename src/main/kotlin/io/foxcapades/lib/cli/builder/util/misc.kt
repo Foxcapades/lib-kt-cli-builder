@@ -4,7 +4,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-internal inline fun <T, reified R : Any> T.takeAs(): R? =
+internal inline fun <reified R : Any> Any.takeAs(): R? =
   takeIf { it is R }?.let { it as R }
 
 @OptIn(ExperimentalContracts::class)

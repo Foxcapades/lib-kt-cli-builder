@@ -21,7 +21,9 @@ interface CliFlagAnnotation : CliComponentAnnotation<CliFlag> {
 
   val hasFilter: Boolean
 
-  val filter: KClass<out FlagPredicate<*, *, *>>
+  val filter: KClass<out FlagPredicate<*>>
 
   val argument: CliArgumentAnnotation
+
+  fun initFilter(): FlagPredicate<*>
 }

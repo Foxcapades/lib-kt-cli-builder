@@ -1,6 +1,9 @@
+@file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.arg.filter
 
 import io.foxcapades.lib.cli.builder.arg.Argument
+import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
+import kotlin.reflect.KClass
 
 /**
  * Convenience method for defining a simple, value-based [ArgumentPredicate]
@@ -22,13 +25,15 @@ import io.foxcapades.lib.cli.builder.arg.Argument
  *
  * @return An `ArgumentPredicate` instance wrapping the given [predicate][pred].
  */
-inline fun <A : Argument<V>, V> ArgumentPredicate(crossinline pred: (V) -> Boolean) =
-  ArgumentPredicate<A, V> { a, _, _ -> pred(a.get()) }
+inline fun <V> ArgumentPredicate(crossinline pred: (V) -> Boolean) =
+  ArgumentPredicate { a, _, _ -> pred(a.get()) }
 
-@Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
-internal inline fun <A : Argument<V>, V> ArgumentPredicate<*, *>.unsafeCast() =
-  this as ArgumentPredicate<A, V>
+@Suppress("UNCHECKED_CAST")
+internal inline fun <V> ArgumentPredicate<*>.unsafeCast() =
+  this as ArgumentPredicate<V>
 
-@Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
-internal inline fun ArgumentPredicate<*, *>.forceAny() =
-  this as ArgumentPredicate<Argument<Any?>, Any?>
+internal inline fun ArgumentPredicate<*>.forceAny() =
+  unsafeCast<Any?>()
+
+internal inline fun <V> KClass<out ArgumentPredicate<*>>.new() =
+  getOrCreate().unsafeCast<V>()

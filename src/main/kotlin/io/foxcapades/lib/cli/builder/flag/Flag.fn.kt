@@ -10,13 +10,16 @@ import kotlin.reflect.KClass
 
 // region Flag Base
 
+@Deprecated("simplified type")
+internal typealias AnyFlag = Flag<Any?>
+
 @Suppress("UNCHECKED_CAST")
-internal inline fun <V> Flag<*, *>.unsafeCast() = this as Flag<Argument<V>, V>
+internal inline fun <V> Flag<*>.unsafeCast() = this as Flag<V>
 
 
-internal inline fun Flag<*, *>.forceAny() = unsafeCast<Any?>()
+internal inline fun Flag<*>.forceAny() = unsafeCast<Any?>()
 
-internal inline val Flag<*, *>.safeName
+internal inline val Flag<*>.safeName
   get() = if (hasLongForm) {
     "long-form($longForm)"
   } else if (hasShortForm) {
@@ -75,7 +78,7 @@ internal inline val Flag<*, *>.safeName
  *
  * @return New `Flag` instance configured by the given [action].
  */
-inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit = {}): Flag<Argument<T>, T> =
+inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit = {}): Flag<T> =
   flag(T::class, action)
 
 /**
@@ -366,7 +369,7 @@ fun <T : Any> flag(shortForm: Char, type: KClass<out T>, action: FlagOptions<T>.
  */
 inline fun <reified T : Any> nullableFlag(
   noinline action: NullableFlagOptions<T>.() -> Unit = {}
-): Flag<Argument<T?>, T?> =
+): Flag<T?> =
   nullableFlag(T::class, action)
 
 /**
@@ -417,7 +420,7 @@ inline fun <reified T : Any> nullableFlag(
 inline fun <reified T : Any> nullableFlag(
   longForm: String,
   noinline action: NullableFlagOptions<T>.() -> Unit = {}
-): Flag<Argument<T?>, T?> =
+): Flag<T?> =
   nullableFlag(longForm, T::class, action)
 
 /**
@@ -468,7 +471,7 @@ inline fun <reified T : Any> nullableFlag(
 inline fun <reified T : Any> nullableFlag(
   shortForm: Char,
   noinline action: NullableFlagOptions<T>.() -> Unit = {}
-): Flag<Argument<T?>, T?> =
+): Flag<T?> =
   nullableFlag(shortForm, T::class, action)
 
 // endregion Constructors -> Nullable -> Reified
@@ -517,7 +520,7 @@ inline fun <reified T : Any> nullableFlag(
  *
  * @return New `Flag` instance configured by the given [action].
  */
-fun <T : Any> nullableFlag(type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> =
+fun <T : Any> nullableFlag(type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<T?> =
   type.tryNullableTyped(action) ?: UniversalFlagImpl.of(NullableFlagOptions(type).also(action))
 
 /**
@@ -564,7 +567,7 @@ fun <T : Any> nullableFlag(type: KClass<out T>, action: NullableFlagOptions<T>.(
  *
  * @return New `Flag` instance configured by the given [action].
  */
-fun <T : Any> nullableFlag(longForm: String, type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> =
+fun <T : Any> nullableFlag(longForm: String, type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<T?> =
   nullableFlag(type) {
     this.longForm = longForm
     action()
@@ -614,7 +617,7 @@ fun <T : Any> nullableFlag(longForm: String, type: KClass<out T>, action: Nullab
  *
  * @return New `Flag` instance configured by the given [action].
  */
-fun <T : Any> nullableFlag(shortForm: Char, type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?> =
+fun <T : Any> nullableFlag(shortForm: Char, type: KClass<out T>, action: NullableFlagOptions<T>.() -> Unit): Flag<T?> =
   nullableFlag(type) {
     this.shortForm = shortForm
     action()
@@ -628,7 +631,7 @@ fun <T : Any> nullableFlag(shortForm: Char, type: KClass<out T>, action: Nullabl
 
 // region Constructor Support
 
-private fun <T : Any> KClass<*>.tryTyped(action: FlagOptions<T>.() -> Unit): Flag<Argument<T>, T>? {
+private fun <T : Any> KClass<*>.tryTyped(action: FlagOptions<T>.() -> Unit): Flag<T>? {
   @Suppress("UNCHECKED_CAST")
   return when (java.`package`?.name) {
 
@@ -672,10 +675,10 @@ private fun <T : Any> KClass<*>.tryTyped(action: FlagOptions<T>.() -> Unit): Fla
     }
 
     else -> null
-  } as Flag<Argument<T>, T>?
+  } as Flag<T>?
 }
 
-private fun <T : Any> KClass<out T>.tryNullableTyped(action: NullableFlagOptions<T>.() -> Unit): Flag<Argument<T?>, T?>? {
+private fun <T : Any> KClass<out T>.tryNullableTyped(action: NullableFlagOptions<T>.() -> Unit): Flag<T?>? {
   @Suppress("UNCHECKED_CAST")
   return when (java.`package`?.name) {
 
@@ -719,7 +722,7 @@ private fun <T : Any> KClass<out T>.tryNullableTyped(action: NullableFlagOptions
     }
 
     else -> null
-  } as Flag<Argument<T?>, T?>?
+  } as Flag<T?>?
 }
 
 // endregion Constructor Support

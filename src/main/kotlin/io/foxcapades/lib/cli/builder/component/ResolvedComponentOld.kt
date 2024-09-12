@@ -1,8 +1,5 @@
 package io.foxcapades.lib.cli.builder.component
 
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import kotlin.reflect.KCallable
-
 /**
  * Represents a component that has been resolved to a single instance and
  * class property.
@@ -13,9 +10,6 @@ import kotlin.reflect.KCallable
  *
  * @since 1.0.0
  */
-interface ResolvedComponentOld<T : Any, V> : CliCallComponent, ValueAccessorReference<T, V, KCallable<V>> {
+interface ResolvedComponentOld<T : Any, V> : CliCallComponent {
   val instance: T
-
-  fun getValue() = getValue(instance)
 }
-

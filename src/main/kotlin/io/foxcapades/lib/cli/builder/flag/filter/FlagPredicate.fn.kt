@@ -1,8 +1,13 @@
+@file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.flag.filter
 
-import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.flag.Flag
+import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
+import kotlin.reflect.KClass
 
-@Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
-internal inline fun <F : Flag<A, V>, A : Argument<V>, V> FlagPredicate<*, *, *>.unsafeCast() =
-  this as FlagPredicate<F, A, V>
+@Suppress("UNCHECKED_CAST")
+internal inline fun <V> FlagPredicate<*>.unsafeCast() =
+  this as FlagPredicate<V>
+
+internal inline fun <V> KClass<out FlagPredicate<*>>.new() =
+  getOrCreate().unsafeCast<V>()
+

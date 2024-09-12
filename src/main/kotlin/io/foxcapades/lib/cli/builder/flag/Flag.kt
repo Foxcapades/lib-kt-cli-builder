@@ -4,16 +4,15 @@ import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.MutableDefaultableProperty
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import kotlin.reflect.KCallable
 
 /**
  * Represents a command line flag option.
  *
  * @since v1.0.0
  */
-interface Flag<out A : Argument<V>, V> : MutableDefaultableProperty<V>, CliCallComponent {
+interface Flag<V> : MutableDefaultableProperty<V>, CliCallComponent {
   /**
    * Indicates whether this flag has a long form.
    */
@@ -37,7 +36,7 @@ interface Flag<out A : Argument<V>, V> : MutableDefaultableProperty<V>, CliCallC
   /**
    * Argument for this flag.
    */
-  val argument: A
+  val argument: Argument<V>
 
   /**
    * Indicates whether this flag is required to be present in CLI calls.
@@ -62,15 +61,14 @@ interface Flag<out A : Argument<V>, V> : MutableDefaultableProperty<V>, CliCallC
    *
    * @param config Current serialization configuration.
    *
-   * @param reference Reference to the class property or method from which the
-   * `Flag` instance was obtained.  If the `Flag` instance is not a property
-   * delegate, this parameter will be `null`.
+   * @param source Information about the source of the `Flag` instance.  A
+   * `Flag` source will typically be a class property.
    *
    * @return `true` if this `Flag` instance should be included in serialization
    * output, otherwise `false` if this `Flag` should be omitted.
    */
-  fun shouldSerialize(config: CliSerializationConfig, reference: ValueAccessorReference<*, V, KCallable<V>>?): Boolean =
-    argument.shouldSerialize(config, reference)
+  fun shouldSerialize(config: CliSerializationConfig, source: ValueSource): Boolean =
+    argument.shouldSerialize(config, source)
 
   fun writeToString(writer: CliFlagWriter<*, V>)
 

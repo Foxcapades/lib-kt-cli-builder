@@ -8,18 +8,20 @@ import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.flag.filter.FlagSetFilter
 import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
+import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.serial.writeArgument
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
 import io.foxcapades.lib.cli.builder.util.reflect.property
 
-internal open class BasicFlagImpl<A : Argument<V>, V>(
+internal open class BasicFlagImpl<V>(
   longForm:   Property<String>,
   shortForm:  Property<Char>,
   isRequired: Property<Boolean>,
-  filter:     Property<FlagPredicate<Flag<A, V>, A, V>>,
-  argument:   A,
-) : Flag<A, V> {
+  filter:     Property<FlagPredicate<V>>,
+  argument:   Argument<V>,
+) : Flag<V> {
   private val lf = longForm
   private val sf = shortForm
 
@@ -41,13 +43,16 @@ internal open class BasicFlagImpl<A : Argument<V>, V>(
 
   override val argument = argument
 
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    filter.shouldInclude(this, config, source)
+
   override fun writeToString(writer: CliFlagWriter<*, V>) {
     // TODO: handle optional arguments
     writer.writePreferredForm().writeArgument(argument)
   }
 
   companion object {
-    internal fun <V : Any> of(opts: FlagOptions<V>) = BasicFlagImpl<Argument<V>, V>(
+    internal fun <V : Any> of(opts: FlagOptions<V>) = BasicFlagImpl<V>(
       longForm   = FlagOptions<V>::longForm.property(opts),
       shortForm  = FlagOptions<V>::shortForm.property(opts),
       isRequired = FlagOptions<V>::required.property(opts),

@@ -1,11 +1,9 @@
 package io.foxcapades.lib.cli.builder.flag.impl
 
-import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
 import io.foxcapades.lib.cli.builder.flag.*
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.flag.filter.UnconfiguredFlagFilter
-import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
 
 @JvmInline
@@ -44,5 +42,5 @@ internal value class CliFlagAnnotationImpl(override val annotation: CliFlag) : C
 
   //
 
-  fun <V> initFilter(): FlagPredicate<Flag<Argument<V>, V>, Argument<V>, V> = filter.getOrCreate().unsafeCast()
+  override fun initFilter(): FlagPredicate<*> = filter.getOrCreate()
 }

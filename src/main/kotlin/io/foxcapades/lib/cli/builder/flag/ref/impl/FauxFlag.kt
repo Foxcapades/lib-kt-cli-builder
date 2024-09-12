@@ -3,22 +3,26 @@ package io.foxcapades.lib.cli.builder.flag.ref.impl
 import io.foxcapades.lib.cli.builder.arg.ref.impl.FauxArgument
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.flag.CliFlag
-import io.foxcapades.lib.cli.builder.flag.impl.CliFlagAnnotationImpl
-import io.foxcapades.lib.cli.builder.flag.ref.ResolvedImaginaryFlag
+import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.writeArgument
-import kotlin.reflect.KCallable
+import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
 
-internal class FauxFlag<T : Any, V>(
-  annotation: CliFlagAnnotationImpl,
-  parent:     ResolvedCommand<T>,
-  accessor:   KCallable<V>,
-) : ResolvedImaginaryFlag<T, V> {
-  override val annotation = annotation
+internal class FauxFlag<V>(
+  annotation:      CliFlagAnnotation,
+  parentComponent: ResolvedCommand<*>,
+  accessor: ValueAccessor<V>,
+)
+  : ResolvedFlag<V>
+{
+  private val annotation: CliFlagAnnotation = annotation
 
-  override val parentComponent = parent
+  override val parentComponent = parentComponent
 
-  override val accessor = accessor
+  override val valueSource = accessor
+
+  override val argument = FauxArgument(annotation.argument, this, accessor)
 
   override val hasLongForm
     get() = annotation.hasLongForm
@@ -35,17 +39,6 @@ internal class FauxFlag<T : Any, V>(
   override val isRequired
     get() = annotation.required == CliFlag.Toggle.Yes
 
-  override val argument by lazy { FauxArgument<T, V>(annotation.argument, parent.instance, this, accessor) }
-
-  override fun writeToString(writer: CliFlagWriter<*, V>) {
-    val name = if (accessor.name.startsWith("get"))
-      accessor.name.substring(3)
-    else
-      accessor.name
-
+  override fun writeToString(writer: CliFlagWriter<*, V>) =
     writer.writePreferredForm().writeArgument(argument)
-
-    writer.config.propertyNameFormatter.format(name, writer.config)
-    TODO("Not yet implemented")
-  }
 }

@@ -14,15 +14,14 @@ import io.foxcapades.lib.cli.builder.util.properties.BasicMutableDefaultableProp
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
 import io.foxcapades.lib.cli.builder.util.properties.getOrNull
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.builder.util.reflect.property
-import kotlin.reflect.KCallable
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class BasicArgumentImpl<V>(
   default:     Property<V>,
   isRequired:  Property<Boolean>,
   shouldQuote: Property<Boolean>,
-  filter:      Property<ArgumentPredicate<Argument<V>, V>>,
+  filter:      Property<ArgumentPredicate<V>>,
   formatter:   Property<ArgumentFormatter<V>>,
 )
   : BasicMutableDefaultableProperty<V>(
@@ -40,13 +39,11 @@ internal class BasicArgumentImpl<V>(
 
   override val shouldQuote = shouldQuote.getOr(false)
 
-  override fun shouldSerialize(
-    config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?,
-  ) = filter.shouldInclude(this, config, reference)
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    filter.shouldInclude(this, config, source)
 
   override fun writeToString(writer: CliArgumentWriter<*, V>) =
-    formatter.formatValue(get(), writer)
+    formatter.formatValue(get(), writer, this)
 
   companion object {
     internal fun <V : Any> of(opts: ArgOptions<V>) = BasicArgumentImpl<V>(

@@ -2,24 +2,29 @@ package io.foxcapades.lib.cli.builder.arg.ref.impl
 
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.CliArgument
+import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
+import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedDelegatedArgumentRef
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import kotlin.reflect.KCallable
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class AnnotatedDelegateArgument<T : Any, V>(
   annotation: CliArgumentAnnotationImpl,
   parent:     ResolvedCommand<T>,
   delegate:   Argument<V>,
-  accessor:   KCallable<V>,
+  accessor:   ValueSource,
 )
   : ResolvedDelegatedArgumentRef<T, V>
-  , DelegateArgument<T, V>(parent, delegate, accessor)
+  , AbstractArgument<V>(parent, delegate, accessor)
 {
   private val annotation = annotation
+
+  @Suppress("UNCHECKED_CAST")
+  override val parentComponent
+    get() = super.parentComponent as ResolvedCommand<T>
 
   override val isRequired
     get() = when (annotation.required) {
@@ -30,22 +35,20 @@ internal class AnnotatedDelegateArgument<T : Any, V>(
 
   override val shouldQuote
     get() = when (annotation.shouldQuote) {
-      CliArgument.Toggle.Yes  -> true
-      CliArgument.Toggle.No   -> false
+      CliArgument.Toggle.Yes   -> true
+      CliArgument.Toggle.No    -> false
       CliArgument.Toggle.Unset -> super.shouldQuote
     }
 
-  override fun shouldSerialize(
-    config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?,
-  ) = if (annotation.hasFilter)
-    annotation.initFilter<V>().shouldInclude(this, config, reference)
-  else
-    super.shouldSerialize(config, reference)
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    if (annotation.hasFilter)
+      annotation.initFilter().unsafeCast<V>().shouldInclude(this, config, source)
+    else
+      super.shouldSerialize(config, source)
 
   override fun writeToString(writer: CliArgumentWriter<*, V>) =
     if (annotation.hasFormatter)
-      annotation.initFormatter<V>().formatValue(get(), writer, this)
+      annotation.initFormatter().unsafeCast<V>().formatValue(get(), writer, this)
     else
       super.writeToString(writer)
 }

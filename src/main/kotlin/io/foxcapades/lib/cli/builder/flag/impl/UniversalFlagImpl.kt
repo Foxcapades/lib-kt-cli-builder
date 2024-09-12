@@ -10,20 +10,19 @@ import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.flag.NullableFlagOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.serial.*
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.properties.getOr
 import io.foxcapades.lib.cli.builder.util.properties.getOrNull
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
 import io.foxcapades.lib.cli.builder.util.reflect.property
-import kotlin.reflect.KCallable
 
-internal class UniversalFlagImpl<A : Argument<V>, V>(
+internal class UniversalFlagImpl<V>(
   longForm:    Property<String>,
   shortForm:   Property<Char>,
   isRequired:  Property<Boolean>,
-  filter:      Property<FlagPredicate<Flag<A, V>, A, V>>,
-  argument:    A,
-) : Flag<A, V> {
+  filter:      Property<FlagPredicate<V>>,
+  argument:    Argument<V>,
+) : Flag<V> {
   private val lf = longForm
   private val sf = shortForm
   private val fi = filter.getOrNull()
@@ -51,12 +50,12 @@ internal class UniversalFlagImpl<A : Argument<V>, V>(
 
   override fun shouldSerialize(
     config:    CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?,
+    source: ValueSource,
   ) =
-    fi?.shouldInclude(this, reference, config) ?: super.shouldSerialize(config, reference)
+    fi?.shouldInclude(this, config, source) ?: super.shouldSerialize(config, source)
 
   companion object {
-    fun <T : Any> of(config: FlagOptions<T>): Flag<Argument<T>, T> =
+    fun <T : Any> of(config: FlagOptions<T>): Flag<T> =
       UniversalFlagImpl(
         longForm   = FlagOptions<T>::longForm.property(config),
         shortForm  = FlagOptions<T>::shortForm.property(config),

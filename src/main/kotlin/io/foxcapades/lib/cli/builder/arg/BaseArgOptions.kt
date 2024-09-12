@@ -38,7 +38,7 @@ abstract class BaseArgOptions<T : Any, O : T?>(type: KClass<out T>) : BaseCompon
    *
    * If the argument is marked as required, this filter is not used.
    */
-  var filter by MutableProperty<ArgumentPredicate<out Argument<O>, O>>()
+  var filter by MutableProperty<ArgumentPredicate<O>>()
 
   /**
    * Whether this argument's value should be quoted.

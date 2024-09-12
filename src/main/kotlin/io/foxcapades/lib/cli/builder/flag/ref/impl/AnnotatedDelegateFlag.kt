@@ -1,25 +1,33 @@
 package io.foxcapades.lib.cli.builder.flag.ref.impl
 
-import io.foxcapades.lib.cli.builder.arg.Argument
+import io.foxcapades.lib.cli.builder.arg.ref.impl.AnnotatedValueArgument
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.flag.CliFlag
+import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
 import io.foxcapades.lib.cli.builder.flag.Flag
-import io.foxcapades.lib.cli.builder.flag.impl.CliFlagAnnotationImpl
-import io.foxcapades.lib.cli.builder.flag.ref.ResolvedDelegateFlagRef
+import io.foxcapades.lib.cli.builder.flag.filter.new
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
-import kotlin.reflect.KCallable
+import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class AnnotatedDelegateFlag<T : Any, V>(
-  annotation: CliFlagAnnotationImpl,
-  parent:    ResolvedCommand<T>,
-  delegate:  Flag<Argument<V>, V>,
-  accessor:  KCallable<V>,
+  annotation: CliFlagAnnotation,
+  parent:     ResolvedCommand<T>,
+  delegate:   Flag<V>,
+  source: ValueAccessor<V>,
 )
-  : ResolvedDelegateFlagRef<T, V>
-  , DelegateFlag<T, V>(parent, delegate, accessor)
+  : ResolvedFlag<V>
+  , AbstractValueFlag<T, V>(parent, delegate, source)
 {
   private val annotation = annotation
+
+  override val valueSource = source
+
+  override val argument = AnnotatedValueArgument(annotation.argument, this, delegate.argument, source)
+
+  override val parentComponent: ResolvedCommand<T>
+    get() = super.parentComponent
 
   override val hasLongForm
     get() = annotation.hasLongForm || super.hasLongForm
@@ -40,11 +48,9 @@ internal class AnnotatedDelegateFlag<T : Any, V>(
       CliFlag.Toggle.Unset -> super.isRequired
     }
 
-  override fun shouldSerialize(
-    config: CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?,
-  ) = if (annotation.hasFilter)
-    annotation.initFilter<V>().shouldInclude(this, reference, config)
-  else
-    super<DelegateFlag>.shouldSerialize(config, reference)
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    if (annotation.hasFilter)
+      annotation.filter.new<V>().shouldInclude(this, config, source)
+    else
+      super<AbstractValueFlag>.shouldSerialize(config, source)
 }

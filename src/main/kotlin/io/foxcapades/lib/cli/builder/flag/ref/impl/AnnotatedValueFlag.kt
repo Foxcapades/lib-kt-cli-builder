@@ -1,30 +1,28 @@
 package io.foxcapades.lib.cli.builder.flag.ref.impl
 
-import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.arg.impl.CliArgumentAnnotationImpl
-import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
-import io.foxcapades.lib.cli.builder.arg.ref.impl.AnnotatedFlagValueArgument
+import io.foxcapades.lib.cli.builder.arg.ref.impl.AnnotatedValueArgument
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.flag.CliFlag
 import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.flag.impl.CliFlagAnnotationImpl
-import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlagValueRef
+import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.reflect.ValueAccessorReference
+import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.reflect.getOrCreate
-import kotlin.reflect.KCallable
 
 internal class AnnotatedValueFlag<T : Any, V>(
   annotation: CliFlagAnnotationImpl,
   parent:     ResolvedCommand<T>,
-  instance:   Flag<Argument<V>, V>,
-  accessor:   KCallable<Flag<Argument<V>, V>>,
+  instance:   Flag<V>,
+  source: ValueSource,
 )
-  : ResolvedFlagValueRef<T, V>
-  , ValueFlag<T, V>(parent, instance, accessor)
+  : ResolvedFlag<V>
+  , AbstractValueFlag<T, V>(parent, instance, source)
 {
   private val annotation = annotation
+
+  override val argument = AnnotatedValueArgument(annotation.argument, this, instance.argument, source)
 
   override val hasLongForm
     get() = annotation.hasLongForm || super.hasLongForm
@@ -51,17 +49,9 @@ internal class AnnotatedValueFlag<T : Any, V>(
       CliFlag.Toggle.Unset -> super.isRequired
     }
 
-  override val argument: ResolvedArgument<V> by lazy { AnnotatedFlagValueArgument(
-    CliArgumentAnnotationImpl(annotation.argument),
-    this,
-    instance.argument,
-  ) }
-
-  override fun shouldSerialize(
-    config: CliSerializationConfig,
-    reference: ValueAccessorReference<*, V, KCallable<V>>?,
-  ) = if (annotation.hasFilter)
-    annotation.filter.getOrCreate().unsafeCast<Flag<Argument<V>, V>, Argument<V>, V>().shouldInclude(this, reference, config)
-  else
-    super<ValueFlag>.shouldSerialize(config, reference)
+  override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
+    if (annotation.hasFilter)
+      annotation.filter.getOrCreate().unsafeCast<V>().shouldInclude(this, config, source)
+    else
+      super<AbstractValueFlag>.shouldSerialize(config, source)
 }
