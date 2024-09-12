@@ -178,7 +178,6 @@ tasks.create("release") {
   }
 
   dependsOn(
-    "dokkaHtml",
     "publishToSonatype",
     "closeAndReleaseSonatypeStagingRepository"
   )
