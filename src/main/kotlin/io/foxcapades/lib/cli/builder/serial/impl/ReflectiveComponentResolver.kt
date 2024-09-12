@@ -32,14 +32,19 @@ import kotlin.reflect.KFunction1
 import kotlin.reflect.KProperty1
 
 internal class ReflectiveComponentResolver<T : Any>(
-  parent: ResolvedCommand<T>,
-  config: CliSerializationConfig,
+  parent:   ResolvedCommand<T>,
+  instance: T,
+  config:   CliSerializationConfig,
 )
   : AbstractComponentResolver<T>(parent, config)
 {
+  override val type = instance::class
+
   private val typeInfo = ClassInfo(type)
 
   private val stream = filterRelevantMembers().filter { it.isUsable }
+
+  private val instance = instance
 
   // region Public API
 
@@ -89,7 +94,7 @@ internal class ReflectiveComponentResolver<T : Any>(
   // sift class properties down to only those that can be resolved to components
   private fun siftProperty(prop: KProperty1<T, Any?>): ResolvedComponent? {
     // If the property is delegated, use the delegate for component resolution
-    prop.asDelegateType<CliCallComponent>(parent)
+    prop.asDelegateType<CliCallComponent>(instance)
       ?.then { return siftDelegateProperty(it, prop) }
 
     // if the property is not delegated...
@@ -104,11 +109,11 @@ internal class ReflectiveComponentResolver<T : Any>(
 
     return when {
       annotations.hasFlagAnnotation ->
-        FauxFlag(annotations.flag!!, parent, ValueAccessorKP1(prop, parent.instance))
+        FauxFlag(annotations.flag!!, parent, ValueAccessorKP1(prop, instance))
           .also { it.validateFlagNames(config) }
 
       annotations.hasArgumentAnnotation ->
-        FauxArgument(annotations.argument!!, parent, ValueAccessorKP1(prop, parent.instance))
+        FauxArgument(annotations.argument!!, parent, ValueAccessorKP1(prop, instance))
 
       annotations.hasCommandAnnotation -> SUB_COMMAND()
 
@@ -142,11 +147,11 @@ internal class ReflectiveComponentResolver<T : Any>(
     // If the function is not annotated, but returns a ...
     if (annotations.isEmpty) {
       return when (returns) {
-        ValueType.Flag -> func.unsafeCast<T, Flag<Any?>?>()(parent.instance)
-          ?.let { ValueFlag(parent, it, WrapperAccessorK1(it::get, func, parent.instance)) }
+        ValueType.Flag -> func.unsafeCast<T, Flag<Any?>?>()(instance)
+          ?.let { ValueFlag(parent, it, WrapperAccessorK1(it::get, func, instance)) }
 
-        ValueType.Argument -> func.unsafeCast<T, Argument<Any?>?>()(parent.instance)
-          ?.let { ValueArgument(parent, it, WrapperAccessorK1(it::get, func, parent.instance)) }
+        ValueType.Argument -> func.unsafeCast<T, Argument<Any?>?>()(instance)
+          ?.let { ValueArgument(parent, it, WrapperAccessorK1(it::get, func, instance)) }
 
         ValueType.Command -> SUB_COMMAND()
         ValueType.AnnotatedCommand -> SUB_COMMAND()
@@ -162,11 +167,11 @@ internal class ReflectiveComponentResolver<T : Any>(
       // if it is annotated as a flag
       annotations.hasFlagAnnotation -> when (returns) {
         // but just returns a plain value, use a faux flag
-        ValueType.Value -> FauxFlag(annotations.flag!!, parent, ValueAccessorKF1(func, parent.instance))
+        ValueType.Value -> FauxFlag(annotations.flag!!, parent, ValueAccessorKF1(func, instance))
 
         // and is also a flag instance, use a joined flag
         ValueType.Flag  -> func.unsafeCast<T, Flag<Any?>?>()(parent.instance)
-          ?.let { AnnotatedValueFlag(annotations.flag!!, parent, it, WrapperAccessorK1(it::get, func, parent.instance)) }
+          ?.let { AnnotatedValueFlag(annotations.flag!!, parent, it, WrapperAccessorK1(it::get, func, instance)) }
 
         // else it's annotated as a flag, but is actually an argument or command
         else -> throw IllegalStateException("${func.qualifiedName(type)} is annotated as being a Flag, but returns a value of type ${returns.name}")
@@ -175,11 +180,11 @@ internal class ReflectiveComponentResolver<T : Any>(
       // if it is annotated as an argument
       annotations.hasArgumentAnnotation -> when (returns) {
         // but just returns a plain value, use a faux argument
-        ValueType.Value    -> FauxArgument(annotations.argument!!, parent, ValueAccessorKF1(func, parent.instance))
+        ValueType.Value    -> FauxArgument(annotations.argument!!, parent, ValueAccessorKF1(func, instance))
 
         // and is also an argument instance, use a joined argument
         ValueType.Argument -> func.unsafeCast<T, Argument<Any?>?>()(parent.instance)
-          ?.let { AnnotatedValueArgument(annotations.argument!!, parent, it, WrapperAccessorK1(it::get, func, parent.instance)) }
+          ?.let { AnnotatedValueArgument(annotations.argument!!, parent, it, WrapperAccessorK1(it::get, func, instance)) }
 
         // else it's annotated as an argument but is actually a flag or command
         else -> throw IllegalStateException("${func.qualifiedName(type)} is annotated as being an Argument, but returns a value of type ${returns.name}")
@@ -214,10 +219,10 @@ internal class ReflectiveComponentResolver<T : Any>(
     }
 
     return if (annotations.hasFlagAnnotation)
-      AnnotatedDelegateFlag(annotations.flag!!, parent, del, ValueAccessorKP1(prop, parent.instance))
+      AnnotatedDelegateFlag(annotations.flag!!, parent, del, ValueAccessorKP1(prop, instance))
         .also { it.validateFlagNames(config) }
     else
-      DelegateFlag(parent, del, ValueAccessorKP1(prop, parent.instance))
+      DelegateFlag(parent, del, ValueAccessorKP1(prop, instance))
   }
 
   private fun siftDelegateArg(del: Argument<Any?>, prop: KProperty1<T, Any?>): ResolvedComponent {
@@ -229,9 +234,9 @@ internal class ReflectiveComponentResolver<T : Any>(
     }
 
     return if (annotations.hasArgumentAnnotation)
-      AnnotatedDelegateArgument(annotations.argument!!, parent, del.forceAny(), ValueAccessorKP1(prop, parent.instance))
+      AnnotatedDelegateArgument(annotations.argument!!, parent, del.forceAny(), ValueAccessorKP1(prop, instance))
     else
-      DirectArgument(parent, del.forceAny(), ValueAccessorKP1(prop, parent.instance))
+      DirectArgument(parent, del.forceAny(), ValueAccessorKP1(prop, instance))
   }
 
   private fun siftDelegateCom(del: Command, prop: KProperty1<T, Command?>): ResolvedComponent {

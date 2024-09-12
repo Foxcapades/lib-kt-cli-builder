@@ -95,14 +95,20 @@ internal class StringCliAppenderImpl<T : Any>(
 
   private fun maybeStartArg() {
     when (last) {
-      Type.Long -> buffer.append(config.longFlagValueSeparator)
+      Type.Long  -> buffer.append(config.longFlagValueSeparator)
       Type.Short -> buffer.append(config.shortFlagPrefix)
-      Type.Raw -> {}
+      Type.Raw   -> {}
 
       Type.InQuotes, Type.Arg -> return
     }
 
-    if (argument.shouldQuote) {
+    val shouldQuote = when (reference) {
+      is ResolvedFlag<*>     -> flag.argument.shouldQuote
+      is ResolvedArgument<*> -> argument.shouldQuote
+      else                   -> false
+    }
+
+    if (shouldQuote) {
       config.targetShell.startString(appender)
       last = Type.InQuotes
     } else {

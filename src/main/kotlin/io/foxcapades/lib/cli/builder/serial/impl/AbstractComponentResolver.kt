@@ -13,6 +13,7 @@ import io.foxcapades.lib.cli.builder.flag.Flag
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
 import io.foxcapades.lib.cli.builder.util.logger
+import io.foxcapades.lib.cli.builder.util.reflect.makeDuplicateAnnotationsError
 import io.foxcapades.lib.cli.builder.util.reflect.relevantAnnotations
 import io.foxcapades.lib.cli.builder.util.reflect.safeName
 import kotlin.reflect.*
@@ -31,8 +32,7 @@ internal abstract class AbstractComponentResolver<T : Any>(
 
   protected val config = config
 
-  protected inline val type
-    get() = parent.type
+  abstract val type: KClass<out T>
 
   // region Type Determination
 

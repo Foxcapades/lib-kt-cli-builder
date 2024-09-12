@@ -30,7 +30,7 @@ internal class FauxCommand<C : Any>(
         yield(HeadlessArgument(this@FauxCommand, arg, AnonymousComponentValue))
 
       // then the components that could be found on the instance class
-      for (component in ReflectiveComponentResolver(this@FauxCommand, config))
+      for (component in ReflectiveComponentResolver(this@FauxCommand, instance, config))
         yield(component)
     } }
   }

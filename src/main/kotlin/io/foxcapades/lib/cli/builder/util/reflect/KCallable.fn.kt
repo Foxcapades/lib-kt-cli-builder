@@ -24,3 +24,6 @@ internal inline val <T> KCallable<T>.relevantAnnotations: Iterator<CliComponentA
 
 internal inline fun KCallable<*>.qualifiedName(parent: KClass<*>?) =
   (parent?.qualifiedName ?: "???") + "::" + name
+
+internal inline fun KCallable<*>.makeDuplicateAnnotationsError(parent: KClass<out Any>, type: KClass<out Annotation>) =
+  IllegalStateException("${qualifiedName(parent)} has more than one ${type::class.simpleName} annotation")

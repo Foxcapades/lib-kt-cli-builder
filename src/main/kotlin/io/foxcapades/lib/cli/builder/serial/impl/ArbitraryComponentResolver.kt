@@ -25,6 +25,7 @@ import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKP0
 import io.foxcapades.lib.cli.builder.util.values.AnonymousComponentValue
 import io.foxcapades.lib.cli.builder.util.values.ValueAccessorKF0
 import io.foxcapades.lib.cli.builder.util.values.WrapperAccessorK0
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KProperty0
 import kotlin.reflect.full.findAnnotation
@@ -40,6 +41,9 @@ internal class ArbitraryComponentResolver<T : Any>(
   private val stream = iterable.iterator()
 
   private val queue = ArrayDeque<Any>(4)
+
+  override val type: KClass<out T>
+    get() = parent.type
 
   override fun hasNext() = queue.isNotEmpty() || prepQueue()
 

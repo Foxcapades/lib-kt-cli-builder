@@ -11,6 +11,7 @@ import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import io.foxcapades.lib.cli.builder.util.properties.NoSuchDefaultValueException
+import io.foxcapades.lib.cli.builder.util.reflect.shouldQuote
 
 internal class FauxArgument<V>(
   annotation: CliArgumentAnnotation,
@@ -29,9 +30,11 @@ internal class FauxArgument<V>(
   override val isRequired
     get() = annotation.required == CliArgument.Toggle.Yes
 
-  // TODO: this should be smarter
-  override val shouldQuote
-    get() = annotation.shouldQuote == CliArgument.Toggle.Yes
+  override val shouldQuote = when (annotation.shouldQuote) {
+    CliArgument.Toggle.Yes   -> true
+    CliArgument.Toggle.No    -> false
+    CliArgument.Toggle.Unset -> get()?.let{ it::class }?.shouldQuote() ?: false
+  }
 
   override val hasDefault
     get() = false
