@@ -72,10 +72,11 @@ data class MyCommandConfig(
 [source, kotlin]
 ----
 class MyCommandConfig : Command {
+  // Combine an annotation with a delegate
   @CliFlag("input", 'i')
   var input by pathFlag()
 
-  fun getCliCallComponents(config: CliSerializationConfig) =
+  override fun getCliCallComponents(config: CliSerializationConfig) =
     "my-command" to listOf(::input)
 }
 
@@ -85,3 +86,68 @@ foo.input = Path("path/to/some/file")
 require(Cli.toCliString(foo) == "my-command --input='path/to/some/file'")
 ----
 
+=== Building A CLI Command
+
+A CLI command is expected to be a value that is annotated with `@CliCommand`
+and/or implements the `Command` interface.
+
+A command may contain flags and/or arguments defined as delegated properties, as
+annotated values, or as raw `Flag` or `Argument` instances directly used as
+values from properties or getters.
+
+For classes that implement the `Command` interface, the output of the
+`getCliCallComponents` method will be used as the source for what components may
+be considered for inclusion in a generated CLI call.
+
+[source, kotlin]
+----
+class MyCommandConfig : Command {
+  // Will not be considered when generated CLI calls as the getCliCallComponents
+  // method does not include this property.
+  var input by pathFlag()
+
+  override fun getCliCallComponents(config: CliSerializationConfig) =
+    "my-command" to emptyList()
+}
+----
+
+For classes that instead use the `@CliCommand` annotation, the class will be
+inspected to determine what components may be considered for inclusion in a
+generated CLI call.
+
+[source, kotlin]
+----
+@CliCommand("my-command")
+class MyCommandConfig {
+  // Will be considered when generating CLI calls due to the @CliFlag annotation
+  @CliFlag("input", 'i')
+  var input: Path?
+
+  // Will be considered when generating CLI calls as it is a Flag delegate
+  var output by pathFlag()
+
+  // Will be considered when generating CLI calls as it is an Argument value
+  val value: Argument<String>
+
+  // Will NOT be considered when generating CLI calls as it is a plain value
+  val toggle: Boolean
+}
+----
+
+==== Delegation vs Annotation vs Value
+
+TODO
+
+annotation can be combined with either delegate or value, but value and delegate
+cannot be used together.
+
+When an annotation is used in combination with either a delegate or a component
+value, the settings from the annotation take priority over the settings from
+the component itself.
+
+TODO
+
+when using the `@CliCommand` annotation on an implementation of `Command`, the
+command name returned by the `getCliCallComponents` method is ignored.
+Additionally any positional args included in the annotation will precede the
+components returned by the `getCliCallComponents` method.
