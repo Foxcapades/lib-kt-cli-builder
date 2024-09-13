@@ -2,6 +2,11 @@ package io.foxcapades.lib.cli.builder.util.values
 
 import kotlin.reflect.KClass
 
+/**
+ * Represents or contains information about the origin of a value.
+ *
+ * @since 1.0.0
+ */
 interface ValueSource {
   /**
    * Short/simple name of the [ValueSource].
