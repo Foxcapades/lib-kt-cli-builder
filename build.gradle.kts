@@ -1,5 +1,3 @@
-import org.jetbrains.dokka.versioning.VersioningPlugin
-import org.jetbrains.dokka.versioning.VersioningConfiguration
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
@@ -8,12 +6,6 @@ plugins {
   `maven-publish`
   signing
   id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
-}
-
-buildscript {
-  dependencies {
-    classpath("org.jetbrains.dokka:versioning-plugin:1.9.20")
-  }
 }
 
 data class SemVer(
@@ -56,8 +48,6 @@ dependencies {
 
   implementation(kotlin("reflect"))
 
-  dokkaHtmlPlugin("org.jetbrains.dokka:versioning-plugin:1.9.20")
-
   testImplementation("org.mockito:mockito-junit-jupiter:5.13.0")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
   testImplementation("org.mockito:mockito-core:5.13.0")
@@ -83,11 +73,6 @@ tasks.dokkaHtml {
 
   doFirst {
     targetDir.deleteRecursively()
-  }
-
-  pluginConfiguration<VersioningPlugin, VersioningConfiguration> {
-    version = projectVersion.gitTag
-    olderVersionsDir = file("docs/dokka")
   }
 }
 

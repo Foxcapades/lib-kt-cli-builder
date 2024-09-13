@@ -24,11 +24,48 @@ import kotlin.time.Duration
 // Collection
 // Array
 // Map
+/**
+ * Generalized Defaulted Argument Filter
+ *
+ * Attempts to filter out arguments that are set to their "default" value.
+ *
+ * This filter performs up to 3 types of tests on a given argument to try and
+ * determine whether the [Argument] should be considered as having its "default"
+ * value.
+ *
+ * 1. Is set: if a given argument is not set, the filter will return
+ * `false` for that argument.
+ * 2. Is configured default: if a given, set argument has a configured default
+ * value, and the currently set value is equal to that default, the filter will
+ * return `false` for that argument.
+ * 3. Is default for type: if a given, set argument does not have a configured
+ * default value, the filter will attempt to guess at the default for a small
+ * set of types, primarily consisting of primitives, strings, and collections by
+ * comparing the argument value to the 'zero' value for that type.
+ *
+ * ### Type Based Default Tests
+ *
+ * The following types will be tested for their 'zero' value:
+ *
+ * | Type       | Default If | Includes                                                                |
+ * |------------|------------|-------------------------------------------------------------------------|
+ * | Number     | `0`        | all primitive number types, kotlin unsigned types, and `char`
+ * | Boolean    | `false`    | Boolean
+ * | String     | empty      | CharSequence, String
+ * | Array      | empty      | All array types including primitive arrays and kotlin unsigned arrays
+ * | Collection | empty      |
+ * | Map        | empty      |
+ * | Optional   | empty      | All Java Optional types including primitive options
+ * | Duration   | `0`        | Both Java and Kotlin durations
+ * | Property   | empty      | cli-builder Property implementations and subtypes
+ *
+ * @since 1.0.0
+ */
 internal object ArgGeneralDefaultFilter : ArgumentPredicate<Any?> {
   override fun shouldInclude(argument: Argument<Any?>, config: CliSerializationConfig, source: ValueSource) =
     when {
       !argument.isSet     -> false
-      argument.hasDefault -> argument.getDefault() == argument.get()
+      argument.hasDefault -> argument.getDefault() != argument.get()
       else                -> !valueIsDefault(argument.get())
     }
 
@@ -82,10 +119,10 @@ internal object ArgGeneralDefaultFilter : ArgumentPredicate<Any?> {
         is UByte  -> value == UByteZero
         is UShort -> value == UShortZero
 
-        is UIntArray   -> value == UIntZero
-        is ULongArray  -> value == ULongZero
-        is UByteArray  -> value == UByteZero
-        is UShortArray -> value == UShortZero
+        is UIntArray   -> value.isEmpty()
+        is ULongArray  -> value.isEmpty()
+        is UByteArray  -> value.isEmpty()
+        is UShortArray -> value.isEmpty()
 
         else -> false
       }

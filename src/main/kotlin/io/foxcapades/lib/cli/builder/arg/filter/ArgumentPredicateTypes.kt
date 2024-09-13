@@ -2,9 +2,22 @@ package io.foxcapades.lib.cli.builder.arg.filter
 
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.Duration as JDuration
+import java.util.Dictionary
+import java.util.Optional
+import java.util.OptionalDouble
+import java.util.OptionalInt
+import java.util.OptionalLong
 import kotlin.reflect.KClass
+import kotlin.time.Duration as KDuration
+
+import io.foxcapades.lib.cli.builder.util.properties.Property
 
 object ArgumentPredicateTypes {
+  /**
+   * Filters the target argument based on whether it has been explicitly set to
+   * any value.
+   */
   @JvmStatic
   val Set: KClass<out ArgumentPredicate<*>>
     get() = ArgSetFilter::class
@@ -16,35 +29,43 @@ object ArgumentPredicateTypes {
    *
    * Default type mappings:
    *
-   * | Type           | Exclude If | Notes                                     |
-   * |----------------|------------|-------------------------------------------|
-   * | [Array]        | is empty   | All non-primitive arrays.                 |
-   * | [BigDecimal]   | `0.0`      |
-   * | [BigInteger]   | `0`        |
-   * | [Boolean]      | `false`    |
-   * | [BooleanArray] | is empty   |
-   * | [Byte]         | `0`        |
-   * | [ByteArray]    | is empty   |
-   * | [Char]         | `0`        |
-   * | [CharArray]    | is empty   |
-   * | [CharSequence] | is empty   | Catches [String], [StringBuilder], etc... |
-   * | [Collection]   | is empty   | Catches [UByteArray], [UIntArray], etc... |
-   * | [Double]       | `0.0`      |
-   * | [DoubleArray]  | is empty   |
-   * | [Float]        | `0.0`      |
-   * | [FloatArray]   | is empty   |
-   * | [Int]          | `0`        |
-   * | [IntArray]     | is empty   |
-   * | [Long]         | `0`        |
-   * | [LongArray]    | is empty   |
-   * | [Map]          | is empty   |
-   * | [Short]        | `0`        |
-   * | [ShortArray]   | is empty   |
-   * | [UByte]        | `0`        |
-   * | [UInt]         | `0`        |
-   * | [ULong]        | `0`        |
-   * | [UShort]       | `0`        |
-   * | [Any]?         | `null`     | Fallthrough                               |
+   * | Type                           | Exclude If |
+   * |--------------------------------|------------|
+   * | [Array]                        | is empty   |
+   * | [BigDecimal]                   | `0.0`      |
+   * | [BigInteger]                   | `0`        |
+   * | [Boolean]                      | `false`    |
+   * | [BooleanArray]                 | is empty   |
+   * | [Byte]                         | `0`        |
+   * | [ByteArray]                    | is empty   |
+   * | [Char]                         | `0`        |
+   * | [CharArray]                    | is empty   |
+   * | [CharSequence]                 | is empty   |
+   * | [Collection]                   | is empty   |
+   * | [Dictionary]                   | is empty   |
+   * | [Double]                       | `0.0`      |
+   * | [DoubleArray]                  | is empty   |
+   * | [Duration (Java)][JDuration]   | `0`        |
+   * | [Duration (Kotlin)][KDuration] | `0`        |
+   * | [Float]                        | `0.0`      |
+   * | [FloatArray]                   | is empty   |
+   * | [Int]                          | `0`        |
+   * | [IntArray]                     | is empty   |
+   * | [Long]                         | `0`        |
+   * | [LongArray]                    | is empty   |
+   * | [Map]                          | is empty   |
+   * | [Optional]                     | is empty   |
+   * | [OptionalDouble]               | is empty   |
+   * | [OptionalInt]                  | is empty   |
+   * | [OptionalLong]                 | is empty   |
+   * | [Property]                     | is empty   |
+   * | [Short]                        | `0`        |
+   * | [ShortArray]                   | is empty   |
+   * | [UByte]                        | `0`        |
+   * | [UInt]                         | `0`        |
+   * | [ULong]                        | `0`        |
+   * | [UShort]                       | `0`        |
+   * | [Any]?                         | `null`     |
    */
   @JvmStatic
   val Default: KClass<out ArgumentPredicate<*>>

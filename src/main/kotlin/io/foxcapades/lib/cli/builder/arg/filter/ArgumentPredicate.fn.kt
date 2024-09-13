@@ -27,12 +27,9 @@ import kotlin.reflect.KClass
 inline fun <V> ArgumentPredicate(crossinline pred: (V) -> Boolean) =
   ArgumentPredicate { a, _, _ -> pred(a.get()) }
 
+
+//
+
+
 @Suppress("UNCHECKED_CAST")
-internal inline fun <V> ArgumentPredicate<*>.unsafeCast() =
-  this as ArgumentPredicate<V>
-
-internal inline fun ArgumentPredicate<*>.forceAny() =
-  unsafeCast<Any?>()
-
-internal inline fun <V> KClass<out ArgumentPredicate<*>>.new() =
-  getOrCreate().unsafeCast<V>()
+internal inline fun <V> ArgumentPredicate<*>.unsafeCast() = this as ArgumentPredicate<V>
