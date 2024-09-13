@@ -6,5 +6,5 @@ import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal object FlagSetFilter : FlagPredicate<Any?> {
   override fun shouldInclude(flag: Flag<Any?>, config: CliSerializationConfig, source: ValueSource) =
-    flag.argument.isSet
+    flag.argument.shouldSerialize(config, source)
 }

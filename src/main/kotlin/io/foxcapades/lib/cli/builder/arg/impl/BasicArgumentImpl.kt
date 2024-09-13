@@ -2,7 +2,7 @@ package io.foxcapades.lib.cli.builder.arg.impl
 
 import io.foxcapades.lib.cli.builder.arg.ArgOptions
 import io.foxcapades.lib.cli.builder.arg.Argument
-import io.foxcapades.lib.cli.builder.arg.filter.ArgSetFilter
+import io.foxcapades.lib.cli.builder.arg.filter.ArgUnsetFilter
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
@@ -31,7 +31,7 @@ internal class BasicArgumentImpl<V>(
   )
   , Argument<V>
 {
-  private val filter = filter.getOr(ArgSetFilter.unsafeCast())
+  private val filter = filter.getOr(ArgUnsetFilter.unsafeCast())
 
   private val formatter = formatter.getOr(NonNullGeneralStringifier.unsafeCast())
 

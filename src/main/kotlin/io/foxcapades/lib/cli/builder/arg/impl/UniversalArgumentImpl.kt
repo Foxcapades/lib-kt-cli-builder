@@ -3,7 +3,7 @@ package io.foxcapades.lib.cli.builder.arg.impl
 import io.foxcapades.lib.cli.builder.arg.ArgOptions
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.NullableArgOptions
-import io.foxcapades.lib.cli.builder.arg.filter.ArgSetFilter
+import io.foxcapades.lib.cli.builder.arg.filter.ArgUnsetFilter
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
@@ -52,7 +52,7 @@ internal class UniversalArgumentImpl<V>(
       @Suppress("UNCHECKED_CAST")
       (if (nullable) NullableGeneralStringifier else NonNullGeneralStringifier) as ArgumentFormatter<V>
     },
-    filter      = filter.getOr(ArgSetFilter.unsafeCast())
+    filter      = filter.getOr(ArgUnsetFilter.unsafeCast())
   )
 
   override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =

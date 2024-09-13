@@ -6,5 +6,5 @@ import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 internal class UnconfiguredArgFilter : ArgumentPredicate<Any?> {
   override fun shouldInclude(argument: Argument<Any?>, config: CliSerializationConfig, source: ValueSource) =
-    ArgSetFilter.shouldInclude(argument, config, source)
+    ArgUnsetFilter.shouldInclude(argument, config, source)
 }

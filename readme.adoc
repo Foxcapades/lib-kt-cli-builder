@@ -149,5 +149,18 @@ TODO
 
 when using the `@CliCommand` annotation on an implementation of `Command`, the
 command name returned by the `getCliCallComponents` method is ignored.
-Additionally any positional args included in the annotation will precede the
+Additionally, any positional args included in the annotation will precede the
 components returned by the `getCliCallComponents` method.
+
+
+==== Component Filtering
+
+When and if individual components are included in a generated CLI call is based
+on configurable predicates that are applied to components when they are to be
+serialized.
+
+The default configuration for whether a flag should be included in a CLI call
+falls through to the flag's argument predicate.
+
+The default configuration for whether an argument should be included simply
+tests whether the argument has been explicitly set.

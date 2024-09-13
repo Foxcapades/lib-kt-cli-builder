@@ -20,7 +20,7 @@ object ArgumentPredicateTypes {
    */
   @JvmStatic
   val Set: KClass<out ArgumentPredicate<*>>
-    get() = ArgSetFilter::class
+    get() = ArgUnsetFilter::class
 
   /**
    * Filters the target argument based on whether it is explicitly set to either
@@ -62,9 +62,13 @@ object ArgumentPredicateTypes {
    * | [Short]                        | `0`        |
    * | [ShortArray]                   | is empty   |
    * | [UByte]                        | `0`        |
+   * | [UByteArray]                   | is empty   |
    * | [UInt]                         | `0`        |
+   * | [UIntArray]                    | is empty   |
    * | [ULong]                        | `0`        |
+   * | [ULongArray]                   | is empty   |
    * | [UShort]                       | `0`        |
+   * | [UShortArray]                  | is empty   |
    * | [Any]?                         | `null`     |
    */
   @JvmStatic
