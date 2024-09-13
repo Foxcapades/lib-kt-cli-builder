@@ -12,6 +12,7 @@ import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
 import io.foxcapades.lib.cli.builder.util.dump
 import io.foxcapades.lib.cli.builder.util.impl.StringBuilderAppender
+import io.foxcapades.lib.cli.builder.util.logger
 
 /**
  * @param T Top level CLI command config class containing components to be
@@ -26,6 +27,8 @@ internal class StringCliAppenderImpl<T : Any>(
   , CliFlagWriter<T, Any?>
   , CliArgumentWriter<T, Any?>
 {
+  private val logger = logger()
+
   private val command = command
 
   private val buffer = StringBuilder(initSize)

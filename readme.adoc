@@ -66,3 +66,22 @@ data class MyCommandConfig(
   val threads: Int,
 )
 ----
+
+==== Headless
+
+[source, kotlin]
+----
+class MyCommandConfig : Command {
+  @CliFlag("input", 'i')
+  var input by pathFlag()
+
+  fun getCliCallComponents(config: CliSerializationConfig) =
+    "my-command" to listOf(::input)
+}
+
+val foo = MyCommandConfig()
+foo.input = Path("path/to/some/file")
+
+require(Cli.toCliString(foo) == "my-command --input='path/to/some/file'")
+----
+

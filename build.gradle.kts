@@ -48,6 +48,7 @@ dependencies {
 
   implementation(kotlin("reflect"))
 
+  testImplementation("org.slf4j:slf4j-simple:2.0.16")
   testImplementation("org.mockito:mockito-junit-jupiter:5.13.0")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
   testImplementation("org.mockito:mockito-core:5.13.0")
@@ -63,6 +64,8 @@ tasks.test {
       TestLogEvent.FAILED,
       TestLogEvent.SKIPPED,
     )
+
+    showStandardStreams = true
   }
 }
 

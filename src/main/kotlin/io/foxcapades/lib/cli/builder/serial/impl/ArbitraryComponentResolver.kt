@@ -84,7 +84,7 @@ internal class ArbitraryComponentResolver<T : Any>(
       }
     }
 
-    return false
+    return queue.isNotEmpty()
   }
 
   private fun enqueueFlag(flag: ResolvedFlag<*>) {
