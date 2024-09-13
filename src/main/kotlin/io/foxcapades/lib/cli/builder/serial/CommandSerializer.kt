@@ -1,5 +1,7 @@
 package io.foxcapades.lib.cli.builder.serial
 
+import io.foxcapades.lib.cli.builder.command.CliCommand
+import io.foxcapades.lib.cli.builder.command.Command
 import kotlin.math.max
 
 /**
@@ -8,6 +10,9 @@ import kotlin.math.max
  * @since 1.0.0
  */
 interface CommandSerializer {
+  /**
+   * Configuration for the [CommandSerializer] instance.
+   */
   val config: CliSerializationConfig
 
   /**
@@ -19,10 +24,19 @@ interface CommandSerializer {
    * **IMPORTANT**: When serializing to `Iterator`, string quoting and escaping
    * rules are not applied!
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * @param command Object to serialize.
    *
    * @return Iterator of CLI call parts.
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToIterator(command: Any): Iterator<String>
 
   /**
@@ -34,10 +48,19 @@ interface CommandSerializer {
    * **IMPORTANT**: When serializing to `Sequence`, string quoting and escaping
    * rules are not applied!
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * @param command Object to serialize.
    *
    * @return Sequence of CLI call parts.
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToSequence(command: Any): Sequence<String> =
     Sequence { serializeToIterator(command) }
 
@@ -50,10 +73,19 @@ interface CommandSerializer {
    * **IMPORTANT**: When serializing to `Iterable`, string quoting and escaping
    * rules are not applied!
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * @param command Object to serialize.
    *
    * @return Iterable of CLI call parts.
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToIterable(command: Any): Iterable<String> =
     Iterable { serializeToIterator(command) }
 
@@ -66,12 +98,21 @@ interface CommandSerializer {
    * **IMPORTANT**: When serializing to `List`, string quoting and escaping
    * rules are not applied!
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * @param command Object to serialize.
    *
    * @return List of CLI call parts.
    *
    * @see serializeToMutableList
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToList(command: Any): List<String> =
     serializeToList(command, 16)
 
@@ -84,6 +125,11 @@ interface CommandSerializer {
    * **IMPORTANT**: When serializing to `List`, string quoting and escaping
    * rules are not applied!
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * @param command Object to serialize.
    *
    * @param preSize Starting size to use when constructing the returned list.
@@ -96,7 +142,11 @@ interface CommandSerializer {
    * @return List of CLI call parts.
    *
    * @see serializeToMutableList
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToList(command: Any, preSize: Int): List<String> =
     serializeToArray(command, preSize).asList()
 
@@ -109,12 +159,21 @@ interface CommandSerializer {
    * **IMPORTANT**: When serializing to `List`, string quoting and escaping
    * rules are not applied!
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * @param command Object to serialize.
    *
    * @return Mutable list of CLI call parts.
    *
    * @see serializeToList
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToMutableList(command: Any): MutableList<String> =
     serializeToMutableList(command, 16)
 
@@ -126,6 +185,11 @@ interface CommandSerializer {
    *
    * **IMPORTANT**: When serializing to `List`, string quoting and escaping
    * rules are not applied!
+   *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
    *
    * @param command Object to serialize.
    *
@@ -139,7 +203,11 @@ interface CommandSerializer {
    * @return Mutable list of CLI call parts.
    *
    * @see serializeToList
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToMutableList(command: Any, preSize: Int): MutableList<String> =
     ArrayList<String>(max(8, preSize)).apply { serializeToIterator(command).forEach { add(it) } }
 
@@ -149,13 +217,22 @@ interface CommandSerializer {
    * The returned array will always contain at least one value, the name of
    * or path to the executable command.
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * **IMPORTANT**: When serializing to `Array`, string quoting and escaping
    * rules are not applied!
    *
    * @param command Object to serialize.
    *
    * @return Array of CLI call parts.
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToArray(command: Any): Array<String> =
     serializeToArray(command, 16)
 
@@ -168,6 +245,11 @@ interface CommandSerializer {
    * **IMPORTANT**: When serializing to `Array`, string quoting and escaping
    * rules are not applied!
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * @param command Object to serialize.
    *
    * @param preSize Starting size to use when constructing the returned array.
@@ -178,7 +260,11 @@ interface CommandSerializer {
    * serialized as part of the call.
    *
    * @return Array of CLI call parts.
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToArray(command: Any, preSize: Int): Array<String> {
     var pos = 0
     var tmp = arrayOfNulls<String>(max(8, preSize))
@@ -198,15 +284,29 @@ interface CommandSerializer {
   /**
    * Serializes a CLI call into a full call string.
    *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
+   *
    * @param command Object to serialize.
    *
    * @return Serialized CLI call string.
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToString(command: Any): String =
     serializeToString(command, 2048)
 
   /**
    * Serializes a CLI call into a full call string.
+   *
+   * The given object must either implement the [Command] interface, or be
+   * annotated with [@CliCommand][CliCommand] to be serialized.  Providing a
+   * value that does not meet at least one of those requirements will cause in
+   * an exception to be thrown.
    *
    * @param command Object to serialize.
    *
@@ -216,6 +316,10 @@ interface CommandSerializer {
    * likely to be larger than the default [preSize] value of `2048` characters.
    *
    * @return Serialized CLI call string.
+   *
+   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
+  @Throws(IllegalArgumentException::class)
   fun serializeToString(command: Any, preSize: Int): String
 }
