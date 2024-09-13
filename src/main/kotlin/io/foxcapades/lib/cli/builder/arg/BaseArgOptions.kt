@@ -3,7 +3,7 @@ package io.foxcapades.lib.cli.builder.arg
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
 import io.foxcapades.lib.cli.builder.component.BaseComponentOptions
-import io.foxcapades.lib.cli.builder.util.properties.MutableProperty
+import io.foxcapades.lib.cli.builder.util.properties.MutableDelegateProperty
 import kotlin.reflect.KClass
 
 /**
@@ -23,12 +23,12 @@ abstract class BaseArgOptions<T : Any, O : T?>(type: KClass<out T>) : BaseCompon
    * TODO: document what this means, especially in relation to flag option for
    *       required.
    */
-  var required by MutableProperty<Boolean>()
+  var required by MutableDelegateProperty<Boolean>()
 
   /**
    * Default value for this argument.
    */
-  var default by MutableProperty<O>()
+  var default by MutableDelegateProperty<O>()
 
   /**
    * Argument inclusion predicate.
@@ -38,7 +38,7 @@ abstract class BaseArgOptions<T : Any, O : T?>(type: KClass<out T>) : BaseCompon
    *
    * If the argument is marked as required, this filter is not used.
    */
-  var filter by MutableProperty<ArgumentPredicate<O>>()
+  var filter by MutableDelegateProperty<ArgumentPredicate<O>>()
 
   /**
    * Whether this argument's value should be quoted.
@@ -48,10 +48,10 @@ abstract class BaseArgOptions<T : Any, O : T?>(type: KClass<out T>) : BaseCompon
    * Default value is dependent on type; built-in numeric types and boolean are
    * not quoted by default, everything else is.
    */
-  var shouldQuote by MutableProperty<Boolean>()
+  var shouldQuote by MutableDelegateProperty<Boolean>()
 
   /**
    * Formater used to render the argument's value as a string.
    */
-  var formatter by MutableProperty<ArgumentFormatter<O>>()
+  var formatter by MutableDelegateProperty<ArgumentFormatter<O>>()
 }

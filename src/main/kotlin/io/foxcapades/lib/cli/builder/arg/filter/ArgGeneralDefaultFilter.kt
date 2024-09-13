@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.arg.filter
 
+import io.foxcapades.kt.prop.delegation.Property
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.filter.ArgZeroFilter.CharZero
 import io.foxcapades.lib.cli.builder.arg.filter.ArgZeroFilter.DoubleZero
@@ -10,7 +11,6 @@ import io.foxcapades.lib.cli.builder.arg.filter.ArgZeroFilter.ULongZero
 import io.foxcapades.lib.cli.builder.arg.filter.ArgZeroFilter.UShortZero
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
-import io.foxcapades.lib.cli.builder.util.properties.Property
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import java.math.BigDecimal
 import java.math.BigInteger

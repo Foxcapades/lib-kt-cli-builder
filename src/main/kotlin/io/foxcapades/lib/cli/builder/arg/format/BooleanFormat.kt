@@ -5,6 +5,7 @@ package io.foxcapades.lib.cli.builder.arg.format
  *
  * @since 1.0.0
  */
+@Suppress("unused")
 object BooleanFormat {
 
   /**

@@ -22,6 +22,7 @@ fun interface PropertyNameFormatter {
    */
   fun format(name: String, serializationConfig: CliSerializationConfig): String
 
+  @Suppress("unused")
   companion object {
     /**
      * Formats class property names into a camel case string.

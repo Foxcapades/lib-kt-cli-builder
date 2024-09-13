@@ -1,7 +1,11 @@
 package io.foxcapades.lib.cli.builder.arg.impl
 
+import io.foxcapades.kt.prop.delegation.Property
+import io.foxcapades.kt.prop.delegation.getOr
+import io.foxcapades.kt.prop.delegation.getOrCompute
+import io.foxcapades.kt.prop.delegation.getOrNull
 import io.foxcapades.lib.cli.builder.arg.ArgOptions
-import io.foxcapades.lib.cli.builder.arg.Argument
+import io.foxcapades.lib.cli.builder.arg.DelegateArgument
 import io.foxcapades.lib.cli.builder.arg.NullableArgOptions
 import io.foxcapades.lib.cli.builder.arg.filter.ArgUnsetFilter
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
@@ -18,15 +22,15 @@ import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import java.math.BigDecimal
 import kotlin.reflect.KClass
 
-internal class UniversalArgumentImpl<V>(
+internal class UniversalDelegateArgument<V>(
   default:     Property<V>,
   shouldQuote: Boolean,
   isRequired:  Boolean,
   private val  formatter: ArgumentFormatter<V>,
   private val  filter: ArgumentPredicate<V>
 )
-  : Argument<V>
-  , BasicMutableDefaultableProperty<V>(
+  : DelegateArgument<V>
+  , AbstractDelegate<V>(
     if (default.isSet) 2 else 0,
     default.getOrNull(),
     null
@@ -63,7 +67,7 @@ internal class UniversalArgumentImpl<V>(
 
   companion object {
     @JvmStatic
-    inline fun <reified T : Any> of(opts: NullableArgOptions<T>) = UniversalArgumentImpl<T?>(
+    inline fun <reified T : Any> of(opts: NullableArgOptions<T>) = UniversalDelegateArgument<T?>(
       type        = T::class,
       nullable    = true,
       default     = NullableArgOptions<BigDecimal>::default.property(opts),
@@ -74,7 +78,7 @@ internal class UniversalArgumentImpl<V>(
     )
 
     @JvmStatic
-    inline fun <reified T : Any> of(opts: ArgOptions<T>) = UniversalArgumentImpl<T>(
+    inline fun <reified T : Any> of(opts: ArgOptions<T>) = UniversalDelegateArgument<T>(
       type        = T::class,
       nullable    = false,
       default     = NullableArgOptions<BigDecimal>::default.property(opts),

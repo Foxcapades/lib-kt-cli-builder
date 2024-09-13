@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
   kotlin("jvm") version "2.0.20"
@@ -22,13 +23,17 @@ data class SemVer(
   override fun toString() = "$major.$minor.$patch"
 }
 
-val projectVersion = SemVer(major = 0, minor = 6, patch = 0)
+val projectVersion = SemVer(major = 0, minor = 7, patch = 0)
 
 group = "io.foxcapades.kt"
 version = projectVersion.toString()
 
 repositories {
   mavenCentral()
+  maven {
+    name = "Sonatype Releases"
+    url = uri("https://s01.oss.sonatype.org/content/repositories/releases")
+  }
 }
 
 kotlin {
@@ -47,6 +52,8 @@ dependencies {
   api("org.slf4j:slf4j-api:2.0.16")
 
   implementation(kotlin("reflect"))
+
+  implementation("io.foxcapades.kt:property-delegation:0.2.1")
 
   testImplementation("org.slf4j:slf4j-simple:2.0.16")
   testImplementation("org.mockito:mockito-junit-jupiter:5.13.0")

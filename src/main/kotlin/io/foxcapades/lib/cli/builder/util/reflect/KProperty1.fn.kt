@@ -1,7 +1,7 @@
 @file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.util.reflect
 
-import io.foxcapades.lib.cli.builder.util.properties.MutableProperty
+import io.foxcapades.kt.prop.delegation.MutableProperty
 import io.foxcapades.lib.cli.builder.util.takeAs
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1

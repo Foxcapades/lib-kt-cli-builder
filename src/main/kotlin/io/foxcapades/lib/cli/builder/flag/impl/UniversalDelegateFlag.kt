@@ -1,28 +1,28 @@
 package io.foxcapades.lib.cli.builder.flag.impl
 
+import io.foxcapades.kt.prop.delegation.Property
+import io.foxcapades.kt.prop.delegation.getOr
+import io.foxcapades.kt.prop.delegation.getOrNull
 import io.foxcapades.lib.cli.builder.*
 import io.foxcapades.lib.cli.builder.arg.ArgOptions
-import io.foxcapades.lib.cli.builder.arg.Argument
+import io.foxcapades.lib.cli.builder.arg.DelegateArgument
 import io.foxcapades.lib.cli.builder.arg.NullableArgOptions
-import io.foxcapades.lib.cli.builder.arg.impl.UniversalArgumentImpl
-import io.foxcapades.lib.cli.builder.flag.Flag
+import io.foxcapades.lib.cli.builder.arg.impl.UniversalDelegateArgument
+import io.foxcapades.lib.cli.builder.flag.DelegateFlag
 import io.foxcapades.lib.cli.builder.flag.FlagOptions
 import io.foxcapades.lib.cli.builder.flag.NullableFlagOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.serial.*
-import io.foxcapades.lib.cli.builder.util.properties.Property
-import io.foxcapades.lib.cli.builder.util.properties.getOr
-import io.foxcapades.lib.cli.builder.util.properties.getOrNull
 import io.foxcapades.lib.cli.builder.util.reflect.property
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
-internal class UniversalFlagImpl<V>(
+internal class UniversalDelegateFlag<V>(
   longForm:    Property<String>,
   shortForm:   Property<Char>,
   isRequired:  Property<Boolean>,
   filter:      Property<FlagPredicate<V>>,
-  argument:    Argument<V>,
-) : Flag<V> {
+  argument:    DelegateArgument<V>,
+) : DelegateFlag<V> {
   private val lf = longForm
   private val sf = shortForm
   private val fi = filter.getOrNull()
@@ -52,16 +52,16 @@ internal class UniversalFlagImpl<V>(
     config:    CliSerializationConfig,
     source: ValueSource,
   ) =
-    fi?.shouldInclude(this, config, source) ?: super.shouldSerialize(config, source)
+    fi?.shouldInclude(this, config, source) ?: argument.shouldSerialize(config, source)
 
   companion object {
-    fun <T : Any> of(config: FlagOptions<T>): Flag<T> =
-      UniversalFlagImpl(
+    fun <T : Any> of(config: FlagOptions<T>) =
+      UniversalDelegateFlag<T>(
         longForm   = FlagOptions<T>::longForm.property(config),
         shortForm  = FlagOptions<T>::shortForm.property(config),
         isRequired = FlagOptions<T>::required.property(config),
         filter     = FlagOptions<T>::flagFilter.property(config),
-        argument   = UniversalArgumentImpl(
+        argument   = UniversalDelegateArgument(
           config.type,
           false,
           default     = ArgOptions<T>::default.property(config.argument),
@@ -72,13 +72,13 @@ internal class UniversalFlagImpl<V>(
         ),
       )
 
-    fun <T : Any> of(config: NullableFlagOptions<T>): Flag<T?> =
-      UniversalFlagImpl(
+    fun <T : Any> of(config: NullableFlagOptions<T>) =
+      UniversalDelegateFlag<T?>(
         longForm   = NullableFlagOptions<T>::longForm.property(config),
         shortForm  = NullableFlagOptions<T>::shortForm.property(config),
         isRequired = NullableFlagOptions<T>::required.property(config),
         filter     = NullableFlagOptions<T>::flagFilter.property(config),
-        argument   = UniversalArgumentImpl(
+        argument   = UniversalDelegateArgument(
           config.type,
           false,
           default     = NullableArgOptions<T>::default.property(config.argument),

@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.arg.ref.impl
 
+import io.foxcapades.kt.prop.delegation.NoSuchValueException
 import io.foxcapades.lib.cli.builder.arg.CliArgument
 import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
@@ -8,7 +9,6 @@ import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.properties.NoSuchDefaultValueException
 import io.foxcapades.lib.cli.builder.util.reflect.shouldQuote
 import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
@@ -46,7 +46,7 @@ internal class FauxArgument<V>(
     valueSource()
 
   override fun getDefault() =
-    throw NoSuchDefaultValueException()
+    throw NoSuchValueException()
 
   override fun set(value: V) =
     throw UnsupportedOperationException()

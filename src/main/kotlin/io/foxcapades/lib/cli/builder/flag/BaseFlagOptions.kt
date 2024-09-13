@@ -4,7 +4,7 @@ import io.foxcapades.lib.cli.builder.arg.BaseArgOptions
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.component.BaseComponentOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
-import io.foxcapades.lib.cli.builder.util.properties.MutableProperty
+import io.foxcapades.lib.cli.builder.util.properties.MutableDelegateProperty
 import kotlin.reflect.KClass
 
 open class BaseFlagOptions<V : Any, O : V?, A : BaseArgOptions<V, O>>(
@@ -16,17 +16,17 @@ open class BaseFlagOptions<V : Any, O : V?, A : BaseArgOptions<V, O>>(
   /**
    * Sets the long-form name of the flag being configured.
    */
-  var longForm by MutableProperty<String>()
+  var longForm by MutableDelegateProperty<String>()
 
   /**
    * Sets the short-form name of the flag being configured.
    */
-  var shortForm by MutableProperty<Char>()
+  var shortForm by MutableDelegateProperty<Char>()
 
   /**
    * Sets whether this flag's presence is required in a CLI generated call.
    */
-  var required by MutableProperty<Boolean>()
+  var required by MutableDelegateProperty<Boolean>()
 
   /**
    * Defines a predicate which will is used to determine when a non-required
@@ -35,7 +35,7 @@ open class BaseFlagOptions<V : Any, O : V?, A : BaseArgOptions<V, O>>(
    * Flags marked as being [required] will always be included without any call
    * to this filter.
    */
-  var flagFilter by MutableProperty<FlagPredicate<O>>()
+  var flagFilter by MutableDelegateProperty<FlagPredicate<O>>()
 
   /**
    * Argument configuration

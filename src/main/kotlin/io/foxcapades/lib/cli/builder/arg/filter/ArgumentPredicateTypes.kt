@@ -11,15 +11,14 @@ import java.util.OptionalLong
 import kotlin.reflect.KClass
 import kotlin.time.Duration as KDuration
 
-import io.foxcapades.lib.cli.builder.util.properties.Property
-
+@Suppress("unused")
 object ArgumentPredicateTypes {
   /**
    * Filters the target argument based on whether it has been explicitly set to
    * any value.
    */
   @JvmStatic
-  val Set: KClass<out ArgumentPredicate<*>>
+  val Unset: KClass<out ArgumentPredicate<*>>
     get() = ArgUnsetFilter::class
 
   /**
@@ -58,7 +57,6 @@ object ArgumentPredicateTypes {
    * | [OptionalDouble]               | is empty   |
    * | [OptionalInt]                  | is empty   |
    * | [OptionalLong]                 | is empty   |
-   * | [Property]                     | is empty   |
    * | [Short]                        | `0`        |
    * | [ShortArray]                   | is empty   |
    * | [UByte]                        | `0`        |

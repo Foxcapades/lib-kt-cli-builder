@@ -1,10 +1,10 @@
 package io.foxcapades.lib.cli.builder.flag
 
+import io.foxcapades.kt.prop.delegation.MutableDefaultableProperty
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.component.CliCallComponent
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.properties.MutableDefaultableProperty
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
 /**
@@ -12,7 +12,7 @@ import io.foxcapades.lib.cli.builder.util.values.ValueSource
  *
  * @since v1.0.0
  */
-interface Flag<V> : MutableDefaultableProperty<V>, CliCallComponent {
+interface Flag<V> : CliCallComponent, MutableDefaultableProperty<V> {
   /**
    * Indicates whether this flag has a long form.
    */
@@ -47,11 +47,6 @@ interface Flag<V> : MutableDefaultableProperty<V>, CliCallComponent {
    * Method used to indicate whether a [Flag] instance should be included in
    * serialization based on customizable logic.
    *
-   * Different implementations may provide varying default serialization
-   * inclusion rules, however the default behavior provided by this interface is
-   * to always include flags whose arguments return `true` on calls to
-   * [Argument.shouldSerialize].
-   *
    * `Flag` instances that are marked with [isRequired] = `true` will be always
    * be included in serialization.  For such instances, this method will not be
    * called.
@@ -67,16 +62,15 @@ interface Flag<V> : MutableDefaultableProperty<V>, CliCallComponent {
    * @return `true` if this `Flag` instance should be included in serialization
    * output, otherwise `false` if this `Flag` should be omitted.
    */
-  fun shouldSerialize(config: CliSerializationConfig, source: ValueSource): Boolean =
-    argument.shouldSerialize(config, source)
+  fun shouldSerialize(config: CliSerializationConfig, source: ValueSource): Boolean
 
   fun writeToString(writer: CliFlagWriter<*, V>)
 
+  override val hasDefault
+    get() = argument.hasDefault
+
   override val isSet: Boolean
     get() = argument.isSet
-
-  override val hasDefault: Boolean
-    get() = argument.hasDefault
 
   override fun get() = argument.get()
 
@@ -86,3 +80,4 @@ interface Flag<V> : MutableDefaultableProperty<V>, CliCallComponent {
 
   override fun getDefault() = argument.getDefault()
 }
+

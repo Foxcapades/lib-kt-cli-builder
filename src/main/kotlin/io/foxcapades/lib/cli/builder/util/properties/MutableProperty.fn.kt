@@ -1,11 +1,14 @@
 @file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.util.properties
 
-fun <T> MutableProperty(): MutableProperty<T> = SimpleMutableProperty()
+import io.foxcapades.kt.prop.delegation.MutableDelegateProperty
+import io.foxcapades.kt.prop.delegation.MutableProperty
+import io.foxcapades.kt.prop.delegation.NoSuchValueException
+import kotlin.reflect.KProperty
 
-fun <T> MutableProperty(value: T): MutableProperty<T> = SimpleMutableProperty(value)
+internal fun <T> MutableDelegateProperty(): MutableDelegateProperty<T, T> = SimpleMutableProperty()
 
-private class SimpleMutableProperty<T> : MutableProperty<T> {
+private class SimpleMutableProperty<T> : MutableDelegateProperty<T, T> {
   override var isSet: Boolean
     private set
 
@@ -28,10 +31,14 @@ private class SimpleMutableProperty<T> : MutableProperty<T> {
     else
       throw NoSuchValueException()
 
+  override fun getValue(thisRef: Any?, property: KProperty<*>) = get()
+
   override fun set(value: T) {
     this.value = value
     this.isSet = true
   }
+
+  override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) = set(value)
 
   override fun unset() {
     this.value = null

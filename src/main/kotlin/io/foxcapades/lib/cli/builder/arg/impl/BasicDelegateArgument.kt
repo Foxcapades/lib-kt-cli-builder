@@ -1,7 +1,10 @@
 package io.foxcapades.lib.cli.builder.arg.impl
 
+import io.foxcapades.kt.prop.delegation.Property
+import io.foxcapades.kt.prop.delegation.getOr
+import io.foxcapades.kt.prop.delegation.getOrNull
 import io.foxcapades.lib.cli.builder.arg.ArgOptions
-import io.foxcapades.lib.cli.builder.arg.Argument
+import io.foxcapades.lib.cli.builder.arg.DelegateArgument
 import io.foxcapades.lib.cli.builder.arg.filter.ArgUnsetFilter
 import io.foxcapades.lib.cli.builder.arg.filter.ArgumentPredicate
 import io.foxcapades.lib.cli.builder.arg.filter.unsafeCast
@@ -10,26 +13,23 @@ import io.foxcapades.lib.cli.builder.arg.format.NonNullGeneralStringifier
 import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
-import io.foxcapades.lib.cli.builder.util.properties.BasicMutableDefaultableProperty
-import io.foxcapades.lib.cli.builder.util.properties.Property
-import io.foxcapades.lib.cli.builder.util.properties.getOr
-import io.foxcapades.lib.cli.builder.util.properties.getOrNull
+import io.foxcapades.lib.cli.builder.util.properties.*
 import io.foxcapades.lib.cli.builder.util.reflect.property
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 
-internal class BasicArgumentImpl<V>(
+internal class BasicDelegateArgument<V>(
   default:     Property<V>,
   isRequired:  Property<Boolean>,
   shouldQuote: Property<Boolean>,
   filter:      Property<ArgumentPredicate<V>>,
   formatter:   Property<ArgumentFormatter<V>>,
 )
-  : BasicMutableDefaultableProperty<V>(
+  : AbstractDelegate<V>(
     if (default.isSet) 2 else 0,
     default.getOrNull(),
     null
   )
-  , Argument<V>
+  , DelegateArgument<V>
 {
   private val filter = filter.getOr(ArgUnsetFilter.unsafeCast())
 
@@ -46,7 +46,7 @@ internal class BasicArgumentImpl<V>(
     formatter.formatValue(get(), writer, this)
 
   companion object {
-    internal fun <V : Any> of(opts: ArgOptions<V>) = BasicArgumentImpl<V>(
+    internal fun <V : Any> of(opts: ArgOptions<V>) = BasicDelegateArgument<V>(
       default     = ArgOptions<V>::default.property(opts),
       isRequired  = ArgOptions<V>::required.property(opts),
       shouldQuote = ArgOptions<V>::shouldQuote.property(opts),

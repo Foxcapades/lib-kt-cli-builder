@@ -6,7 +6,6 @@ import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
-import kotlin.reflect.KProperty
 
 internal abstract class AbstractValueFlag<T : Any, V>(
   parent:   ResolvedCommand<T>,
@@ -45,20 +44,11 @@ internal abstract class AbstractValueFlag<T : Any, V>(
   override fun get() =
     instance.get()
 
-  override fun getValue(thisRef: Any?, property: KProperty<*>) =
-    instance.getValue(thisRef, property)
-
   override fun getDefault() =
     instance.getDefault()
 
-  override fun getOrDefault() =
-    instance.getOrDefault()
-
   override fun set(value: V) =
     instance.set(value)
-
-  override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) =
-    instance.setValue(thisRef, property, value)
 
   override fun unset() =
     instance.unset()

@@ -6,7 +6,6 @@ import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
-import kotlin.reflect.KProperty
 
 internal abstract class AbstractArgument<V>(
   parent:   ResolvedComponent,
@@ -33,26 +32,14 @@ internal abstract class AbstractArgument<V>(
   override val isSet
     get() = instance.isSet
 
-  override val isDefault
-    get() = instance.isDefault
-
   override fun get() =
     instance.get()
-
-  override fun getValue(thisRef: Any?, property: KProperty<*>) =
-    instance.getValue(thisRef, property)
 
   override fun getDefault() =
     instance.getDefault()
 
-  override fun getOrDefault() =
-    instance.getOrDefault()
-
   override fun set(value: V) =
     instance.set(value)
-
-  override fun setValue(thisRef: Any?, property: KProperty<*>, value: V) =
-    instance.setValue(thisRef, property, value)
 
   override fun unset() =
     instance.unset()

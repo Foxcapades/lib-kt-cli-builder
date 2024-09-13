@@ -17,7 +17,7 @@ class BooleanConstructorsTest {
     fun t1() {
       val foo by booleanFlag { default = true }
 
-      assertTrue(foo)
+      assertTrue(foo ?: false)
     }
   }
 }
