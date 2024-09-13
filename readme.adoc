@@ -1,6 +1,6 @@
 = CLI Call Builder
-:version-actual: 0.6.0
-:version-feature: 0.6.0
+:version-actual: 0.7.0
+:version-feature: 0.7.0
 :source-highlighter: highlightjs
 
 Provides delegates, annotations, and tools to generate CLI calls from
