@@ -92,7 +92,7 @@ internal class ReflectiveComponentResolver<T : Any>(
   private fun siftMember(member: KCallable<*>): ResolvedComponent? =
     when (member) {
       is KProperty1<*, *> -> siftProperty(member.unsafeCast())
-      is KFunction1<*, *> -> siftFunction(member.forceAny())
+      is KFunction1<*, *> -> siftFunction(member.unsafeCast())
       else                -> null // TODO: LOG HERE
     }
 

@@ -53,5 +53,5 @@ internal class AnnotatedUnlinkedFlag<V>(
     if (annotation.hasFilter)
       annotation.filter.getOrCreate().unsafeCast<V>().shouldInclude(this, config, source)
     else
-      super<UnlinkedFlag>.shouldSerialize(config, source)
+      super.shouldSerialize(config, source)
 }

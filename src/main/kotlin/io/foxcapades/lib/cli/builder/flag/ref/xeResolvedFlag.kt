@@ -1,3 +1,5 @@
+@file:JvmName("InternalResolvedFlagExtensions")
+@file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.flag.ref
 
 import io.foxcapades.lib.cli.builder.InvalidFlagFormException
@@ -48,7 +50,7 @@ internal fun ResolvedFlag<*>.validateFlagNames(config: CliSerializationConfig) {
 // region Unsafe Casting
 
 @Suppress("UNCHECKED_CAST")
-internal fun <T : ResolvedFlag<V>, V> T.forceAny() = this as ResolvedFlag<Any?>
+internal inline fun <T : ResolvedFlag<V>, V> T.forceAny() = this as ResolvedFlag<Any?>
 
 // endregion Unsafe Casting
 

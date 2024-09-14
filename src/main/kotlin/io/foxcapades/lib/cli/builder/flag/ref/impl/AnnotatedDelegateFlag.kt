@@ -5,7 +5,7 @@ import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.flag.CliFlag
 import io.foxcapades.lib.cli.builder.flag.CliFlagAnnotation
 import io.foxcapades.lib.cli.builder.flag.Flag
-import io.foxcapades.lib.cli.builder.flag.filter.new
+import io.foxcapades.lib.cli.builder.flag.filter.unsafeCast
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
@@ -50,7 +50,7 @@ internal class AnnotatedDelegateFlag<T : Any, V>(
 
   override fun shouldSerialize(config: CliSerializationConfig, source: ValueSource) =
     if (annotation.hasFilter)
-      annotation.filter.new<V>().shouldInclude(this, config, source)
+      annotation.initFilter().unsafeCast<V>().shouldInclude(this, config, source)
     else
-      super<AbstractValueFlag>.shouldSerialize(config, source)
+      super.shouldSerialize(config, source)
 }

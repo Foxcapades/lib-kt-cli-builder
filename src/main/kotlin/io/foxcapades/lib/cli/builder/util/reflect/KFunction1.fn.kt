@@ -8,8 +8,5 @@ import kotlin.reflect.KParameter
 internal inline fun <T : Any, V> KFunction1<*, *>.unsafeCast() =
   this as KFunction1<T, V>
 
-internal inline fun KFunction1<*, *>.forceAny() =
-  unsafeCast<Any, Any?>()
-
 internal inline val KFunction1<*, *>.isGetter
   get() = parameters.size == 1 && parameters[0].kind == KParameter.Kind.INSTANCE

@@ -53,5 +53,5 @@ internal class AnnotatedValueFlag<T : Any, V>(
     if (annotation.hasFilter)
       annotation.filter.getOrCreate().unsafeCast<V>().shouldInclude(this, config, source)
     else
-      super<AbstractValueFlag>.shouldSerialize(config, source)
+      super.shouldSerialize(config, source)
 }

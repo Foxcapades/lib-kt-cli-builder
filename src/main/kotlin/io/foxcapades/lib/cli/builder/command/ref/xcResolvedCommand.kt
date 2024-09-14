@@ -1,4 +1,3 @@
-@file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.command.ref
 
 import io.foxcapades.lib.cli.builder.command.CliCommand
@@ -10,9 +9,6 @@ import io.foxcapades.lib.cli.builder.command.ref.impl.FauxCommand
 import io.foxcapades.lib.cli.builder.util.values.AnonymousComponentValue
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
 import kotlin.reflect.full.findAnnotation
-
-@Suppress("UNCHECKED_CAST")
-internal inline fun ResolvedCommand<*>.forceAny() = this as ResolvedCommand<Any>
 
 
 internal fun <C : Any> ResolvedCommand(value: C, parent: ResolvedCommand<*>?, source: ValueSource?): ResolvedCommand<C> {

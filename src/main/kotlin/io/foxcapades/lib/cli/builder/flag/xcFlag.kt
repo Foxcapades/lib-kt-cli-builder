@@ -1,3 +1,4 @@
+@file:JvmName("Flags")
 @file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.flag
 
@@ -6,11 +7,117 @@ import io.foxcapades.lib.cli.builder.arg.format.NonNullGeneralStringifier
 import io.foxcapades.lib.cli.builder.arg.format.unsafeCast
 import io.foxcapades.lib.cli.builder.flag.impl.BasicDelegateFlag
 import io.foxcapades.lib.cli.builder.flag.impl.DelegateBooleanFlagImpl
+import io.foxcapades.lib.cli.builder.flag.impl.UniversalDelegateFlag
 import java.io.File
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.nio.file.Path
+import kotlin.reflect.KClass
 
+// region Universal Constructors
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * @param T Flag value type.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+inline fun <reified T : Any> flag(noinline action: FlagOptions<T>.() -> Unit = {}): DelegateFlag<T> =
+  flag(T::class, action)
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * @param T Flag value type.
+ *
+ * @param longForm Long-form name of the flag.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+inline fun <reified T : Any> flag(longForm: String, noinline action: FlagOptions<T>.() -> Unit = {}): DelegateFlag<T> =
+  flag(longForm, T::class, action)
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * @param T Flag value type.
+ *
+ * @param shortForm Short-form name of the flag.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+inline fun <reified T : Any> flag(shortForm: Char, noinline action: FlagOptions<T>.() -> Unit = {}): DelegateFlag<T> =
+  flag(shortForm, T::class, action)
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * @param T Flag value type.
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+fun <T : Any> flag(type: KClass<out T>, action: FlagOptions<T>.() -> Unit): DelegateFlag<T> =
+  type.tryTyped(action) ?: UniversalDelegateFlag.of(FlagOptions(type).also(action))
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * @param T Flag value type.
+ *
+ * @param longForm Long-form name of the flag.
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+fun <T : Any> flag(longForm: String, type: KClass<out T>, action: FlagOptions<T>.() -> Unit): DelegateFlag<T> =
+  flag(type) {
+    this.longForm = longForm
+    action()
+  }
+
+/**
+ * Creates a new [Flag] delegate instance for the target type ([T]).
+ *
+ * @param T Flag value type.
+ *
+ * @param shortForm Short-form name of the flag.
+ *
+ * @param type Class for the type of value that the new `Flag` will hold.
+ *
+ * @param action Configuration that will be called on a new [FlagOptions]
+ * instance which will then be used to configure the newly created `Flag`.
+ *
+ * @return New `Flag` instance configured by the given [action].
+ */
+fun <T : Any> flag(shortForm: Char, type: KClass<out T>, action: FlagOptions<T>.() -> Unit): DelegateFlag<T> =
+  flag(type) {
+    this.shortForm = shortForm
+    action()
+  }
+
+// endregion Universal Constructors
+
+
+// region Typed Constructors
 
 // region BigDecimal
 
@@ -100,7 +207,6 @@ fun booleanFlag(action: BooleanFlagOptions.() -> Unit = {}): DelegateBooleanFlag
 
 // region Byte
 
-
 inline fun byteFlag(longForm: String, noinline action: FlagOptions<Byte>.() -> Unit = {}) =
   byteFlag { this.longForm = longForm; action() }
 
@@ -116,7 +222,6 @@ fun byteFlag(action: FlagOptions<Byte>.() -> Unit = {}): DelegateFlag<Byte> =
 // endregion Byte
 
 // region Char
-
 
 inline fun charFlag(longForm: String, noinline action: FlagOptions<Char>.() -> Unit = {}) =
   charFlag { this.longForm = longForm; action() }
@@ -326,3 +431,57 @@ fun ushortFlag(action: FlagOptions<UShort>.() -> Unit = {}): DelegateFlag<UShort
   })
 
 // endregion UShort
+
+// endregion Typed Constructors
+
+
+// region Universal Constructor Support
+
+private fun <T : Any> KClass<*>.tryTyped(action: FlagOptions<T>.() -> Unit): DelegateFlag<T>? {
+  @Suppress("UNCHECKED_CAST")
+  return when (java.`package`?.name) {
+
+    null -> when (this) {
+      Boolean::class -> booleanFlag { (action as FlagOptions<Boolean>.() -> Unit)(this) }
+      Int::class     -> intFlag(action as FlagOptions<Int>.() -> Unit)
+      Double::class  -> doubleFlag(action as FlagOptions<Double>.() -> Unit)
+      Long::class    -> longFlag(action as FlagOptions<Long>.() -> Unit)
+      Float::class   -> floatFlag(action as FlagOptions<Float>.() -> Unit)
+      Byte::class    -> byteFlag(action as FlagOptions<Byte>.() -> Unit)
+      Char::class    -> charFlag(action as FlagOptions<Char>.() -> Unit)
+      Short::class   -> shortFlag(action as FlagOptions<Short>.() -> Unit)
+      else           -> null
+    }
+
+    "java.lang" -> when (this) {
+      String::class  -> stringFlag(action as FlagOptions<String>.() -> Unit)
+      Boolean::class -> booleanFlag { (action as FlagOptions<Boolean>.() -> Unit)(this) }
+      Int::class     -> intFlag(action as FlagOptions<Int>.() -> Unit)
+      Double::class  -> doubleFlag(action as FlagOptions<Double>.() -> Unit)
+      Long::class    -> longFlag(action as FlagOptions<Long>.() -> Unit)
+      Float::class   -> floatFlag(action as FlagOptions<Float>.() -> Unit)
+      Byte::class    -> byteFlag(action as FlagOptions<Byte>.() -> Unit)
+      Char::class    -> charFlag(action as FlagOptions<Char>.() -> Unit)
+      Short::class   -> shortFlag(action as FlagOptions<Short>.() -> Unit)
+      else          -> null
+    }
+
+    "kotlin" -> when (this) {
+      UInt::class   -> uintFlag(action as FlagOptions<UInt>.() -> Unit)
+      ULong::class  -> ulongFlag(action as FlagOptions<ULong>.() -> Unit)
+      UByte::class  -> ubyteFlag(action as FlagOptions<UByte>.() -> Unit)
+      UShort::class -> ushortFlag(action as FlagOptions<UShort>.() -> Unit)
+      else          -> null
+    }
+
+    "java.math" -> when (this) {
+      BigInteger::class -> bigIntegerFlag(action as FlagOptions<BigInteger>.() -> Unit)
+      BigDecimal::class -> bigDecimalFlag(action as FlagOptions<BigDecimal>.() -> Unit)
+      else              -> null
+    }
+
+    else -> null
+  } as DelegateFlag<T>?
+}
+
+// endregion Universal Constructor Support

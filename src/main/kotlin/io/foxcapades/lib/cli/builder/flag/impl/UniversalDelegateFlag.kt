@@ -6,11 +6,9 @@ import io.foxcapades.kt.prop.delegation.getOrNull
 import io.foxcapades.lib.cli.builder.*
 import io.foxcapades.lib.cli.builder.arg.ArgOptions
 import io.foxcapades.lib.cli.builder.arg.DelegateArgument
-import io.foxcapades.lib.cli.builder.arg.NullableArgOptions
 import io.foxcapades.lib.cli.builder.arg.impl.UniversalDelegateArgument
 import io.foxcapades.lib.cli.builder.flag.DelegateFlag
 import io.foxcapades.lib.cli.builder.flag.FlagOptions
-import io.foxcapades.lib.cli.builder.flag.NullableFlagOptions
 import io.foxcapades.lib.cli.builder.flag.filter.FlagPredicate
 import io.foxcapades.lib.cli.builder.serial.*
 import io.foxcapades.lib.cli.builder.util.reflect.property
@@ -69,23 +67,6 @@ internal class UniversalDelegateFlag<V>(
           isRequired  = ArgOptions<T>::required.property(config.argument),
           filter      = ArgOptions<T>::filter.property(config.argument),
           formatter   = ArgOptions<T>::formatter.property(config.argument),
-        ),
-      )
-
-    fun <T : Any> of(config: NullableFlagOptions<T>) =
-      UniversalDelegateFlag<T?>(
-        longForm   = NullableFlagOptions<T>::longForm.property(config),
-        shortForm  = NullableFlagOptions<T>::shortForm.property(config),
-        isRequired = NullableFlagOptions<T>::required.property(config),
-        filter     = NullableFlagOptions<T>::flagFilter.property(config),
-        argument   = UniversalDelegateArgument(
-          config.type,
-          false,
-          default     = NullableArgOptions<T>::default.property(config.argument),
-          shouldQuote = NullableArgOptions<T>::shouldQuote.property(config.argument),
-          isRequired  = NullableArgOptions<T>::required.property(config.argument),
-          filter      = NullableArgOptions<T>::filter.property(config.argument),
-          formatter   = NullableArgOptions<T>::formatter.property(config.argument),
         ),
       )
   }
