@@ -3,6 +3,16 @@ package io.foxcapades.lib.cli.builder.util.values
 import io.foxcapades.lib.cli.builder.util.reflect.qualifiedName
 import kotlin.reflect.KProperty1
 
+/**
+ * Represents a property reference.
+ *
+ * @param V Type of the value returned by the given [property][member].
+ *
+ * @param member Property reference.
+ *
+ * @param instance An instance of the class that [member] belongs to which will
+ * be passed to `member` as the `this` parameter when invoked.
+ */
 internal class ValueAccessorKP1<T : Any, V>(member: KProperty1<T, V>, instance: T) : ValueAccessor<V> {
   private val member = member
 

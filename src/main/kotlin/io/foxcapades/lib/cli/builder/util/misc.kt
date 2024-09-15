@@ -15,6 +15,3 @@ internal inline fun <T> T.then(fn: (T) -> Unit) {
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun StringBuilder.dump() = toString().also { clear() }
-
-internal inline fun <reified R : Any> Iterable<*>.findInstance(): R? =
-  find { it is R }?.let { it as R }
