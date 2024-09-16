@@ -23,7 +23,7 @@ data class SemVer(
   override fun toString() = "$major.$minor.$patch"
 }
 
-val projectVersion = SemVer(major = 0, minor = 7, patch = 3)
+val projectVersion = SemVer(major = 0, minor = 7, patch = 4)
 
 group = "io.foxcapades.kt"
 version = projectVersion.toString()

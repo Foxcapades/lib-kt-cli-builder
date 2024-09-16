@@ -10,8 +10,11 @@ import io.foxcapades.lib.cli.builder.component.ResolvedComponent
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.reflect.shouldQuote
+import io.foxcapades.lib.cli.builder.util.takeAs
 import io.foxcapades.lib.cli.builder.util.values.ValueAccessor
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
 
 internal class FauxArgument<V>(
   annotation: CliArgumentAnnotation,
@@ -33,7 +36,12 @@ internal class FauxArgument<V>(
   override val shouldQuote = when (annotation.shouldQuote) {
     CliArgument.Toggle.Yes   -> true
     CliArgument.Toggle.No    -> false
-    CliArgument.Toggle.Unset -> get()?.let{ it::class }?.shouldQuote() ?: false
+    CliArgument.Toggle.Unset -> accessor.instance?.takeAs<KCallable<*>>()
+      ?.returnType
+      ?.classifier
+      ?.takeAs<KClass<*>>()
+      ?.shouldQuote()
+      ?: false
   }
 
   override val hasDefault
