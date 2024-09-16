@@ -17,14 +17,13 @@ internal inline fun <T> KProperty1<*, *>.property(instance: Any) =
     .getDelegate(instance) as MutableProperty<T>
 
 @Suppress("UNCHECKED_CAST")
-internal inline fun <R : Any> KProperty1<*, *>.asDelegateType(instance: Any, delegateType: KClass<R>): R? {
-  return if (returnType.classifier?.takeAs<KClass<*>>()?.let(delegateType::isSuperclassOf) == true)
-    forceAny().get(instance) as R?
-  else
+internal inline fun <R : Any> KProperty1<*, *>.asDelegateType(instance: Any, delegateType: KClass<R>): R? =
+  if (returnType.classifier?.takeAs<KClass<*>>()?.let(delegateType::isSuperclassOf) == true)
     forceAny().getDelegate(instance)
       ?.takeIf { delegateType.isInstance(it) }
       ?.let { delegateType.cast(it) }
-}
+  else
+    forceAny().get(instance) as R?
 
 internal inline fun <reified R : Any> KProperty1<*, *>.asDelegateType(instance: Any) =
   asDelegateType(instance, R::class)
