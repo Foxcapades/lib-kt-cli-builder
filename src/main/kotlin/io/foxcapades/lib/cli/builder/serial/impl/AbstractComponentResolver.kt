@@ -92,7 +92,7 @@ internal abstract class AbstractComponentResolver<T : Any>(
   protected fun MemberInfo<out Any, out KCallable<*>>.relevantAnnotations(): RelevantAnnotations {
     var flag:     CliFlagAnnotation?     = null
     var argument: CliArgumentAnnotation? = null
-    var command:  CliCommandAnnotation?      = null
+    var command:  CliCommandAnnotation?  = null
 
     val fn = when (member) {
       is KProperty<*> -> { t: KClass<out Any>, a: KClass<out Annotation> -> member.makeDuplicateAnnotationsError(t, a) }
