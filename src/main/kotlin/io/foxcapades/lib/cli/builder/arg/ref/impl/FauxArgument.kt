@@ -36,9 +36,9 @@ internal class FauxArgument<V>(
   override val shouldQuote = when (annotation.shouldQuote) {
     CliArgument.Toggle.Yes   -> true
     CliArgument.Toggle.No    -> false
-    CliArgument.Toggle.Unset -> accessor.instance?.takeAs<KCallable<*>>()
-      ?.returnType
-      ?.classifier
+    CliArgument.Toggle.Unset -> accessor.accessorInstance
+      .returnType
+      .classifier
       ?.takeAs<KClass<*>>()
       ?.shouldQuote()
       ?: false

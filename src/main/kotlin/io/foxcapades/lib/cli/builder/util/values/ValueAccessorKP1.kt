@@ -1,6 +1,7 @@
 package io.foxcapades.lib.cli.builder.util.values
 
 import io.foxcapades.lib.cli.builder.util.reflect.qualifiedName
+import kotlin.reflect.KCallable
 import kotlin.reflect.KProperty1
 
 /**
@@ -16,7 +17,10 @@ import kotlin.reflect.KProperty1
 internal class ValueAccessorKP1<T : Any, V>(member: KProperty1<T, V>, instance: T) : ValueAccessor<V> {
   private val member = member
 
-  override val instance = instance
+  override val containerInstance = instance
+
+  override val accessorInstance
+    get() = member
 
   override val name
     get() = member.name
@@ -25,14 +29,14 @@ internal class ValueAccessorKP1<T : Any, V>(member: KProperty1<T, V>, instance: 
     get() = true
 
   override val reference
-    get() = member.qualifiedName(instance::class)
+    get() = member.qualifiedName(containerInstance::class)
 
   override val kind
     get() = ValueSource.Kind.Getter
 
   override val containerType
-    get() = instance::class
+    get() = containerInstance::class
 
   override fun invoke() =
-    member(instance)
+    member(containerInstance)
 }

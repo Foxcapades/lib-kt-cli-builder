@@ -29,6 +29,9 @@ internal class WrapperAccessorK0<V>(
 
   override val containerType = parent
 
+  override val accessorInstance
+    get() = member
+
   override val name
     get() = member.name
 
@@ -41,7 +44,7 @@ internal class WrapperAccessorK0<V>(
   override val kind
     get() = ValueSource.Kind.Property
 
-  override val instance: Any?
+  override val containerInstance: Any?
     get() = null
 
   override fun invoke() = fn()

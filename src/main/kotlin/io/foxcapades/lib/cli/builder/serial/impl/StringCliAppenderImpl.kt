@@ -4,8 +4,8 @@ import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.arg.ref.forceAny
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
-import io.foxcapades.lib.cli.builder.flag.forceAny
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
+import io.foxcapades.lib.cli.builder.flag.ref.forceAny
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
@@ -131,8 +131,14 @@ internal class StringCliAppenderImpl<T : Any>(
       reference = component
 
       when (component) {
-        is ResolvedFlag<*>     -> component.forceAny().writeToString(this)
-        is ResolvedArgument<*> -> component.forceAny().writeToString(this)
+        is ResolvedFlag<*> -> component.forceAny()
+          .takeIf { it.shouldSerialize(config, it.valueSource) }
+          ?.writeToString(this)
+
+        is ResolvedArgument<*> -> component.forceAny()
+          .takeIf { it.shouldSerialize(config, it.valueSource) }
+          ?.writeToString(this)
+
         else                   -> BUG()
       }
     }

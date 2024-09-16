@@ -21,6 +21,9 @@ internal class ValueAccessorKF0<V>(member: KFunction0<V>, parent: KClass<*>?) : 
 
   override val containerType = parent
 
+  override val accessorInstance
+    get() = member
+
   override val name
     get() = member.name
 
@@ -33,7 +36,7 @@ internal class ValueAccessorKF0<V>(member: KFunction0<V>, parent: KClass<*>?) : 
   override val kind
     get() = ValueSource.Kind.Getter
 
-  override val instance: Any?
+  override val containerInstance: Any?
     get() = null
 
   override fun invoke() =

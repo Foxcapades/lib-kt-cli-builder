@@ -30,6 +30,6 @@ internal object AnonymousComponentValue : ValueSource {
   override val containerType: KClass<*>?
     get() = null
 
-  override val instance: Any?
+  override val containerInstance: Any?
     get() = null
 }

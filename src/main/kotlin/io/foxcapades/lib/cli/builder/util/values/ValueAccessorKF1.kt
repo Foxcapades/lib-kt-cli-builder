@@ -16,7 +16,10 @@ import kotlin.reflect.KFunction1
 internal class ValueAccessorKF1<T : Any, V>(member: KFunction1<T, V>, instance: T) : ValueAccessor<V> {
   private val member = member
 
-  override val instance = instance
+  override val containerInstance = instance
+
+  override val accessorInstance
+    get() = member
 
   override val name
     get() = member.name
@@ -25,14 +28,14 @@ internal class ValueAccessorKF1<T : Any, V>(member: KFunction1<T, V>, instance: 
     get() = true
 
   override val reference
-    get() = member.qualifiedName(instance::class)
+    get() = member.qualifiedName(containerInstance::class)
 
   override val kind
     get() = ValueSource.Kind.Getter
 
   override val containerType
-    get() = instance::class
+    get() = containerInstance::class
 
   override fun invoke() =
-    member(instance)
+    member(containerInstance)
 }

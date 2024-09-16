@@ -4,13 +4,14 @@ import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.arg.ref.forceAny
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
 import io.foxcapades.lib.cli.builder.component.ResolvedComponent
-import io.foxcapades.lib.cli.builder.flag.forceAny
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
+import io.foxcapades.lib.cli.builder.flag.ref.forceAny
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
 import io.foxcapades.lib.cli.builder.serial.CliFlagWriter
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import io.foxcapades.lib.cli.builder.util.BUG
 import io.foxcapades.lib.cli.builder.util.dump
+import io.foxcapades.lib.cli.builder.util.then
 
 /**
  * @param T Top level CLI command config class containing components to be
@@ -132,9 +133,16 @@ internal class LazyCliAppenderImpl<T : Any>(
       reference = next
 
       when (next) {
-        is ResolvedFlag<*>     -> next.forceAny().writeToString(this)
-        is ResolvedArgument<*> -> next.forceAny().writeToString(this)
+        is ResolvedFlag<*> -> next.forceAny()
+            .takeIf { it.shouldSerialize(config, it.valueSource) }
+            ?.then { it.writeToString(this) }
+
+        is ResolvedArgument<*> -> next.forceAny()
+          .takeIf { it.shouldSerialize(config, it.valueSource) }
+          ?.writeToString(this)
+
 //        is ResolvedCommand<*>  -> next.forceAny().writeToString(this)
+
         else                   -> BUG()
       }
 

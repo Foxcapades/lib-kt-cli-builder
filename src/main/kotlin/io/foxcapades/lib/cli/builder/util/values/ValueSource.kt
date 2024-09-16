@@ -54,7 +54,7 @@ interface ValueSource {
    * This property will always be `null` for [Kind.Anonymous], but may be
    * present for other [kind] values.
    */
-  val instance: Any?
+  val containerInstance: Any?
 
   enum class Kind {
     Property,

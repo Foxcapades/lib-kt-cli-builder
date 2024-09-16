@@ -3,7 +3,7 @@ package io.foxcapades.lib.cli.builder.util.values
 import io.foxcapades.lib.cli.builder.util.reflect.qualifiedName
 import kotlin.reflect.KCallable
 
-internal class /**
+/**
  * Represents a value accessor wrapping a getter or class property.
  *
  * @param V Type of the value returned by the given [function][fn].
@@ -15,7 +15,7 @@ internal class /**
  *
  * @param instance An instance of the class that [member] belongs to.
  */
-WrapperAccessorK1<T : Any, V>(
+internal class WrapperAccessorK1<T : Any, V>(
   fn:       () -> V,
   member:   KCallable<*>,
   instance: T,
@@ -24,10 +24,13 @@ WrapperAccessorK1<T : Any, V>(
 
   private val member = member
 
-  override val instance = instance
+  override val containerInstance = instance
+
+  override val accessorInstance
+    get() = member
 
   override val containerType
-    get() = instance::class
+    get() = containerInstance::class
 
   override val name
     get() = member.name
