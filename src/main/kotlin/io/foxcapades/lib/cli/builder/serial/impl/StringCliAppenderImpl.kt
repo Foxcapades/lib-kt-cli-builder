@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.arg.ref.forceAny
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
@@ -131,13 +132,23 @@ internal class StringCliAppenderImpl<T : Any>(
       reference = component
 
       when (component) {
-        is ResolvedFlag<*> -> component.forceAny()
-          .takeIf { it.shouldSerialize(config, it.valueSource) }
-          ?.writeToString(this)
+        is ResolvedFlag<*> ->
+          try {
+            component.forceAny()
+              .takeIf { it.shouldSerialize(config, it.valueSource) }
+              ?.writeToString(this)
+          } catch (e: Throwable) {
+            throw CliSerializationException("encountered exception while serializing flag ${getPreferredForm(component)}", e)
+          }
 
-        is ResolvedArgument<*> -> component.forceAny()
-          .takeIf { it.shouldSerialize(config, it.valueSource) }
-          ?.writeToString(this)
+        is ResolvedArgument<*> ->
+          try {
+            component.forceAny()
+              .takeIf { it.shouldSerialize(config, it.valueSource) }
+              ?.writeToString(this)
+          } catch (e: Throwable) {
+            throw CliSerializationException("encountered exception while serializing argument ${component.valueSource.reference}", e)
+          }
 
         else                   -> BUG()
       }

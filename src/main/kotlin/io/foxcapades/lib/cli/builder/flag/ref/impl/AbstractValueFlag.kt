@@ -10,7 +10,7 @@ import io.foxcapades.lib.cli.builder.util.values.ValueSource
 internal abstract class AbstractValueFlag<T : Any, V>(
   parent:   ResolvedCommand<T>,
   instance: Flag<V>,
-  source: ValueSource,
+  source:   ValueSource,
 )
   : ResolvedFlag<V>
 {

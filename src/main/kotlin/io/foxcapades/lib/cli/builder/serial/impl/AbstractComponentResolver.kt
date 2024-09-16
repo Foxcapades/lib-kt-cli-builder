@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.CliArgumentAnnotation
 import io.foxcapades.lib.cli.builder.command.CliCommand
@@ -109,7 +110,7 @@ internal abstract class AbstractComponentResolver<T : Any>(
     if (command != null) i++
 
     if (i > 1)
-      throw IllegalStateException("Argument property \"${name}\" provided by ${type.safeName} is annotated as more than one type of CLI component")
+      throw CliSerializationException("Argument property \"${name}\" provided by ${type.safeName} is annotated as more than one type of CLI component")
 
     return RelevantAnnotations(flag, argument, command)
   }

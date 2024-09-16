@@ -3,7 +3,7 @@ package io.foxcapades.lib.cli.builder
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.util.isPrintable
 
-class InvalidFlagFormException(message: String, val invalidForm: InvalidForm) : RuntimeException(message) {
+class InvalidFlagFormException(message: String, val invalidForm: InvalidForm) : CliSerializationException(message) {
   inline val isAboutShortFlag get() = invalidForm.isShort || invalidForm.isBoth
 
   inline val isAboutLongFlag get() = invalidForm.isLong || invalidForm.isBoth

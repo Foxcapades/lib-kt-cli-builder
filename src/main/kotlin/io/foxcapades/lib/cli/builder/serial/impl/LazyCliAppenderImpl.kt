@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.arg.ref.forceAny
 import io.foxcapades.lib.cli.builder.command.ref.ResolvedCommand
@@ -133,13 +134,24 @@ internal class LazyCliAppenderImpl<T : Any>(
       reference = next
 
       when (next) {
-        is ResolvedFlag<*> -> next.forceAny()
-            .takeIf { it.shouldSerialize(config, it.valueSource) }
-            ?.then { it.writeToString(this) }
+        is ResolvedFlag<*> ->
+          try {
+            next.forceAny()
+              .takeIf { it.shouldSerialize(config, it.valueSource) }
+              ?.writeToString(this)
+          } catch (e: Throwable) {
+            throw CliSerializationException("encountered exception while serializing flag ${getPreferredForm(next)}", e)
+          }
 
-        is ResolvedArgument<*> -> next.forceAny()
-          .takeIf { it.shouldSerialize(config, it.valueSource) }
-          ?.writeToString(this)
+        is ResolvedArgument<*> ->
+          try {
+            next.forceAny()
+              .takeIf { it.shouldSerialize(config, it.valueSource) }
+              ?.writeToString(this)
+          } catch (e: Throwable) {
+            throw CliSerializationException("encountered exception while serializing argument ${next.valueSource.reference}", e)
+          }
+
 
 //        is ResolvedCommand<*>  -> next.forceAny().writeToString(this)
 

@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.command.ref
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.command.CliCommand
 import io.foxcapades.lib.cli.builder.command.Command
 import io.foxcapades.lib.cli.builder.command.impl.CliCommandAnnotationImpl
@@ -28,7 +29,7 @@ internal fun <C : Any> ResolvedCommand(value: C, parent: ResolvedCommand<*>?, so
   }
 
   if (annotation == null)
-    throw IllegalArgumentException("CLI calls can only be built from Command instances or classes annotated with @CliCommand")
+    throw CliSerializationException("CLI calls can only be built from Command instances or classes annotated with @CliCommand")
 
   return FauxCommand(annotation, value, parent, source ?: AnonymousComponentValue)
 }

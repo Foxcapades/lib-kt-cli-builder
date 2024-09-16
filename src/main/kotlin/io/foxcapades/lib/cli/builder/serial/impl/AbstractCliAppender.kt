@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
 import io.foxcapades.lib.cli.builder.flag.ref.ResolvedFlag
 import io.foxcapades.lib.cli.builder.serial.CliArgumentWriter
@@ -36,11 +37,11 @@ internal abstract class AbstractCliAppender<T : Any>(
       if (flagName.isNotBlank() && flagName.all { config.targetShell.isFlagSafe(it) })
         return writeLongForm(config.propertyNameFormatter.format(flagName, config))
       else
-        throw IllegalStateException("Flag instance has no known or derivable long or short CLI names, Flag source was \"${flag.valueSource.reference}\"")
+        throw CliSerializationException("Flag instance has no known or derivable long or short CLI names, Flag source was \"${flag.valueSource.reference}\"")
     }
 
     // TODO: make this a concrete type
-    throw IllegalStateException("Flag instance has no known or derivable long or short CLI names")
+    throw CliSerializationException("Flag instance has no known or derivable long or short CLI names")
   }
 
   override fun writePreferredForm(action: CliArgumentWriter<T, Any?>.() -> Unit) =
@@ -73,4 +74,30 @@ internal abstract class AbstractCliAppender<T : Any>(
 
   override fun writeChar(char: Byte) =
     writeChar(char.toInt().toChar())
+
+  //
+
+  protected fun getPreferredForm(flag: ResolvedFlag<*>): String {
+    if (flag.hasLongForm) {
+      return if (config.preferredFlagForm.isLong || !flag.hasShortForm)
+        config.longFlagPrefix + flag.longForm
+      else
+        config.shortFlagPrefix + flag.shortForm
+    }
+
+    if (flag.hasShortForm)
+      return config.shortFlagPrefix + flag.shortForm
+
+    if (flag.valueSource.hasName) {
+      val flagName = flag.valueSource.name.run { takeIf { it.startsWith("get") }?.substring(3) ?: this }
+
+      if (flagName.isNotBlank() && flagName.all { config.targetShell.isFlagSafe(it) })
+        return config.longFlagPrefix + config.propertyNameFormatter.format(flagName, config)
+      else
+        throw CliSerializationException("Flag instance has no known or derivable long or short CLI names, Flag source was \"${flag.valueSource.reference}\"")
+    }
+
+    // TODO: make this a concrete type
+    throw CliSerializationException("Flag instance has no known or derivable long or short CLI names")
+  }
 }

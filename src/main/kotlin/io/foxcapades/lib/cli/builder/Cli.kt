@@ -29,12 +29,12 @@ object Cli {
    *
    * @return The serialized CLI call string.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
   @JvmStatic
   @JvmOverloads
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun toCliString(cliCommand: Any, options: CliSerializationConfig = CliSerializationConfig()) =
     newCommandSerializer(options).serializeToString(cliCommand)
 
@@ -56,12 +56,12 @@ object Cli {
    *
    * @return An array of strings representing the serialized CLI call.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
   @JvmStatic
   @JvmOverloads
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun toCliCallArray(cliCommand: Any, options: CliSerializationConfig = CliSerializationConfig()) =
     newCommandSerializer(options).serializeToArray(cliCommand)
 
@@ -83,12 +83,12 @@ object Cli {
    *
    * @return A list of strings representing the serialized CLI call.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
   @JvmStatic
   @JvmOverloads
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun toCliCallList(cliCommand: Any, options: CliSerializationConfig = CliSerializationConfig()) =
     newCommandSerializer(options).serializeToList(cliCommand)
 
@@ -108,12 +108,12 @@ object Cli {
    * @return A new [ProcessBuilder] instance configured by the CLI call
    * serialized from the given input object.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
   @JvmStatic
   @JvmOverloads
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun toProcessBuilder(cliCommand: Any, options: CliSerializationConfig = CliSerializationConfig()) =
     ProcessBuilder(toCliCallList(cliCommand, options))
 

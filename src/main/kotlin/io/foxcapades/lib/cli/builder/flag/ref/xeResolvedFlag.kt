@@ -2,6 +2,7 @@
 @file:Suppress("NOTHING_TO_INLINE")
 package io.foxcapades.lib.cli.builder.flag.ref
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.InvalidFlagFormException
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 
@@ -41,7 +42,7 @@ internal fun ResolvedFlag<*>.validateFlagNames(config: CliSerializationConfig) {
     if (!lv)
       throw InvalidFlagFormException.invalidLongForm(this)
   } else if (!valueSource.hasName) {
-    throw IllegalStateException("Flag instance has no short or long form defined; sourced from ${parentComponent.qualifiedName}")
+    throw CliSerializationException("Flag instance has no short or long form defined; sourced from ${parentComponent.qualifiedName}")
   }
 }
 

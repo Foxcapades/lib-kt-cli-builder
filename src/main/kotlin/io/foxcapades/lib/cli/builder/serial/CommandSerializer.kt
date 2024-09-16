@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.serial
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.command.CliCommand
 import io.foxcapades.lib.cli.builder.command.Command
 import kotlin.math.max
@@ -33,10 +34,10 @@ interface CommandSerializer {
    *
    * @return Iterator of CLI call parts.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [command] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToIterator(command: Any): Iterator<String>
 
   /**
@@ -57,10 +58,10 @@ interface CommandSerializer {
    *
    * @return Sequence of CLI call parts.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [command] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToSequence(command: Any): Sequence<String> =
     Sequence { serializeToIterator(command) }
 
@@ -82,10 +83,10 @@ interface CommandSerializer {
    *
    * @return Iterable of CLI call parts.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToIterable(command: Any): Iterable<String> =
     Iterable { serializeToIterator(command) }
 
@@ -109,10 +110,10 @@ interface CommandSerializer {
    *
    * @see serializeToMutableList
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToList(command: Any): List<String> =
     serializeToList(command, 16)
 
@@ -143,10 +144,10 @@ interface CommandSerializer {
    *
    * @see serializeToMutableList
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToList(command: Any, preSize: Int): List<String> =
     serializeToArray(command, preSize).asList()
 
@@ -170,10 +171,10 @@ interface CommandSerializer {
    *
    * @see serializeToList
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToMutableList(command: Any): MutableList<String> =
     serializeToMutableList(command, 16)
 
@@ -204,10 +205,10 @@ interface CommandSerializer {
    *
    * @see serializeToList
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToMutableList(command: Any, preSize: Int): MutableList<String> =
     ArrayList<String>(max(8, preSize)).apply { serializeToIterator(command).forEach { add(it) } }
 
@@ -229,10 +230,10 @@ interface CommandSerializer {
    *
    * @return Array of CLI call parts.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToArray(command: Any): Array<String> =
     serializeToArray(command, 16)
 
@@ -261,10 +262,10 @@ interface CommandSerializer {
    *
    * @return Array of CLI call parts.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToArray(command: Any, preSize: Int): Array<String> {
     var pos = 0
     var tmp = arrayOfNulls<String>(max(8, preSize))
@@ -293,10 +294,10 @@ interface CommandSerializer {
    *
    * @return Serialized CLI call string.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToString(command: Any): String =
     serializeToString(command, 2048)
 
@@ -317,9 +318,9 @@ interface CommandSerializer {
    *
    * @return Serialized CLI call string.
    *
-   * @throws IllegalArgumentException If the given [cliCommand] value is not a
+   * @throws CliSerializationException If the given [cliCommand] value is not a
    * [Command] instance and is not annotated with [@CliCommand][CliCommand].
    */
-  @Throws(IllegalArgumentException::class)
+  @Throws(CliSerializationException::class)
   fun serializeToString(command: Any, preSize: Int): String
 }

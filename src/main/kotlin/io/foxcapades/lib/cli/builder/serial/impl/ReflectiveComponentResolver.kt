@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.CliArgument
 import io.foxcapades.lib.cli.builder.arg.forceAny
@@ -72,7 +73,7 @@ internal class ReflectiveComponentResolver<T : Any>(
     if (isRequired) {
       // TODO: interplay: flag vs argument requirements
       // TODO: this needs to be its own error type!
-      isSet || hasDefault || throw IllegalStateException("$qualifiedName is marked as required but is not set")
+      isSet || hasDefault || throw CliSerializationException("$qualifiedName is marked as required but is not set")
     } else {
       forceAny().let { it.shouldSerialize(config, it.valueSource) }
     }
@@ -80,7 +81,7 @@ internal class ReflectiveComponentResolver<T : Any>(
   private fun ResolvedArgument<*>.isUsable() =
     if (isRequired) {
       // TODO: this needs to be its own error type!
-      isSet || hasDefault || throw IllegalStateException("$qualifiedName is marked as required but is not set")
+      isSet || hasDefault || throw CliSerializationException("$qualifiedName is marked as required but is not set")
     } else {
       forceAny().let { it.shouldSerialize(config, it.valueSource) }
     }
@@ -136,7 +137,7 @@ internal class ReflectiveComponentResolver<T : Any>(
       // but it has an annotation, report an error
       if (!annotations.isEmpty) {
         // TODO: This should be a concrete error type
-        throw IllegalStateException("${func.qualifiedName(type)} is not a getter, but is annotated as a CLI component")
+        throw CliSerializationException("${func.qualifiedName(type)} is not a getter, but is annotated as a CLI component")
       }
 
       // else, it has no annotation, it's just some random function we don't
@@ -179,7 +180,7 @@ internal class ReflectiveComponentResolver<T : Any>(
           ?.let { AnnotatedValueFlag(annotations.flag!!, parent, it, WrapperAccessorK1(it::get, func, instance)) }
 
         // else it's annotated as a flag, but is actually an argument or command
-        else -> throw IllegalStateException("${func.qualifiedName(type)} is annotated as being a Flag, but returns a value of type ${returns.name}")
+        else -> throw CliSerializationException("${func.qualifiedName(type)} is annotated as being a Flag, but returns a value of type ${returns.name}")
       }
 
       // if it is annotated as an argument
@@ -192,7 +193,7 @@ internal class ReflectiveComponentResolver<T : Any>(
           ?.let { AnnotatedValueArgument(annotations.argument!!, parent, it, WrapperAccessorK1(it::get, func, instance)) }
 
         // else it's annotated as an argument but is actually a flag or command
-        else -> throw IllegalStateException("${func.qualifiedName(type)} is annotated as being an Argument, but returns a value of type ${returns.name}")
+        else -> throw CliSerializationException("${func.qualifiedName(type)} is annotated as being an Argument, but returns a value of type ${returns.name}")
       }
 
       // if it is annotated as a command
@@ -219,8 +220,8 @@ internal class ReflectiveComponentResolver<T : Any>(
     val annotations = prop.relevantAnnotations()
 
     when {
-      annotations.hasArgumentAnnotation -> throw IllegalStateException("${prop.qualifiedName(type)} is a flag delegate annotated with @${CliArgument::class.simpleName}")
-      annotations.hasCommandAnnotation  -> throw IllegalStateException("${prop.qualifiedName(type)} is a flag delegate annotated with @${CliCommand::class.simpleName}")
+      annotations.hasArgumentAnnotation -> throw CliSerializationException("${prop.qualifiedName(type)} is a flag delegate annotated with @${CliArgument::class.simpleName}")
+      annotations.hasCommandAnnotation  -> throw CliSerializationException("${prop.qualifiedName(type)} is a flag delegate annotated with @${CliCommand::class.simpleName}")
     }
 
     return if (annotations.hasFlagAnnotation)
@@ -235,8 +236,8 @@ internal class ReflectiveComponentResolver<T : Any>(
     val annotations = prop.relevantAnnotations()
 
     when {
-      annotations.hasFlagAnnotation    -> throw IllegalStateException("${prop.qualifiedName(type)} is an annotation delegate annotated with @${CliFlag::class.simpleName}")
-      annotations.hasCommandAnnotation -> throw IllegalStateException("${prop.qualifiedName(type)} is an annotation delegate annotated with @${CliCommand::class.simpleName}")
+      annotations.hasFlagAnnotation    -> throw CliSerializationException("${prop.qualifiedName(type)} is an annotation delegate annotated with @${CliFlag::class.simpleName}")
+      annotations.hasCommandAnnotation -> throw CliSerializationException("${prop.qualifiedName(type)} is an annotation delegate annotated with @${CliCommand::class.simpleName}")
     }
 
     return if (annotations.hasArgumentAnnotation)

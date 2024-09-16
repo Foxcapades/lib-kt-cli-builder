@@ -1,5 +1,6 @@
 package io.foxcapades.lib.cli.builder.serial.impl
 
+import io.foxcapades.lib.cli.builder.CliSerializationException
 import io.foxcapades.lib.cli.builder.arg.Argument
 import io.foxcapades.lib.cli.builder.arg.forceAny
 import io.foxcapades.lib.cli.builder.arg.ref.ResolvedArgument
@@ -133,10 +134,10 @@ internal class ArbitraryComponentResolver<T : Any>(
       return enqueueFlag(AnnotatedDelegateFlag(annotations.flag!!, parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
 
     if (annotations.hasArgumentAnnotation)
-      throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
+      throw CliSerializationException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
 
     if (annotations.hasCommandAnnotation)
-      throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
+      throw CliSerializationException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
 
     BUG()
   }
@@ -151,10 +152,10 @@ internal class ArbitraryComponentResolver<T : Any>(
       return queue.addLast(AnnotatedDelegateArgument(annotations.argument!!, parent.forceAny(), delegate, ValueAccessorKP0(prop, type)))
 
     if (annotations.hasFlagAnnotation)
-      throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Flag")
+      throw CliSerializationException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Flag")
 
     if (annotations.hasCommandAnnotation)
-      throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
+      throw CliSerializationException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
 
     BUG()
   }
@@ -170,10 +171,10 @@ internal class ArbitraryComponentResolver<T : Any>(
       return enqueueFlag(AnnotatedUnlinkedFlag(annotations.flag!!, parent, instance, WrapperAccessorK0(instance::get, prop, type)))
 
     if (annotations.hasArgumentAnnotation)
-      throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
+      throw CliSerializationException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as an Argument")
 
     if (annotations.hasCommandAnnotation)
-      throw IllegalStateException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
+      throw CliSerializationException("Flag property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
 
     BUG()
   }
@@ -189,10 +190,10 @@ internal class ArbitraryComponentResolver<T : Any>(
       return queue.addLast(AnnotatedUnlinkedArgument(annotations.argument!!, parent, instance, WrapperAccessorK0(instance::get, prop, type)))
 
     if (annotations.hasFlagAnnotation)
-      throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Flag")
+      throw CliSerializationException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Flag")
 
     if (annotations.hasCommandAnnotation)
-      throw IllegalStateException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
+      throw CliSerializationException("Argument property \"${prop.name}\" provided by ${type.safeName} is annotated as a Command")
 
     BUG()
   }
@@ -240,10 +241,10 @@ internal class ArbitraryComponentResolver<T : Any>(
     val annotations = getter.relevantAnnotations()
 
     if (annotations.hasCommandAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(parent::class)} is a Flag getter annotated with ${annotations.command!!::class}")
+      throw CliSerializationException("${getter.qualifiedName(parent::class)} is a Flag getter annotated with ${annotations.command!!::class}")
 
     if (annotations.hasArgumentAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(parent::class)} is a Flag getter annotated with ${annotations.argument!!::class}")
+      throw CliSerializationException("${getter.qualifiedName(parent::class)} is a Flag getter annotated with ${annotations.argument!!::class}")
 
     val flag = (getter() ?: return).forceAny()
 
@@ -257,10 +258,10 @@ internal class ArbitraryComponentResolver<T : Any>(
     val annotations = getter.relevantAnnotations()
 
     if (annotations.hasCommandAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(parent::class)} is an Argument getter annotated with ${annotations.command!!::class}")
+      throw CliSerializationException("${getter.qualifiedName(parent::class)} is an Argument getter annotated with ${annotations.command!!::class}")
 
     if (annotations.hasFlagAnnotation)
-      throw IllegalStateException("${getter.qualifiedName(parent::class)} is an Argument getter annotated with ${annotations.flag!!::class}")
+      throw CliSerializationException("${getter.qualifiedName(parent::class)} is an Argument getter annotated with ${annotations.flag!!::class}")
 
     val arg = (getter() ?: return).forceAny()
 
