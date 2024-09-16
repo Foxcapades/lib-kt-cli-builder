@@ -5,6 +5,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.superclasses
 
 
 internal inline val KClass<*>.safeName
@@ -37,3 +38,19 @@ internal inline fun <T : Any> KClass<out T>.getOrCreate() =
 
 @Suppress("UNCHECKED_CAST")
 internal inline fun <T : Any> KClass<*>.unsafeCast() = this as KClass<out T>
+
+
+internal inline fun <reified A : Annotation> KClass<*>.findAnnotations() = sequence {
+  val queue = ArrayDeque<KClass<*>>(5).also { it.add(this@findAnnotations) }
+
+  while (queue.isNotEmpty()) {
+    val target = queue.removeFirst()
+
+    for (ann in target.annotations) {
+      if (ann is A)
+        yield(target to ann)
+    }
+
+    target.superclasses.forEach { queue.add(it) }
+  }
+}

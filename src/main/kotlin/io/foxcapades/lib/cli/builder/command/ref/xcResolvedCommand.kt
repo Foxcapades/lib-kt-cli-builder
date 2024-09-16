@@ -6,9 +6,9 @@ import io.foxcapades.lib.cli.builder.command.impl.CliCommandAnnotationImpl
 import io.foxcapades.lib.cli.builder.command.ref.impl.AnnotatedCommandInstance
 import io.foxcapades.lib.cli.builder.command.ref.impl.CommandInstance
 import io.foxcapades.lib.cli.builder.command.ref.impl.FauxCommand
+import io.foxcapades.lib.cli.builder.util.reflect.findAnnotations
 import io.foxcapades.lib.cli.builder.util.values.AnonymousComponentValue
 import io.foxcapades.lib.cli.builder.util.values.ValueSource
-import kotlin.reflect.full.findAnnotation
 
 
 internal fun <C : Any> ResolvedCommand(value: C, parent: ResolvedCommand<*>?, source: ValueSource?): ResolvedCommand<C> {
@@ -16,7 +16,10 @@ internal fun <C : Any> ResolvedCommand(value: C, parent: ResolvedCommand<*>?, so
   if (value is ResolvedCommand<*>)
     return value as ResolvedCommand<C>
 
-  val annotation = value::class.findAnnotation<CliCommand>()?.let(::CliCommandAnnotationImpl)
+  val annotation = value::class.findAnnotations<CliCommand>()
+    .firstOrNull()
+    ?.second
+    ?.let(::CliCommandAnnotationImpl)
 
   if (value is Command) {
     @Suppress("UNCHECKED_CAST")
