@@ -87,26 +87,27 @@ internal class ReflectiveComponentResolver<T : Any>(
     }
 
   private fun filterRelevantMembers() =
-    typeInfo.mapFilterMembers(::siftMember) { p, _ -> p }
+    typeInfo.mapFilterMembers(::siftMember)
 
   // sift class members down to only those that can be resolved to components
-  private fun siftMember(member: KCallable<*>): ResolvedComponent? =
-    when (member) {
-      is KProperty1<*, *> -> siftProperty(member.unsafeCast())
-      is KFunction1<*, *> -> siftFunction(member.unsafeCast())
+  private fun siftMember(member: MemberInfo<*, KCallable<*>>): ResolvedComponent? =
+    @Suppress("UNCHECKED_CAST")
+    when (member.member) {
+      is KProperty1<*, *> -> siftProperty(member as MemberInfo<T, KProperty1<T, Any?>>)
+      is KFunction1<*, *> -> siftFunction(member as MemberInfo<T, KFunction1<T, Any?>>)
       else                -> null // TODO: LOG HERE
     }
 
   // sift class properties down to only those that can be resolved to components
-  private fun siftProperty(prop: KProperty1<T, Any?>): ResolvedComponent? {
+  private fun siftProperty(info: MemberInfo<T, KProperty1<T, Any?>>): ResolvedComponent? {
     // If the property is delegated, use the delegate for component resolution
-    prop.asDelegateType<CliCallComponent>(instance)
-      ?.then { return siftDelegateProperty(it, prop) }
+    info.member.asDelegateType<CliCallComponent>(instance)
+      ?.then { return@siftProperty siftDelegateProperty(it, info) }
 
     // if the property is not delegated...
 
     // get any relevant annotations for the property
-    val annotations = prop.relevantAnnotations()
+    val annotations = info.relevantAnnotations()
 
     // If there are no annotations, and it is not a delegate, then it isn't
     // something we care about.
@@ -115,11 +116,11 @@ internal class ReflectiveComponentResolver<T : Any>(
 
     return when {
       annotations.hasFlagAnnotation ->
-        FauxFlag(annotations.flag!!, parent, ValueAccessorKP1(prop, instance))
+        FauxFlag(annotations.flag!!, parent, ValueAccessorKP1(info.member, instance))
           .also { it.validateFlagNames(config) }
 
       annotations.hasArgumentAnnotation ->
-        FauxArgument(annotations.argument!!, parent, ValueAccessorKP1(prop, instance))
+        FauxArgument(annotations.argument!!, parent, ValueAccessorKP1(info.member, instance))
 
       annotations.hasCommandAnnotation -> SUB_COMMAND()
 
@@ -127,10 +128,12 @@ internal class ReflectiveComponentResolver<T : Any>(
     }
   }
 
-  private fun siftFunction(func: KFunction1<T, Any?>): ResolvedComponent? {
+  private fun siftFunction(info: MemberInfo<T, KFunction1<T, Any?>>): ResolvedComponent? {
+    val func = info.member
+
     // Fetch any relevant annotations on the function.
     // We do this before the getter check to provide a more useful error.
-    val annotations = func.relevantAnnotations()
+    val annotations = info.relevantAnnotations()
 
     // If the function is not a getter
     if (!func.isGetter) {
@@ -208,7 +211,7 @@ internal class ReflectiveComponentResolver<T : Any>(
 
   // region Delegate Filtering
 
-  private fun siftDelegateProperty(del: CliCallComponent, prop: KProperty1<T, *>): ResolvedComponent {
+  private fun siftDelegateProperty(del: CliCallComponent, prop: MemberInfo<T, KProperty1<T, Any?>>): ResolvedComponent {
     return when (del) {
       is Flag<*>     -> siftDelegateFlag(del.unsafeCast(), prop)
       is Argument<*> -> siftDelegateArg(del.unsafeCast(), prop)
@@ -216,34 +219,34 @@ internal class ReflectiveComponentResolver<T : Any>(
     }
   }
 
-  private fun siftDelegateFlag(del: Flag<Any?>, prop: KProperty1<T, *>): ResolvedComponent {
-    val annotations = prop.relevantAnnotations()
+  private fun siftDelegateFlag(del: Flag<Any?>, info: MemberInfo<T, KProperty1<T, Any?>>): ResolvedComponent {
+    val annotations = info.relevantAnnotations()
 
     when {
-      annotations.hasArgumentAnnotation -> throw CliSerializationException("${prop.qualifiedName(type)} is a flag delegate annotated with @${CliArgument::class.simpleName}")
-      annotations.hasCommandAnnotation  -> throw CliSerializationException("${prop.qualifiedName(type)} is a flag delegate annotated with @${CliCommand::class.simpleName}")
+      annotations.hasArgumentAnnotation -> throw CliSerializationException("${info.member.qualifiedName(type)} is a flag delegate annotated with @${CliArgument::class.simpleName}")
+      annotations.hasCommandAnnotation  -> throw CliSerializationException("${info.member.qualifiedName(type)} is a flag delegate annotated with @${CliCommand::class.simpleName}")
     }
 
     return if (annotations.hasFlagAnnotation)
-      AnnotatedDelegateFlag(annotations.flag!!, parent, del, ValueAccessorKP1(prop, instance))
+      AnnotatedDelegateFlag(annotations.flag!!, parent, del, ValueAccessorKP1(info.member, instance))
         .also { it.validateFlagNames(config) }
     else
-      DelegateFlag(parent, del, ValueAccessorKP1(prop, instance))
+      DelegateFlag(parent, del, ValueAccessorKP1(info.member, instance))
         .also { it.validateFlagNames(config) }
   }
 
-  private fun siftDelegateArg(del: Argument<Any?>, prop: KProperty1<T, Any?>): ResolvedComponent {
-    val annotations = prop.relevantAnnotations()
+  private fun siftDelegateArg(del: Argument<Any?>, info: MemberInfo<T, KProperty1<T, Any?>>): ResolvedComponent {
+    val annotations = info.relevantAnnotations()
 
     when {
-      annotations.hasFlagAnnotation    -> throw CliSerializationException("${prop.qualifiedName(type)} is an annotation delegate annotated with @${CliFlag::class.simpleName}")
-      annotations.hasCommandAnnotation -> throw CliSerializationException("${prop.qualifiedName(type)} is an annotation delegate annotated with @${CliCommand::class.simpleName}")
+      annotations.hasFlagAnnotation    -> throw CliSerializationException("${info.member.qualifiedName(type)} is an annotation delegate annotated with @${CliFlag::class.simpleName}")
+      annotations.hasCommandAnnotation -> throw CliSerializationException("${info.member.qualifiedName(type)} is an annotation delegate annotated with @${CliCommand::class.simpleName}")
     }
 
     return if (annotations.hasArgumentAnnotation)
-      AnnotatedDelegateArgument(annotations.argument!!, parent, del.forceAny(), ValueAccessorKP1(prop, instance))
+      AnnotatedDelegateArgument(annotations.argument!!, parent, del.forceAny(), ValueAccessorKP1(info.member, instance))
     else
-      DirectArgument(parent, del.forceAny(), ValueAccessorKP1(prop, instance))
+      DirectArgument(parent, del.forceAny(), ValueAccessorKP1(info.member, instance))
   }
 
   private fun siftDelegateCom(del: Command, prop: KProperty1<T, Command?>): ResolvedComponent {

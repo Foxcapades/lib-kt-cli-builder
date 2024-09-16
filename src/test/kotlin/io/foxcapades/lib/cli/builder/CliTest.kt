@@ -1,7 +1,7 @@
 package io.foxcapades.lib.cli.builder
 
+import io.foxcapades.lib.cli.builder.arg.format.ArgumentFormatter
 import io.foxcapades.lib.cli.builder.command.CliCommand
-import io.foxcapades.lib.cli.builder.command.CliCommandComponents
 import io.foxcapades.lib.cli.builder.command.Command
 import io.foxcapades.lib.cli.builder.flag.CliFlag
 import io.foxcapades.lib.cli.builder.flag.pathFlag
@@ -10,18 +10,22 @@ import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import kotlin.io.path.Path
 import kotlin.test.assertEquals
 
 @DisplayName("E2E")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CliTest {
 
   @Nested
   @DisplayName("using @CliCommand")
+  @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   inner class WithCommand {
 
     @Nested
     @DisplayName("with annotated flags")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class WithAnnotatedFlags {
       @CliCommand("goodbye")
       private inner class Foo(
@@ -37,6 +41,7 @@ class CliTest {
 
     @Nested
     @DisplayName("with delegate flags")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class WithDelegateFlags {
       @CliCommand("goodbye")
       private inner class Foo {
@@ -54,6 +59,7 @@ class CliTest {
 
   @Nested
   @DisplayName("implementing Command")
+  @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   inner class ImplementingCommand {
 
     private inner class Foo : Command {
@@ -71,5 +77,27 @@ class CliTest {
 
       assertEquals("my-command --input='hello/world'", Cli.toCliString(foo))
     }
+  }
+
+  @Nested
+  @DisplayName("delegates overriding annotated interface types")
+  @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+  inner class DelegatesOverrideInterfaceTypes {
+    private inner class FooImpl : Foo {
+      override var bar by stringFlag { formatter = ArgumentFormatter { it.uppercase() } }
+    }
+
+    @Test
+    fun t1() {
+      val foo = FooImpl().also { it.bar = "hello" }
+
+      assertEquals("test-command --foo='HELLO'", Cli.toCliString(foo as Foo))
+    }
+  }
+
+  @CliCommand("test-command")
+  interface Foo {
+    @CliFlag("foo", 'f')
+    val bar: String?
   }
 }

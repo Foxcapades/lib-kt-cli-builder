@@ -39,7 +39,6 @@ internal inline fun <T : Any> KClass<out T>.getOrCreate() =
 @Suppress("UNCHECKED_CAST")
 internal inline fun <T : Any> KClass<*>.unsafeCast() = this as KClass<out T>
 
-
 internal inline fun <reified A : Annotation> KClass<*>.findAnnotations() = sequence {
   val queue = ArrayDeque<KClass<*>>(5).also { it.add(this@findAnnotations) }
 
