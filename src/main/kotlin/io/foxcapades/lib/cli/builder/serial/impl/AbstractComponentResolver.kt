@@ -126,7 +126,7 @@ internal abstract class AbstractComponentResolver<T : Any>(
     var argument: CliArgumentAnnotation? = null
     var command:  CliCommandAnnotation?      = null
 
-    val fn = when (member) {
+    val fn = when (this) {
       is KProperty<*> -> { t: KClass<out Any>, o: Annotation, n: Annotation -> makeDuplicateAnnotationsError(t, o, n) }
       is KFunction<*> -> { t: KClass<out Any>, o: Annotation, n: Annotation -> makeDuplicateAnnotationsError(t, o, n) }
       else -> BUG()
