@@ -155,6 +155,7 @@ internal abstract class AbstractComponentResolver<T : Any>(
 
   private fun MemberInfo<out Any, out KCallable<*>>.filterRelevantAnnotations(): Sequence<CliComponentAnnotation<*>> =
     annotations()
+      .distinct()
       .mapNotNull { when (it) {
         is CliFlag     -> CliFlagAnnotationImpl(it)
         is CliArgument -> CliArgumentAnnotationImpl(it)
@@ -165,6 +166,7 @@ internal abstract class AbstractComponentResolver<T : Any>(
   private fun KCallable<*>.filterRelevantAnnotations(): Sequence<CliComponentAnnotation<*>> =
     annotations
       .asSequence()
+      .distinct()
       .mapNotNull { when (it) {
         is CliFlag     -> CliFlagAnnotationImpl(it)
         is CliArgument -> CliArgumentAnnotationImpl(it)

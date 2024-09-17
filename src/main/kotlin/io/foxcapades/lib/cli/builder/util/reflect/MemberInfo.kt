@@ -28,16 +28,28 @@ internal class MemberInfo<T : Any, K : KCallable<*>>(reference: K, type: KClass<
 
   fun <T : Annotation> findAnnotations(type: KClass<out T>): Sequence<T> =
     sequence {
-      for ((_, prop) in layers)
-        for (ann in prop.findAnnotations(type))
-          yield(ann)
+      val set = HashSet<Annotation>(4)
+      for ((_, prop) in layers) {
+        for (ann in prop.findAnnotations(type)) {
+          if (ann !in set) {
+            yield(ann)
+            set.add(ann)
+          }
+        }
+      }
     }
 
   fun annotations(): Sequence<Annotation> =
     sequence {
-      for ((_, prop) in layers)
-        for (ann in prop.annotations)
-          yield(ann)
+      val set = HashSet<Annotation>(4)
+      for ((_, prop) in layers) {
+        for (ann in prop.annotations) {
+          if (ann !in set) {
+            yield(ann)
+            set.add(ann)
+          }
+        }
+      }
     }
 
   @Suppress("UNCHECKED_CAST")

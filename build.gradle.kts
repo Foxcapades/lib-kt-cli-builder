@@ -1,5 +1,4 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
   kotlin("jvm") version "2.0.20"
@@ -23,7 +22,7 @@ data class SemVer(
   override fun toString() = "$major.$minor.$patch"
 }
 
-val projectVersion = SemVer(major = 0, minor = 8, patch = 3)
+val projectVersion = SemVer(major = 0, minor = 8, patch = 4)
 
 group = "io.foxcapades.kt"
 version = projectVersion.toString()

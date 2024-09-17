@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import kotlin.io.path.Path
+import kotlin.test.Ignore
 import kotlin.test.assertEquals
 
 @DisplayName("E2E")
@@ -87,17 +88,22 @@ class CliTest {
       override var bar by stringFlag { formatter = ArgumentFormatter { it.uppercase() } }
     }
 
+    private inner class Foo1Impl(val foo: Foo) : Foo1, Foo by foo
+
     @Test
+    @Ignore // FIXME: nested delegation is not supported by kotlin, DOCUMENT THIS IN THE README AS A LIMITATION!
     fun t1() {
-      val foo = FooImpl().also { it.bar = "hello" }
+      val foo = Foo1Impl(FooImpl().also { it.bar = "hello" })
 
       assertEquals("test-command --foo='HELLO'", Cli.toCliString(foo as Foo))
     }
   }
 
-  @CliCommand("test-command")
   interface Foo {
     @CliFlag("foo", 'f')
     val bar: String?
   }
+
+  @CliCommand("test-command")
+  interface Foo1 : Foo
 }
