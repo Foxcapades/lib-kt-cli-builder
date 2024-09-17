@@ -101,7 +101,7 @@ internal class StringCliAppenderImpl<T : Any>(
     when (last) {
       Type.Long  -> buffer.append(config.longFlagValueSeparator)
       Type.Short -> buffer.append(config.shortFlagPrefix)
-      Type.Raw   -> {}
+      Type.Raw   -> buffer.append(' ')
 
       Type.InQuotes, Type.Arg -> return
     }

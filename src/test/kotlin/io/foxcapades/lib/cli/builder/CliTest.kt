@@ -6,6 +6,7 @@ import io.foxcapades.lib.cli.builder.command.Command
 import io.foxcapades.lib.cli.builder.flag.CliFlag
 import io.foxcapades.lib.cli.builder.flag.pathFlag
 import io.foxcapades.lib.cli.builder.flag.stringFlag
+import io.foxcapades.lib.cli.builder.flag.toggleFlag
 import io.foxcapades.lib.cli.builder.serial.CliSerializationConfig
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -85,25 +86,25 @@ class CliTest {
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   inner class DelegatesOverrideInterfaceTypes {
     private inner class FooImpl : Foo {
-      override var bar by stringFlag { formatter = ArgumentFormatter { it.uppercase() } }
+      override var foo by stringFlag { formatter = ArgumentFormatter { it.uppercase() } }
+      override var bar by toggleFlag()
     }
 
-    private inner class Foo1Impl(val foo: Foo) : Foo1, Foo by foo
-
+    // FIXME: nested delegation is not supported by kotlin, DOCUMENT THIS IN THE README AS A LIMITATION!
     @Test
-    @Ignore // FIXME: nested delegation is not supported by kotlin, DOCUMENT THIS IN THE README AS A LIMITATION!
     fun t1() {
-      val foo = Foo1Impl(FooImpl().also { it.bar = "hello" })
+      val foo = FooImpl().also { it.foo = "hello"; it.bar = false }
 
-      assertEquals("test-command --foo='HELLO'", Cli.toCliString(foo as Foo))
+      assertEquals("test-command 'fungus' --foo='HELLO'", Cli.toCliString(foo as Foo))
     }
   }
 
+  @CliCommand("test-command", "fungus")
   interface Foo {
     @CliFlag("foo", 'f')
-    val bar: String?
-  }
+    val foo: String?
 
-  @CliCommand("test-command")
-  interface Foo1 : Foo
+    @CliFlag("bar", 'b')
+    val bar: Boolean?
+  }
 }
