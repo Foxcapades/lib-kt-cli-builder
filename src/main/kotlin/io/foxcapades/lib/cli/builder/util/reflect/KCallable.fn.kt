@@ -8,5 +8,5 @@ import kotlin.reflect.KClass
 internal inline fun KCallable<*>.qualifiedName(parent: KClass<*>?) =
   (parent?.qualifiedName ?: "???") + "::" + name
 
-internal inline fun KCallable<*>.makeDuplicateAnnotationsError(parent: KClass<out Any>, type: KClass<out Annotation>) =
-  CliSerializationException("${qualifiedName(parent)} has more than one ${type.simpleName} annotation")
+internal inline fun <A : Annotation> KCallable<*>.makeDuplicateAnnotationsError(parent: KClass<out Any>, old: A, new: A) =
+  CliSerializationException("${qualifiedName(parent)} has more than one ${old::class.simpleName} annotation: $old .. $new")

@@ -95,16 +95,16 @@ internal abstract class AbstractComponentResolver<T : Any>(
     var command:  CliCommandAnnotation?  = null
 
     val fn = when (member) {
-      is KProperty<*> -> { t: KClass<out Any>, a: KClass<out Annotation> -> member.makeDuplicateAnnotationsError(t, a) }
-      is KFunction<*> -> { t: KClass<out Any>, a: KClass<out Annotation> -> member.makeDuplicateAnnotationsError(t, a) }
+      is KProperty<*> -> { t: KClass<out Any>, o: Annotation, n: Annotation -> member.makeDuplicateAnnotationsError(t, o, n) }
+      is KFunction<*> -> { t: KClass<out Any>, o: Annotation, n: Annotation -> member.makeDuplicateAnnotationsError(t, o, n) }
       else -> BUG()
     }
 
     for (ann in filterRelevantAnnotations()) {
       when (ann) {
-        is CliFlagAnnotation     -> if (flag     == null) flag     = ann else throw fn(type, ann.annotation::class)
-        is CliArgumentAnnotation -> if (argument == null) argument = ann else throw fn(type, ann.annotation::class)
-        is CliCommandAnnotation  -> if (command  == null) command  = ann else throw fn(type, ann.annotation::class)
+        is CliFlagAnnotation     -> if (flag     == null) flag     = ann else throw fn(type, flag.annotation, ann.annotation)
+        is CliArgumentAnnotation -> if (argument == null) argument = ann else throw fn(type, argument.annotation, ann.annotation)
+        is CliCommandAnnotation  -> if (command  == null) command  = ann else throw fn(type, command.annotation, ann.annotation)
         else                     -> BUG()
       }
     }
@@ -126,17 +126,17 @@ internal abstract class AbstractComponentResolver<T : Any>(
     var argument: CliArgumentAnnotation? = null
     var command:  CliCommandAnnotation?      = null
 
-    val fn = when (this) {
-      is KProperty<*> -> { t: KClass<out Any>, a: KClass<out Annotation> -> makeDuplicateAnnotationsError(t, a) }
-      is KFunction<*> -> { t: KClass<out Any>, a: KClass<out Annotation> -> makeDuplicateAnnotationsError(t, a) }
+    val fn = when (member) {
+      is KProperty<*> -> { t: KClass<out Any>, o: Annotation, n: Annotation -> makeDuplicateAnnotationsError(t, o, n) }
+      is KFunction<*> -> { t: KClass<out Any>, o: Annotation, n: Annotation -> makeDuplicateAnnotationsError(t, o, n) }
       else -> BUG()
     }
 
     for (ann in filterRelevantAnnotations()) {
       when (ann) {
-        is CliFlagAnnotation     -> if (flag     == null) flag     = ann else throw fn(type, ann.annotation::class)
-        is CliArgumentAnnotation -> if (argument == null) argument = ann else throw fn(type, ann.annotation::class)
-        is CliCommandAnnotation  -> if (command  == null) command  = ann else throw fn(type, ann.annotation::class)
+        is CliFlagAnnotation     -> if (flag     == null) flag     = ann else throw fn(type, flag.annotation, ann.annotation)
+        is CliArgumentAnnotation -> if (argument == null) argument = ann else throw fn(type, argument.annotation, ann.annotation)
+        is CliCommandAnnotation  -> if (command  == null) command  = ann else throw fn(type, command.annotation, ann.annotation)
         else                     -> BUG()
       }
     }
